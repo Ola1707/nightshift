@@ -94,7 +94,7 @@ Never write `qa.json`: that holds the user's ticks.
 Give the link `http://localhost:<port>/review`. When the user reviews, read `qa.json` in the run folder:
 
 - a tick = the user checked it;
-- a note on a QA task = a problem, which goes through the Bug flow (skill `review-long-task`);
+- a note on a QA task = a problem, which goes through the Bug flow (skill `start-review`);
 - a note on a task without QA = the user's answer to its questions or a note for Claude: answer or act on it in the
   chat. Every task on the page has a text box;
 - a `decision:<id>` key = a decision: `checked` = the user is fine with it; a note = their question or remark on it

@@ -89,7 +89,7 @@ Whatever is not asked takes the detected or default value; say which in one line
    `<paths.board>/flow.json` and `plan-checklist.json`, and never overwrites a file that exists. If it refuses an
    answer, fix the file and run it again.
 3. Write a starter `<paths.board>/project.md`: the project's own rules that came up in steps b and c, grouped by
-   skill (`## All skills`, `## night-board`, `## do`, `## review-long-task`). The skills read it first; where it and
+   skill (`## All skills`, `## night-board`, `## do`, `## start-review`). The skills read it first; where it and
    a skill differ, it wins. Keep it to what really came up; it can grow later.
 
 ## e. Show how the work will go
