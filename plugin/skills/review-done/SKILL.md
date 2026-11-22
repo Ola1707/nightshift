@@ -1,6 +1,6 @@
 ---
 name: review-done
-description: Ends review mode (the hook started by /nightshift:review-long-task), so code edits are allowed again. Only when the user types /nightshift:review-done.
+description: Ends review mode (the hook started by /nightshift:start-review), so code edits are allowed again. Only when the user types /nightshift:review-done.
 disable-model-invocation: true
 ---
 

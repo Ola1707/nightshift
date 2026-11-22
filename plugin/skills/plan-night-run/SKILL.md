@@ -1,9 +1,9 @@
 ---
-name: night-board
-description: Run the Nightshift board (package nightshift-board), the local website where the user picks the night run's tasks and reviews the finished run. Use whenever the user says "night board", "open the board", "I want to pick tonight's tasks", "night board ready", "I picked the tasks", or wants to see or review a run on the board — even if they don't say "board".
+name: plan-night-run
+description: Plan the night run on the Nightshift board (package nightshift-board): the user picks tonight's tasks, Claude writes the missing prompts one item at a time, asks the run's questions and starts the run; the board also shows the finished run for review. Use whenever the user types /nightshift:plan-night-run, says "plan night run", "plan tonight", "night board", "open the board", "I want to pick tonight's tasks", "night board ready", "I picked the tasks", or wants to see or review a run on the board — even if they don't say "board".
 ---
 
-# Night board
+# Plan night run
 
 ## 0. The project's settings first
 
@@ -94,7 +94,7 @@ Never write `qa.json`: that holds the user's ticks.
 Give the link `http://localhost:<port>/review`. When the user reviews, read `qa.json` in the run folder:
 
 - a tick = the user checked it;
-- a note on a QA task = a problem, which goes through the Bug flow (skill `review-long-task`);
+- a note on a QA task = a problem, which goes through the Bug flow (skill `start-review`);
 - a note on a task without QA = the user's answer to its questions or a note for Claude: answer or act on it in the
   chat. Every task on the page has a text box;
 - a `decision:<id>` key = a decision: `checked` = the user is fine with it; a note = their question or remark on it

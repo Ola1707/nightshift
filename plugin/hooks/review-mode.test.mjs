@@ -30,7 +30,7 @@ const flagOf = (dir) => existsSync(join(dir, ".git", "claude-review-mode"));
 const edit = (dir, path) => run(dir, "pre", { tool_name: "Edit", tool_input: { file_path: path } });
 const denied = (out) => out?.hookSpecificOutput?.permissionDecision === "deny";
 
-for (const prompt of ["/nightshift:review-long-task", "/review-long-task some words"]) {
+for (const prompt of ["/nightshift:start-review", "/start-review some words"]) {
   test(`typed ${prompt} turns it on`, () => {
     const dir = repo();
     run(dir, "prompt", { prompt, hook_event_name: "UserPromptSubmit" });
@@ -38,7 +38,7 @@ for (const prompt of ["/nightshift:review-long-task", "/review-long-task some wo
   });
 }
 
-for (const command_name of ["nightshift:review-long-task", "review-long-task"]) {
+for (const command_name of ["nightshift:start-review", "start-review"]) {
   test(`command name ${command_name} turns it on`, () => {
     const dir = repo();
     run(dir, "prompt", { command_name, hook_event_name: "UserPromptExpansion" });
@@ -47,7 +47,7 @@ for (const command_name of ["nightshift:review-long-task", "review-long-task"]) 
 }
 
 test("the Skill tool loading either name turns it on", () => {
-  for (const skill of ["nightshift:review-long-task", "review-long-task"]) {
+  for (const skill of ["nightshift:start-review", "start-review"]) {
     const dir = repo();
     run(dir, "pre", { tool_name: "Skill", tool_input: { skill } });
     assert.ok(flagOf(dir));
@@ -57,7 +57,7 @@ test("the Skill tool loading either name turns it on", () => {
 test("review-done turns it off, both spellings", () => {
   for (const prompt of ["/nightshift:review-done", "/review-done"]) {
     const dir = repo();
-    run(dir, "prompt", { prompt: "/review-long-task" });
+    run(dir, "prompt", { prompt: "/start-review" });
     assert.ok(flagOf(dir));
     const out = run(dir, "prompt", { prompt });
     assert.ok(!flagOf(dir));
@@ -78,7 +78,7 @@ test("nothing is denied while off", () => {
 
 test("a code edit is denied while on, naming the off command", () => {
   const dir = repo();
-  run(dir, "prompt", { prompt: "/review-long-task" });
+  run(dir, "prompt", { prompt: "/start-review" });
   const out = edit(dir, join(dir, "src/app.js"));
   assert.ok(denied(out));
   assert.match(out.hookSpecificOutput.permissionDecisionReason, /\/nightshift:review-done/);
@@ -86,7 +86,7 @@ test("a code edit is denied while on, naming the off command", () => {
 
 test("a .md edit and a docs/ edit are allowed while on", () => {
   const dir = repo();
-  run(dir, "prompt", { prompt: "/review-long-task" });
+  run(dir, "prompt", { prompt: "/start-review" });
   assert.equal(edit(dir, join(dir, "notes/README.md")), null);
   assert.equal(edit(dir, join(dir, "docs/data.json")), null);
 });
@@ -95,13 +95,13 @@ test("an alsoGuard folder: code denied, .md and plugin/skills/ allowed, outside 
   const other = repo();
   const dir = repo({ reviewMode: { alsoGuard: [other] } });
   const relative = repo({ reviewMode: { alsoGuard: ["../does-not-exist-sibling"] } });
-  run(dir, "prompt", { prompt: "/review-long-task" });
+  run(dir, "prompt", { prompt: "/start-review" });
   assert.ok(denied(edit(dir, join(other, "lib/a.mjs"))));
   assert.equal(edit(dir, join(other, "README.md")), null);
   assert.equal(edit(dir, join(other, "plugin/skills/x/SKILL.md")), null);
   assert.equal(edit(dir, join(other, "plugin/skills/x/helper.mjs")), null);
   assert.equal(edit(dir, join(tmpdir(), "somewhere-else/file.js")), null);
-  run(relative, "prompt", { prompt: "/review-long-task" });
+  run(relative, "prompt", { prompt: "/start-review" });
   assert.equal(edit(relative, join(tmpdir(), "elsewhere.js")), null);
 });
 
@@ -113,14 +113,14 @@ test("a relative alsoGuard folder is resolved against the project", () => {
   mkdirSync(other);
   execFileSync("git", ["init", "-q"], { cwd: dir });
   writeFileSync(join(dir, "board.config.json"), JSON.stringify({ reviewMode: { alsoGuard: ["../other"] } }));
-  run(dir, "prompt", { prompt: "/review-long-task" });
+  run(dir, "prompt", { prompt: "/start-review" });
   assert.ok(denied(edit(dir, join(other, "a.js"))));
 });
 
 test("post reports a code file changed since the snapshot, then stays quiet", () => {
   const dir = repo();
   put(dir, "before.js");
-  run(dir, "prompt", { prompt: "/review-long-task" });
+  run(dir, "prompt", { prompt: "/start-review" });
   assert.equal(run(dir, "post", { tool_name: "Bash" }), null);
   put(dir, "after.js");
   const out = run(dir, "post", { tool_name: "Bash" });
@@ -132,7 +132,7 @@ test("post reports a code file changed since the snapshot, then stays quiet", ()
 
 test("post ignores a Markdown change", () => {
   const dir = repo();
-  run(dir, "prompt", { prompt: "/review-long-task" });
+  run(dir, "prompt", { prompt: "/start-review" });
   put(dir, "notes.md");
   assert.equal(run(dir, "post", { tool_name: "Bash" }), null);
 });

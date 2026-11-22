@@ -1,6 +1,6 @@
 ---
-name: review-long-task
-description: Help the user review a finished long task (a day run, night run, release, or any unattended run) line by line, from its summary in the runs folder or the task and roadmap files. Use whenever the user says they are reviewing a run or a long task, quotes or selects lines from a run summary, or comes with questions, remarks and small fixes about what a run did — even if they don't say "review".
+name: start-review
+description: Help the user review a finished long task (a day run, night run, release, or any unattended run) line by line, from its summary in the runs folder or the task and roadmap files. Use whenever the user types /nightshift:start-review, says "start review", says they are reviewing a run or a long task, quotes or selects lines from a run summary, or comes with questions, remarks and small fixes about what a run did — even if they don't say "review".
 ---
 
 # Review a long task
@@ -16,14 +16,14 @@ The user reads the summary of a long task (for example `<runs folder>/day-run-<d
 questions, remarks and small fixes, often several in one message, often about a quoted or selected line. Work
 through each point in turn.
 
-**Review mode:** `/nightshift:review-long-task` turns on the plugin's review-mode hook: docs and Markdown files can
+**Review mode:** `/nightshift:start-review` turns on the plugin's review-mode hook: docs and Markdown files can
 change, code cannot, until the user types `/nightshift:review-done`.
 
 ## Start
 
 When the user says they're starting a review, answer in one short line that you're ready. Don't read files or
 summarize the run before the first point comes in. When the run has a `run.json`, the line carries the board link
-`http://localhost:<port>/review` (start the board first, skill `night-board`); the user's QA ticks and problem notes
+`http://localhost:<port>/review` (start the board first, skill `plan-night-run`); the user's QA ticks and problem notes
 are in `qa.json` next to it, and each note is a point like the ones below. Read `qa.json` of every run being
 reviewed (also older runs not yet "Review done") whenever the user says the review is done or comes back after using
 the board, and work through every note right away; never end the review with a note unhandled.

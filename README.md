@@ -67,7 +67,7 @@ After that, the words you use:
 - "night board": opens the board to pick tonight's tasks;
 - "night board ready": the picks are saved, Claude prepares the run;
 - `/nightshift:do`: starts a new piece of work by its type's steps;
-- `/nightshift:review-long-task` and `/nightshift:review-done`: review mode on and off (code edits are blocked in
+- `/nightshift:start-review` and `/nightshift:review-done`: review mode on and off (code edits are blocked in
   between, docs stay editable);
 - `/nightshift:doctor`: checks the setup again, for example after your test flow changes.
 

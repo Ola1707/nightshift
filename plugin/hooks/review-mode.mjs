@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Review mode: while the owner reviews a run, Claude may change docs, Markdown files and skills, never code.
 // The harness enforces it, not Claude's judgment.
-//   on:  /nightshift:review-long-task or /review-long-task (typed, a command, or the Skill tool loading it)
+//   on:  /nightshift:start-review or /start-review (typed, a command, or the Skill tool loading it)
 //   off: /nightshift:review-done or /review-done
 // The flag lives in .git/claude-review-mode (never tracked). It holds a snapshot of the code files that were already
 // changed when review mode started, so only new code changes are reported.
@@ -34,7 +34,7 @@ function real(path) {
 const root = real(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 const flag = join(root, ".git", "claude-review-mode");
 
-const ON_NAMES = ["nightshift:review-long-task", "review-long-task"];
+const ON_NAMES = ["nightshift:start-review", "start-review"];
 const OFF_NAMES = ["nightshift:review-done", "review-done"];
 
 function guardedFolders() {
