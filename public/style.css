@@ -104,6 +104,20 @@ nav.top a.on {
   background: var(--accent);
   color: #fff;
 }
+nav.top .setup {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding-left: 12px;
+  border-left: 1px solid var(--line);
+}
+nav.top .setup small {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 11px;
+}
 
 .grid {
   display: grid;
@@ -651,7 +665,7 @@ select {
 
 /* Review done */
 nav.top a.waiting {
-  margin-left: auto;
+  margin-left: 8px;
   background: var(--warn-soft);
   color: var(--warn);
   font-size: 13px;

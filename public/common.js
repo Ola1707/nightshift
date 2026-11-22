@@ -30,19 +30,24 @@ export const post = (path, data) =>
   });
 
 export function nav(active) {
-  const links = [
+  // The work, in order; then the setup pages, done once when starting with Nightshift (and when how we work changes).
+  const work = [
     ["/", "1 · Pick tasks"],
     ["/list", "2 · Tonight's list"],
     ["/review", "3 · Review a run"],
+  ];
+  const setup = [
     ["/flow", "Flow"],
     ["/checklist", "Checklist"],
   ];
+  const link = ([href, label]) => el("a", { href, class: href === active ? "on" : null }, label);
   return el(
     "nav",
     { class: "top" },
     el("span", { class: "brand" }, "🌙 AI board"),
-    links.map(([href, label]) => el("a", { href, class: href === active ? "on" : null }, label)),
+    work.map(link),
     el("span", { id: "review-waiting" }),
+    el("span", { class: "setup" }, el("small", {}, "Setup"), setup.map(link)),
   );
 }
 
