@@ -1,0 +1,7 @@
+{
+  "name": "nightshift",
+  "owner": { "name": "Nightshift" },
+  "plugins": [
+    { "name": "nightshift", "source": "./plugin", "description": "Pick tasks for an unattended Claude run and review the result on a local board." }
+  ]
+}
