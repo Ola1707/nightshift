@@ -49,9 +49,9 @@ Follow the type's `steps` in order. Stop after each step whose `who` is `human` 
 
 - **Where it is written:** the task file in `taskFiles` whose `file` is `<type id>.md`, in the tasks folder, from the
   start. A file marked `planOnly`: plan only, never done unattended.
-- **Prompt:** with the project's prompt skill (`skills.prompt`), use it. Without one, write the prompt yourself under
-  the task in its task file: what to change, which files, how "done" is checked. The prompt is written before any
-  code.
+- **Prompt:** with the project's prompt skill (`skills.prompt`), use it. Without one, use `/nightshift:write-a-prompt`:
+  it writes the prompt under the task and splits the work by model (Sonnet codes, Haiku runs fixed commands). The
+  prompt is written before any code.
 - **Plan** (a type whose steps include a plan): build it from `pnpm exec nightshift checklist`. The `approve` items
   go into the plan as a short yes/no block for the user; the `claude` items are done in the plan without asking; the
   `both` items are done and also get a yes/no line.

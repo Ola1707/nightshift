@@ -7,7 +7,7 @@
     "tests": "Tests",
     "deploy": "Deploy"
   },
-  "intro": "Start with **/do**: Claude asks the type of change, **is it for now?** and **what should Claude do**: only the action item, the action item + prompt, or the whole task. Then it follows its row up to that point. Opus always writes the prompt before Sonnet codes.",
+  "intro": "Start with **/do**: Claude asks the type of change, **is it for now?** and **what should Claude do**: only the action item, the action item + prompt, or the whole task. Then it follows its row up to that point. Opus always writes the prompt before anyone codes, and the prompt gives each part to the smallest model that fits: Sonnet codes, Haiku runs fixed commands.",
   "types": [
     {
       "id": "small-fix",
@@ -16,7 +16,7 @@
       "steps": [
         { "who": "human", "text": "wants a small fix" },
         { "who": "planner", "text": "write it in the type's task file" },
-        { "who": "planner", "text": "prompt" },
+        { "who": "planner", "text": "write a prompt", "note": "using lower agents" },
         { "who": "coder", "text": "before screenshots" },
         { "who": "coder", "text": "change it" },
         { "who": "tests", "text": "typecheck + lint" },
@@ -31,7 +31,7 @@
       "steps": [
         { "who": "human", "text": "reports a problem" },
         { "who": "planner", "text": "write it in the type's task file" },
-        { "who": "planner", "text": "prompt" },
+        { "who": "planner", "text": "write a prompt", "note": "using lower agents" },
         { "who": "coder", "text": "test that shows the bug", "note": "unit → integration → e2e only if needed" },
         { "who": "tests", "text": "it fails ❌", "note": "e2e saves the before screenshot" },
         { "who": "coder", "text": "fix" },
@@ -49,7 +49,7 @@
         { "who": "planner", "text": "2–4 options as pictures" },
         { "who": "human", "text": "chooses (always)" },
         { "who": "planner", "text": "roadmap action" },
-        { "who": "planner", "text": "prompt" },
+        { "who": "planner", "text": "write a prompt", "note": "using lower agents" },
         { "who": "coder", "text": "before screenshots" },
         { "who": "coder", "text": "code in a worktree" },
         { "who": "tests", "text": "checks + e2e", "note": "e2e saves the after screenshots" },
@@ -65,7 +65,7 @@
         { "who": "planner", "text": "plan" },
         { "who": "human", "text": "goes over the plan" },
         { "who": "planner", "text": "roadmap action" },
-        { "who": "planner", "text": "prompt" },
+        { "who": "planner", "text": "write a prompt", "note": "using lower agents" },
         { "who": "coder", "text": "before screenshots", "note": "only of screens that already exist" },
         { "who": "coder", "text": "code in a worktree" },
         { "who": "tests", "text": "checks + e2e", "note": ["each test suite in order", "e2e saves the after screenshots"] },
@@ -92,7 +92,7 @@
         { "who": "planner", "text": "plan with a diagram" },
         { "who": "human", "text": "approves" },
         { "who": "planner", "text": "roadmap action" },
-        { "who": "planner", "text": "prompt" },
+        { "who": "planner", "text": "write a prompt", "note": "using lower agents" },
         { "who": "coder", "text": "do it, with Human around" },
         { "who": "tests", "text": "checks + health checks" }
       ]

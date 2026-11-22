@@ -42,8 +42,7 @@ Sort each point into one of these and handle it:
    - Put it in the section where it belongs (the phase or the task file it's about), next to related items.
    - Make it concrete: real numbers, file names, environments, and what "done" looks like. If the user asked for
      numbers or details to be written in, write them in (a table is fine).
-   - Write a prompt for it (the project's prompt skill, `skills.prompt`; without one, write it yourself under the
-     item) only if the rest of that phase already has prompts, or if it's a bug. If the phase isn't planned yet,
+   - Write a prompt for it (the project's prompt skill, `skills.prompt`; without one, `/nightshift:write-a-prompt`) only if the rest of that phase already has prompts, or if it's a bug. If the phase isn't planned yet,
      don't write a prompt and don't ask about one.
    - If you shape the user's idea differently (a safer variant, for example), write your version and say in one
      line what you changed and why.

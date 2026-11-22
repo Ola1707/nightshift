@@ -39,8 +39,7 @@ checklist (`/checklist`).
 3. **Prompts.** Every chosen task with `hasPrompt: false` gets its prompt, and its line flips from `- [ ]` to
    `+ [ ]`. One subagent per task, in parallel, docs only.
    - With the project's prompt skill (`skills.prompt`): use it; it says where the prompt goes.
-   - Without one: write the prompt yourself under the task, in its task file: what to change, which files, how
-     "done" is checked.
+   - Without one: `/nightshift:write-a-prompt` (writes it under the task and splits the work by model).
    Tasks in a task file marked `planOnly` get a plan, never code.
 4. **Questions.** Collect what the prompts and the run need from the user into **one round** of GUI questions
    (AskUserQuestion): real decisions only, short, a recommended option first. Add the reminders the project lists in
