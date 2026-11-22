@@ -15,7 +15,8 @@ No `board.config.json` in the project yet: offer `/nightshift:setup` first.
 2. Read `<paths.board>/project.md` if it exists: the project's own rules, grouped by skill. Where project.md and this
    skill differ, project.md wins.
 3. Run `pnpm exec nightshift flow` (or `npx nightshift flow`): the flow of work as JSON. Each type has an `id`, a
-   `title`, an `example`, `steps` (`who` + `text`, `who` is a key of `roles`) and `approved`. `always` holds the rules
+   `title`, an `example`, `steps` or `parts` (stages, each with a `title` and `steps`; a step has `who` + `text`, `who`
+   is a key of `roles`) and `approved`. A change type has three stages: **1 · Report**, **2 · Plan**, **3 · Execute**. `always` holds the rules
    for every type. `pnpm exec nightshift flow <id>` prints one type.
 
 ## 1. Ask the type first
@@ -29,10 +30,11 @@ In the same AskUserQuestion call, also ask:
 
 - **For now?** Yes, now / Later (later = write it in its task file in the tasks folder; it's offered on the next
   night run).
-- **What should I do?** Action item only (write it in the task or roadmap file) / Action item + prompt / The whole
-  task (follow all its steps).
+- **How far?** 1 · Report (the action item only) / up to 2 · Plan (action item + options or plan + prompt) / All 3
+  stages (also execute it).
 
-Follow the type's steps only up to the chosen point, then stop.
+Follow the type's stages only up to the chosen point, then stop. Chosen "1 · Report": the plan stage's "write the
+prompt now?" is already answered (later: it's written at the prompt planning before a night run).
 
 If the user already described the work in the `/do` message, use it as the description; still ask the type, and
 recommend one first.
@@ -45,10 +47,12 @@ start the work until the user has approved it there.
 
 ## 3. Follow the steps
 
-Follow the type's `steps` in order. Stop after each step whose `who` is `human` and wait for the user's answer.
+Follow the type's stages and their `steps` in order. Stop after each step whose `who` is `human` and wait for the user's answer.
 
 - **Where it is written:** the task file in `taskFiles` whose `file` is `<type id>.md`, in the tasks folder, from the
   start. A file marked `planOnly`: plan only, never done unattended.
+- **Questions** (plan stage and prompt): one item at a time. Ask that item's questions, let the user ask and answer
+  back, and only then go to the next item.
 - **Prompt:** with the project's prompt skill (`skills.prompt`), use it. Without one, use `/nightshift:write-a-prompt`:
   it writes the prompt under the task and splits the work by model (Sonnet codes, Haiku runs fixed commands). The
   prompt is written before any code.

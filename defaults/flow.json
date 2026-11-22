@@ -7,94 +7,388 @@
     "tests": "Tests",
     "deploy": "Deploy"
   },
-  "intro": "Start with **/do**: Claude asks the type of change, **is it for now?** and **what should Claude do**: only the action item, the action item + prompt, or the whole task. Then it follows its row up to that point. Opus always writes the prompt before anyone codes, and the prompt gives each part to the smallest model that fits: Sonnet codes, Haiku runs fixed commands.",
+  "intro": "Every change has **3 stages**: **1 · Report** (Human tells it, Opus writes the action item in its roadmap), **2 · Plan** (options or a plan if the type needs one, then Opus asks: write the prompt now? The prompt uses lower agents: Sonnet codes, Haiku runs fixed commands; all questions are asked here, one item at a time), **3 · Execute** (the work, from the before screenshots). Start with **/do**: Claude asks the type and how far to go. Prompts not written yet are written at the night run's prompt planning (A).",
   "types": [
     {
       "id": "small-fix",
       "title": "Small text or refinement",
       "example": "e.g. a button's wording, a label, a spacing tweak · no test",
-      "steps": [
-        { "who": "human", "text": "wants a small fix" },
-        { "who": "planner", "text": "write it in the type's task file" },
-        { "who": "planner", "text": "write a prompt", "note": "using lower agents" },
-        { "who": "coder", "text": "before screenshots" },
-        { "who": "coder", "text": "change it" },
-        { "who": "tests", "text": "typecheck + lint" },
-        { "who": "coder", "text": "after screenshots" },
-        { "who": "human", "text": "approves ✅", "note": "or reports a problem → Bug" }
+      "parts": [
+        {
+          "title": "1 · Report",
+          "steps": [
+            {
+              "who": "human",
+              "text": "wants a small fix"
+            },
+            {
+              "who": "planner",
+              "text": "action item in \"Small fixes\""
+            }
+          ]
+        },
+        {
+          "title": "2 · Plan",
+          "steps": [
+            {
+              "who": "planner",
+              "text": "asks: write the prompt now?",
+              "note": "now · or later, at the prompt planning before a night run"
+            },
+            {
+              "who": "planner",
+              "text": "write a prompt",
+              "note": "using lower agents · all questions asked here, one item at a time"
+            }
+          ]
+        },
+        {
+          "title": "3 · Execute",
+          "steps": [
+            {
+              "who": "coder",
+              "text": "before screenshots"
+            },
+            {
+              "who": "coder",
+              "text": "change it"
+            },
+            {
+              "who": "tests",
+              "text": "typecheck + lint"
+            },
+            {
+              "who": "coder",
+              "text": "after screenshots"
+            },
+            {
+              "who": "human",
+              "text": "approves ✅",
+              "note": "or reports a problem → Bug"
+            }
+          ]
+        }
       ]
     },
     {
       "id": "bug",
       "title": "Bug",
       "example": "something works wrong",
-      "steps": [
-        { "who": "human", "text": "reports a problem" },
-        { "who": "planner", "text": "write it in the type's task file" },
-        { "who": "planner", "text": "write a prompt", "note": "using lower agents" },
-        { "who": "coder", "text": "test that shows the bug", "note": "unit → integration → e2e only if needed" },
-        { "who": "tests", "text": "it fails ❌", "note": "e2e saves the before screenshot" },
-        { "who": "coder", "text": "fix" },
-        { "who": "tests", "text": "it passes ✅", "note": "e2e saves the after screenshot" },
-        { "who": "coder", "text": "screenshots by hand only if the test wasn't e2e" },
-        { "who": "human", "text": "approves ✅", "note": "or reports a problem → Bug" }
+      "parts": [
+        {
+          "title": "1 · Report",
+          "steps": [
+            {
+              "who": "human",
+              "text": "reports a problem"
+            },
+            {
+              "who": "planner",
+              "text": "action item in \"Bugs\""
+            }
+          ]
+        },
+        {
+          "title": "2 · Plan",
+          "steps": [
+            {
+              "who": "planner",
+              "text": "asks: write the prompt now?",
+              "note": "now · or later, at the prompt planning before a night run"
+            },
+            {
+              "who": "planner",
+              "text": "write a prompt",
+              "note": "using lower agents · all questions asked here, one item at a time"
+            }
+          ]
+        },
+        {
+          "title": "3 · Execute",
+          "steps": [
+            {
+              "who": "coder",
+              "text": "test that shows the bug",
+              "note": "unit → integration → e2e only if needed"
+            },
+            {
+              "who": "tests",
+              "text": "it fails ❌",
+              "note": "e2e saves the before screenshot"
+            },
+            {
+              "who": "coder",
+              "text": "fix"
+            },
+            {
+              "who": "tests",
+              "text": "it passes ✅",
+              "note": "e2e saves the after screenshot"
+            },
+            {
+              "who": "coder",
+              "text": "screenshots by hand only if the test wasn't e2e"
+            },
+            {
+              "who": "human",
+              "text": "approves ✅",
+              "note": "or reports a problem → Bug"
+            }
+          ]
+        }
       ]
     },
     {
       "id": "visual-change",
       "title": "Visual change",
       "example": "a new look, layout, card style, page design",
-      "steps": [
-        { "who": "human", "text": "has an idea" },
-        { "who": "planner", "text": "2–4 options as pictures" },
-        { "who": "human", "text": "chooses (always)" },
-        { "who": "planner", "text": "roadmap action" },
-        { "who": "planner", "text": "write a prompt", "note": "using lower agents" },
-        { "who": "coder", "text": "before screenshots" },
-        { "who": "coder", "text": "code in a worktree" },
-        { "who": "tests", "text": "checks + e2e", "note": "e2e saves the after screenshots" },
-        { "who": "human", "text": "approves ✅", "note": "or reports a problem → Bug" }
+      "parts": [
+        {
+          "title": "1 · Report",
+          "steps": [
+            {
+              "who": "human",
+              "text": "has an idea"
+            },
+            {
+              "who": "planner",
+              "text": "action item in \"Visual changes\""
+            }
+          ]
+        },
+        {
+          "title": "2 · Plan",
+          "steps": [
+            {
+              "who": "planner",
+              "text": "2–4 options as pictures"
+            },
+            {
+              "who": "human",
+              "text": "chooses (always)"
+            },
+            {
+              "who": "planner",
+              "text": "asks: write the prompt now?",
+              "note": "now · or later, at the prompt planning before a night run"
+            },
+            {
+              "who": "planner",
+              "text": "write a prompt",
+              "note": "using lower agents · all questions asked here, one item at a time"
+            }
+          ]
+        },
+        {
+          "title": "3 · Execute",
+          "steps": [
+            {
+              "who": "coder",
+              "text": "before screenshots"
+            },
+            {
+              "who": "coder",
+              "text": "code in a worktree"
+            },
+            {
+              "who": "tests",
+              "text": "checks + e2e",
+              "note": "e2e saves the after screenshots"
+            },
+            {
+              "who": "human",
+              "text": "approves ✅",
+              "note": "or reports a problem → Bug"
+            }
+          ]
+        }
       ]
     },
     {
       "id": "feature",
       "title": "Feature",
       "example": "a new screen, a new setting, a new API route",
-      "steps": [
-        { "who": "human", "text": "has an idea" },
-        { "who": "planner", "text": "plan" },
-        { "who": "human", "text": "goes over the plan" },
-        { "who": "planner", "text": "roadmap action" },
-        { "who": "planner", "text": "write a prompt", "note": "using lower agents" },
-        { "who": "coder", "text": "before screenshots", "note": "only of screens that already exist" },
-        { "who": "coder", "text": "code in a worktree" },
-        { "who": "tests", "text": "checks + e2e", "note": ["each test suite in order", "e2e saves the after screenshots"] },
-        { "who": "human", "text": "approves ✅", "note": "or reports a problem → Bug" }
+      "parts": [
+        {
+          "title": "1 · Report",
+          "steps": [
+            {
+              "who": "human",
+              "text": "has an idea"
+            },
+            {
+              "who": "planner",
+              "text": "action item in \"Features\""
+            }
+          ]
+        },
+        {
+          "title": "2 · Plan",
+          "steps": [
+            {
+              "who": "planner",
+              "text": "plan"
+            },
+            {
+              "who": "human",
+              "text": "goes over the plan"
+            },
+            {
+              "who": "planner",
+              "text": "asks: write the prompt now?",
+              "note": "now · or later, at the prompt planning before a night run"
+            },
+            {
+              "who": "planner",
+              "text": "write a prompt",
+              "note": "using lower agents · all questions asked here, one item at a time"
+            }
+          ]
+        },
+        {
+          "title": "3 · Execute",
+          "steps": [
+            {
+              "who": "coder",
+              "text": "before screenshots",
+              "note": "only of screens that already exist"
+            },
+            {
+              "who": "coder",
+              "text": "code in a worktree"
+            },
+            {
+              "who": "tests",
+              "text": "checks + e2e",
+              "note": [
+                "each test suite in order",
+                "e2e saves the after screenshots"
+              ]
+            },
+            {
+              "who": "human",
+              "text": "approves ✅",
+              "note": "or reports a problem → Bug"
+            }
+          ]
+        }
       ]
     },
     {
       "id": "big-feature",
       "title": "Big feature",
       "example": "e.g. a new way to sign in, a news feed, payments",
-      "steps": [
-        { "who": "human", "text": "has an idea" },
-        { "who": "planner", "text": "research + options, with diagrams" },
-        { "who": "human", "text": "chooses" },
-        { "who": "human", "label": "then", "text": "same as Feature, from \"plan\"" }
+      "parts": [
+        {
+          "title": "1 · Report",
+          "steps": [
+            {
+              "who": "human",
+              "text": "has an idea"
+            },
+            {
+              "who": "planner",
+              "text": "action item in \"Big features\""
+            }
+          ]
+        },
+        {
+          "title": "2 · Plan",
+          "steps": [
+            {
+              "who": "planner",
+              "text": "research + options, with diagrams"
+            },
+            {
+              "who": "human",
+              "text": "chooses"
+            },
+            {
+              "who": "planner",
+              "text": "plan"
+            },
+            {
+              "who": "human",
+              "text": "goes over the plan"
+            },
+            {
+              "who": "planner",
+              "text": "asks: write the prompt now?",
+              "note": "now · or later, at the prompt planning before a night run"
+            },
+            {
+              "who": "planner",
+              "text": "write a prompt",
+              "note": "using lower agents · all questions asked here, one item at a time"
+            }
+          ]
+        },
+        {
+          "title": "3 · Execute",
+          "steps": [
+            {
+              "who": "human",
+              "label": "then",
+              "text": "same as Feature, from \"before screenshots\""
+            }
+          ]
+        }
       ]
     },
     {
       "id": "infrastructure",
       "title": "Infrastructure",
       "example": "hosting, databases, deploys, monitoring · never unattended",
-      "steps": [
-        { "who": "human", "text": "has an idea" },
-        { "who": "planner", "text": "plan with a diagram" },
-        { "who": "human", "text": "approves" },
-        { "who": "planner", "text": "roadmap action" },
-        { "who": "planner", "text": "write a prompt", "note": "using lower agents" },
-        { "who": "coder", "text": "do it, with Human around" },
-        { "who": "tests", "text": "checks + health checks" }
+      "parts": [
+        {
+          "title": "1 · Report",
+          "steps": [
+            {
+              "who": "human",
+              "text": "has an idea"
+            },
+            {
+              "who": "planner",
+              "text": "action item in \"Infrastructure\""
+            }
+          ]
+        },
+        {
+          "title": "2 · Plan",
+          "steps": [
+            {
+              "who": "planner",
+              "text": "plan with a diagram"
+            },
+            {
+              "who": "human",
+              "text": "approves"
+            },
+            {
+              "who": "planner",
+              "text": "asks: write the prompt now?",
+              "note": "now · or later, at the prompt planning before a night run"
+            },
+            {
+              "who": "planner",
+              "text": "write a prompt",
+              "note": "using lower agents · all questions asked here, one item at a time"
+            }
+          ]
+        },
+        {
+          "title": "3 · Execute",
+          "steps": [
+            {
+              "who": "coder",
+              "text": "do it, with Human around"
+            },
+            {
+              "who": "tests",
+              "text": "checks + health checks"
+            }
+          ]
+        }
       ]
     },
     {
@@ -103,53 +397,193 @@
       "example": "unattended while Human sleeps · plan in the run's plan file · summary in the runs folder",
       "parts": [
         {
-          "title": "A · Before Human leaves",
+          "title": "A · Plan prompts",
+          "note": "(any day before the night run)",
+          "steps": [
+            {
+              "who": "human",
+              "text": "\"plan prompts\""
+            },
+            {
+              "who": "planner",
+              "text": "lists open items with no prompt",
+              "note": "\"- [ ]\" in the task files and roadmaps"
+            },
+            {
+              "who": "human",
+              "text": "picks the items to write prompts for"
+            },
+            {
+              "who": "planner",
+              "text": [
+                "one item at a time: asks its questions",
+                "writes its prompt"
+              ],
+              "note": [
+                "Human asks and answers, then the next item",
+                "\"- [ ]\" → \"+ [ ]\""
+              ]
+            }
+          ]
+        },
+        {
+          "title": "B · Before Human leaves",
           "note": "(~10 min, Human is tired: short)",
           "steps": [
-            { "who": "human", "text": "\"plan tonight\"" },
-            { "who": "planner", "text": "offers open items", "note": "the task files + the next-run file" },
-            { "who": "planner", "text": "checks nothing waits to be merged", "note": "no unmerged branches or open PRs · any found → a question below" },
-            { "who": "planner", "subagents": true, "text": "write missing prompts", "note": "collect their questions" },
-            { "who": "planner", "text": "how each task will be done", "note": "1–2 lines per task, plain words" },
-            { "who": "human", "text": "OK or changes the approach" },
-            { "who": "planner", "text": "one round of questions (GUI)", "note": "prompt questions · commit today's docs? · deploy to the test environment? · scope · computer to sleep?" },
-            { "who": "planner", "text": "plan file", "note": "tasks · order · checks · not tonight" },
-            { "who": "human", "text": "closes other apps", "note": "passwords the test suites need" },
-            { "who": "human", "text": "/clear → \"Start the night run in …\"" }
+            {
+              "who": "human",
+              "text": "\"plan tonight\""
+            },
+            {
+              "who": "planner",
+              "text": "offers open items",
+              "note": "the task files + the next-run file"
+            },
+            {
+              "who": "planner",
+              "text": "checks nothing waits to be merged",
+              "note": "no unmerged branches or open PRs · any found → a question below"
+            },
+            {
+              "who": "planner",
+              "text": "checks every picked task has a prompt",
+              "note": "one missing → back to A, one item at a time"
+            },
+            {
+              "who": "planner",
+              "text": "how each task will be done",
+              "note": "1–2 lines per task, plain words"
+            },
+            {
+              "who": "human",
+              "text": "OK or changes the approach"
+            },
+            {
+              "who": "planner",
+              "text": "one round of questions (GUI)",
+              "note": "commit today's docs? · deploy to the test environment? · scope · computer to sleep?"
+            },
+            {
+              "who": "planner",
+              "text": "plan file",
+              "note": "tasks · order · checks · not tonight"
+            },
+            {
+              "who": "human",
+              "text": "closes other apps",
+              "note": "passwords the test suites need"
+            },
+            {
+              "who": "human",
+              "text": "/clear → \"Start the night run in …\""
+            }
           ]
         },
         {
-          "title": "B · The run",
+          "title": "C · The run",
           "steps": [
-            { "who": "runner", "text": ["merge waiting branches, no questions", "run branch from main"], "note": ["conflicts → Sonnet", "free ports · keep the computer awake · timeline"] },
-            { "who": "coder", "subagents": true, "text": "each task by its own row (1–5)", "note": "worktrees, in parallel · before screenshots · typecheck + lint only" },
-            { "who": "runner", "text": "merge each, remove worktree + branch", "note": "conflicts → Sonnet" },
-            { "who": "runner", "text": "typecheck · lint · unit tests · the other fast checks", "note": "PASS/FAIL · a failure → Sonnet" },
-            { "who": "coder", "text": "each test suite in order", "note": "one suite at a time · after screenshots + clips · Haiku watches it isn't stuck" },
-            { "who": "coder", "subagents": true, "text": "one per failure, fix", "note": "reruns only the failed · Opus decides when to stop (max 4 rounds)" },
-            { "who": "runner", "text": "deploy to the test environment, only if Human said yes and all passed" }
+            {
+              "who": "runner",
+              "text": [
+                "merge waiting branches, no questions",
+                "run branch from main"
+              ],
+              "note": [
+                "conflicts → Sonnet",
+                "free ports · keep the computer awake · timeline"
+              ]
+            },
+            {
+              "who": "coder",
+              "subagents": true,
+              "text": "each task by its own row (1–5)",
+              "note": "worktrees, in parallel · before screenshots · typecheck + lint only"
+            },
+            {
+              "who": "runner",
+              "text": "merge each, remove worktree + branch",
+              "note": "conflicts → Sonnet"
+            },
+            {
+              "who": "runner",
+              "text": "typecheck · lint · unit tests · the other fast checks",
+              "note": "PASS/FAIL · a failure → Sonnet"
+            },
+            {
+              "who": "coder",
+              "text": "each test suite in order",
+              "note": "one suite at a time · after screenshots + clips · Haiku watches it isn't stuck"
+            },
+            {
+              "who": "coder",
+              "subagents": true,
+              "text": "one per failure, fix",
+              "note": "reruns only the failed · Opus decides when to stop (max 4 rounds)"
+            },
+            {
+              "who": "runner",
+              "text": "deploy to the test environment, only if Human said yes and all passed"
+            }
           ]
         },
         {
-          "title": "C · The summary",
+          "title": "D · The summary",
           "note": "(Human reads it in the morning)",
           "steps": [
-            { "who": "coder", "text": "tasks table + run.json", "note": "before / after screenshots + clips · \"You\": QA or Questions" },
-            { "who": "coder", "text": "test runs table · proposed items" },
-            { "who": "planner", "text": "decisions made alone · what's flaky" },
-            { "who": "runner", "text": "still open · tick what's done", "note": "with evidence: ticked · no evidence: marked QA for Human" },
-            { "who": "runner", "text": "one PR, not merged" },
-            { "who": "runner", "text": "computer to sleep (if asked)" },
-            { "who": "human", "text": "reviews in the morning → row 8" }
+            {
+              "who": "coder",
+              "text": "tasks table + run.json",
+              "note": "before / after screenshots + clips · \"You\": QA or Questions"
+            },
+            {
+              "who": "coder",
+              "text": "test runs table · proposed items"
+            },
+            {
+              "who": "planner",
+              "text": "decisions made alone · what's flaky"
+            },
+            {
+              "who": "runner",
+              "text": "still open · tick what's done",
+              "note": "with evidence: ticked · no evidence: marked QA for Human"
+            },
+            {
+              "who": "runner",
+              "text": "one PR, not merged"
+            },
+            {
+              "who": "runner",
+              "text": "computer to sleep (if asked)"
+            },
+            {
+              "who": "human",
+              "text": "reviews in the morning → row 8"
+            }
           ]
         }
       ],
       "rules": [
-        { "title": "Never wake Human", "text": "decide alone and write the decision in the summary." },
-        { "title": "Blockers", "text": "remove them yourself (a stuck emulator or test driver); what truly needs Human goes in the summary with the exact command." },
-        { "title": "Never tonight", "text": "carrying out infrastructure (plan only), visual changes Human hasn't chosen, features whose plan isn't approved, deploys beyond the test environment, merging the PR." },
-        { "title": "Don't loop", "text": "same failure after a fix, or 4 rounds → write it down, move on." },
-        { "title": "No new items", "text": "new failures and ideas go under \"Proposed items\"; Human decides." }
+        {
+          "title": "Never wake Human",
+          "text": "decide alone and write the decision in the summary."
+        },
+        {
+          "title": "Blockers",
+          "text": "remove them yourself (a stuck emulator or test driver); what truly needs Human goes in the summary with the exact command."
+        },
+        {
+          "title": "Never tonight",
+          "text": "carrying out infrastructure (plan only), visual changes Human hasn't chosen, features whose plan isn't approved, deploys beyond the test environment, merging the PR."
+        },
+        {
+          "title": "Don't loop",
+          "text": "same failure after a fix, or 4 rounds → write it down, move on."
+        },
+        {
+          "title": "No new items",
+          "text": "new failures and ideas go under \"Proposed items\"; Human decides."
+        }
       ]
     },
     {
@@ -157,31 +591,99 @@
       "title": "Review yesterday's run",
       "example": "Human reads the run's summary and comes back with points, often several in one message",
       "steps": [
-        { "who": "human", "text": "starts the review", "note": "Claude answers in one line: ready, with the board link" },
-        { "who": "human", "text": "questions, remarks and small fixes", "note": "often about a quoted line · QA ticks and notes on the board count too" },
-        { "who": "planner", "text": "answers each question from evidence", "note": "commits, code, task files · real numbers, never guesses" },
-        { "who": "planner", "text": "each task or wish goes into the roadmap", "note": "without asking · no code change unless Human says now" },
-        { "who": "human", "text": "\"Open a task?\" for each proposed item", "note": "yes → a roadmap task · no → left out" },
-        { "who": "human", "text": "\"Review done\"", "note": "every note handled · what's still open carries to the next review" }
+        {
+          "who": "human",
+          "text": "starts the review",
+          "note": "Claude answers in one line: ready, with the board link"
+        },
+        {
+          "who": "human",
+          "text": "questions, remarks and small fixes",
+          "note": "often about a quoted line · QA ticks and notes on the board count too"
+        },
+        {
+          "who": "planner",
+          "text": "answers each question from evidence",
+          "note": "commits, code, task files · real numbers, never guesses"
+        },
+        {
+          "who": "planner",
+          "text": "each task or wish goes into the roadmap",
+          "note": "without asking · no code change unless Human says now"
+        },
+        {
+          "who": "human",
+          "text": "\"Open a task?\" for each proposed item",
+          "note": "yes → a roadmap task · no → left out"
+        },
+        {
+          "who": "human",
+          "text": "\"Review done\"",
+          "note": "every note handled · what's still open carries to the next review"
+        }
       ]
     }
   ],
   "always": [
-    { "title": "UI change", "text": "**before and after** screenshots of each changed screen, on every platform the project has. Sonnet takes them locally (before = before coding; e2e saves the after shots). They go into the release notes, next to the change." },
-    { "title": "Motion counts", "text": "when the change is about motion (a sheet opening, an animation, a transition), also save a short **MP4** (3–5 s, 300px wide, 30 fps) of the moment, before and after, next to the screenshots in the release notes." },
-    { "title": "Diagrams", "text": "one column per part (e.g. app, API, database); never \"server\"." },
-    { "title": "Human's task → roadmap", "text": "a task from Human goes into the roadmap without asking; a question just gets an answer; \"research X\" becomes a roadmap task, not research now." },
-    { "title": "Never add items alone", "text": "follow-ups, ideas and new failures are proposed with context; Human decides." },
-    { "title": "Propose first", "text": "anything outside the current step is proposed and approved before it's done, never after." },
-    { "title": "Bug repro order", "text": "unit/integration, then e2e on the quickest platform, then the other platforms only when it can't reproduce it there. An e2e that already fails is the repro: don't add another." },
-    { "title": "Roadmap marks", "text": "\"+ [ ]\" has a prompt, \"- [ ]\" has none yet. Before Sonnet works, every \"-\" item gets a prompt or a reason it's manual." },
-    { "title": "Checks before a commit", "text": "typecheck, lint, tests and the project's other fast checks, real output reported; docs-only changes skip all checks." },
-    { "title": "New rules", "text": "Claude shows the change to this page for Human to approve, instead of adding memories quietly. When how we work changes, this page changes too." }
+    {
+      "title": "UI change",
+      "text": "**before and after** screenshots of each changed screen, on every platform the project has. Sonnet takes them locally (before = before coding; e2e saves the after shots). They go into the release notes, next to the change."
+    },
+    {
+      "title": "Motion counts",
+      "text": "when the change is about motion (a sheet opening, an animation, a transition), also save a short **MP4** (3–5 s, 300px wide, 30 fps) of the moment, before and after, next to the screenshots in the release notes."
+    },
+    {
+      "title": "Diagrams",
+      "text": "one column per part (e.g. app, API, database); never \"server\"."
+    },
+    {
+      "title": "Human's task → roadmap",
+      "text": "a task from Human goes into the roadmap without asking; a question just gets an answer; \"research X\" becomes a roadmap task, not research now."
+    },
+    {
+      "title": "Never add items alone",
+      "text": "follow-ups, ideas and new failures are proposed with context; Human decides."
+    },
+    {
+      "title": "Propose first",
+      "text": "anything outside the current step is proposed and approved before it's done, never after."
+    },
+    {
+      "title": "Bug repro order",
+      "text": "unit/integration, then e2e on the quickest platform, then the other platforms only when it can't reproduce it there. An e2e that already fails is the repro: don't add another."
+    },
+    {
+      "title": "Roadmap marks",
+      "text": "\"+ [ ]\" has a prompt, \"- [ ]\" has none yet. Before Sonnet works, every \"-\" item gets a prompt or a reason it's manual."
+    },
+    {
+      "title": "Checks before a commit",
+      "text": "typecheck, lint, tests and the project's other fast checks, real output reported; docs-only changes skip all checks."
+    },
+    {
+      "title": "New rules",
+      "text": "Claude shows the change to this page for Human to approve, instead of adding memories quietly. When how we work changes, this page changes too."
+    }
   ],
   "eachDay": [
-    { "who": "human", "text": "review yesterday's run" },
-    { "who": "human", "label": "a few min", "text": "refine how we work" },
-    { "who": "human", "label": "10 min", "text": "learn something new in Claude" },
-    { "who": "human", "text": "pick today's work" }
+    {
+      "who": "human",
+      "text": "review yesterday's run"
+    },
+    {
+      "who": "human",
+      "label": "a few min",
+      "text": "refine how we work"
+    },
+    {
+      "who": "human",
+      "label": "10 min",
+      "text": "learn something new in Claude"
+    },
+    {
+      "who": "human",
+      "text": "pick today's work"
+    }
   ]
 }

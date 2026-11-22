@@ -15,7 +15,8 @@ model does each part**, so no part runs on a bigger model than it needs.
 - Read the task where it's written (its task file or roadmap section) and only the parts of the code and docs it
   touches. Find the real file paths, function names, keys and tests to name in the prompt.
 - List every question the coder could ask. Answer each from the task or the code and write the answer in as a fact.
-  What only the user can decide: ask in one round of GUI questions (AskUserQuestion) before writing. Decide small
+  What only the user can decide: ask before writing (AskUserQuestion, a recommended option first), **one item at a
+  time**: this item's questions, let the user ask and answer back, write this item's prompt, then the next item. Decide small
   technical details yourself. No "if X, do Y or ask me" hedges.
 
 ## 2. Split the work by model
