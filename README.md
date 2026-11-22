@@ -132,6 +132,10 @@ Each command works on the project in the current folder (or `BOARD_PROJECT`):
 
 ## The pages
 
+The top bar has the work, in order (1–3), and on the right the **Setup** pages (Flow, Checklist): you go
+through those once when starting with Nightshift (`/nightshift:setup` opens them), and again when how you work
+changes.
+
 1. **Pick tasks** (`/`). At the top, **Decisions from last night**: every decision Claude made alone that you have
    not ticked yet, from every run, with an "OK" checkbox and a text box (saved into that run's `qa.json`). Then every
    open task in the task files (one section per type of change), with **Check all night work** (every open task
@@ -147,11 +151,14 @@ Each command works on the project in the current folder (or `BOARD_PROJECT`):
    **Review done** writes `review.json` and the review into each release log the run names; **Reopen the review**
    asks first. Until a run's review is done, every page shows ⏳ for it, and deploys to the environments in
    `gate.holdUntilReviewed` are refused by `reviewGateProblem` (see "Use in your scripts").
-4. **Flow** (`/flow`): how work goes for each type of change (small fix, bug, visual change, feature, big feature,
-   infrastructure, night run, review), with an **Approve** button per type. An approval stops counting when the
-   type changes.
-5. **Checklist** (`/checklist`): what goes in every feature plan. Tick who handles each item: the owner approves
-   (one line in the plan, a yes or no) or Claude does (always in the plan). Add items of your own.
+
+**Setup:**
+
+- **Flow** (`/flow`): how work goes for each type of change (small fix, bug, visual change, feature, big feature,
+  infrastructure, night run, review), with an **Approve** button per type. An approval stops counting when the
+  type changes.
+- **Checklist** (`/checklist`): what goes in every feature plan. Tick who handles each item: the owner approves
+  (one line in the plan, a yes or no) or Claude does (always in the plan). Add items of your own.
 
 A click on any picture link opens it in a modal on the same page.
 
