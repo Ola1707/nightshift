@@ -515,6 +515,11 @@
             },
             {
               "who": "planner",
+              "text": "checks subagents work",
+              "note": "rules above Nightshift (CLAUDE.md, settings deny) · a Haiku test · \"Allow subagents?\" is the first question · blocked → Human fixes it before the run"
+            },
+            {
+              "who": "planner",
               "text": "one round of questions (GUI)",
               "note": "commit today's docs? · deploy to the test environment? · scope · computer to sleep?"
             },
@@ -673,8 +678,8 @@
         },
         {
           "who": "human",
-          "text": "\"Review done\"",
-          "note": "every note handled · what's still open carries to the next review"
+          "text": "/nightshift:review-done",
+          "note": "Opus goes over every remark and question (board notes + chat) · what's still open carries to the next review · then \"Review done\" on the board"
         }
       ]
     }
