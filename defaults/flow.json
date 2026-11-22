@@ -98,6 +98,11 @@
           "steps": [
             {
               "who": "planner",
+              "text": "shows Human the impact",
+              "note": "CPU · memory · disk · native · policy · cost · security & privacy · database migration · older app versions"
+            },
+            {
+              "who": "planner",
               "text": "write a prompt",
               "note": "using lower agents · all questions asked here, one item at a time"
             }
@@ -174,6 +179,11 @@
             },
             {
               "who": "planner",
+              "text": "shows Human the impact",
+              "note": "CPU · memory · disk · native · policy · cost · security & privacy · database migration · older app versions"
+            },
+            {
+              "who": "planner",
               "text": "write a prompt",
               "note": "using lower agents · all questions asked here, one item at a time"
             }
@@ -237,6 +247,11 @@
             {
               "who": "human",
               "text": "goes over the plan"
+            },
+            {
+              "who": "planner",
+              "text": "shows Human the impact",
+              "note": "CPU · memory · disk · native · policy · cost · security & privacy · database migration · older app versions"
             },
             {
               "who": "planner",
@@ -318,6 +333,11 @@
             },
             {
               "who": "planner",
+              "text": "shows Human the impact",
+              "note": "CPU · memory · disk · native · policy · cost · security & privacy · database migration · older app versions"
+            },
+            {
+              "who": "planner",
               "text": "write a prompt",
               "note": "using lower agents · all questions asked here, one item at a time"
             }
@@ -368,6 +388,11 @@
             {
               "who": "human",
               "text": "approves"
+            },
+            {
+              "who": "planner",
+              "text": "shows Human the impact",
+              "note": "CPU · memory · disk · native · policy · cost · security & privacy · database migration · older app versions"
             },
             {
               "who": "planner",
