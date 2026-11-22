@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI board · Flow</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div id="nav"></div>
+    <main class="flow-page">
+      <h1>How we work</h1>
+      <p class="lead" id="intro"></p>
+      <div class="legend" id="legend"></div>
+      <h2>Types of change</h2>
+      <p class="note" id="approve-line">
+        This is the suggested way to work. Approve each type, or ask Claude to change it: say
+        'change the flow'.
+      </p>
+      <div id="types"></div>
+      <h2>Always</h2>
+      <ul class="rules" id="always"></ul>
+      <h2>Each day</h2>
+      <div class="day" id="each-day"></div>
+    </main>
+    <script type="module" src="/flow.js"></script>
+  </body>
+</html>

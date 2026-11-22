@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI board · Checklist</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div id="nav"></div>
+    <main class="checklist-page">
+      <h1>What goes in every feature plan</h1>
+      <p class="lead" id="lead"></p>
+      <h2 id="important-title">Important</h2>
+      <div class="table-wrap"><table class="checklist" id="important"></table></div>
+      <h2 id="rest-title">All the rest</h2>
+      <div class="table-wrap"><table class="checklist" id="rest"></table></div>
+      <h2>Add item</h2>
+      <form class="add-item" id="add-form">
+        <input id="add-name" type="text" placeholder="Name" autocomplete="off" />
+        <input id="add-description" type="text" placeholder="Description (optional)" autocomplete="off" />
+        <button type="submit">Add</button>
+        <div class="field-error" id="add-error"></div>
+      </form>
+    </main>
+    <script type="module" src="/checklist.js"></script>
+  </body>
+</html>

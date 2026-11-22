@@ -1,0 +1,23 @@
+{
+  "name": "nightshift-board",
+  "version": "0.1.0",
+  "description": "A local board for unattended Claude Code runs: pick tonight's tasks, review the finished run.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "nightshift": "bin/nightshift.mjs"
+  },
+  "exports": {
+    ".": "./lib/index.mjs"
+  },
+  "dependencies": {
+    "sharp": "0.35.5"
+  },
+  "scripts": {
+    "test": "node --test",
+    "privacy": "node scripts/privacy-check.mjs"
+  }
+}

@@ -1,0 +1,445 @@
+{
+  "items": [
+    {
+      "id": "i98",
+      "name": "Edge cases",
+      "description": "The unusual cases each feature must handle (empty, too many, wrong order, offline…), listed in the plan and covered by tests",
+      "group": null,
+      "important": true,
+      "approve": false,
+      "claude": true
+    },
+    {
+      "id": "i99",
+      "name": "Components changed and used",
+      "description": "Which parts we change (apps, website, API, database, background jobs…) and which existing parts the feature uses. New feature: \"nothing used before\" is fine",
+      "group": null,
+      "important": true,
+      "approve": false,
+      "claude": true
+    },
+    {
+      "id": "i0",
+      "name": "Metrics + alerts",
+      "description": "Which errors to count; does it need an alert rule?",
+      "group": null,
+      "important": true,
+      "approve": true,
+      "claude": false
+    },
+    {
+      "id": "i1",
+      "name": "Logs",
+      "description": "What is logged when it fails (never personal data)",
+      "group": null,
+      "important": true,
+      "approve": true,
+      "claude": false
+    },
+    {
+      "id": "i2",
+      "name": "Rollback",
+      "description": "How to undo it: code, database, settings",
+      "group": null,
+      "important": true,
+      "approve": true,
+      "claude": false
+    },
+    {
+      "id": "i3",
+      "name": "Cost",
+      "description": "Money per month, and the Claude cost if notable",
+      "group": null,
+      "important": true,
+      "approve": true,
+      "claude": false
+    },
+    {
+      "id": "i23",
+      "name": "Time",
+      "description": "How long it takes each time it runs, for a new process (e.g. deploy the API: build ~2 min + deploy ~1 min), and whether it beats a cheaper option that only saves that time",
+      "group": null,
+      "important": true,
+      "approve": true,
+      "claude": false
+    },
+    {
+      "id": "i4",
+      "name": "Visual options",
+      "description": "Anything visual: options as pictures, you pick",
+      "group": null,
+      "important": true,
+      "approve": true,
+      "claude": false
+    },
+    {
+      "id": "i7",
+      "name": "Setting instead of hardcoding",
+      "description": "Which values the owner can change without a code change",
+      "group": null,
+      "important": true,
+      "approve": true,
+      "claude": false
+    },
+    {
+      "id": "i8",
+      "name": "Goals and non-goals",
+      "description": "What it must do, and what it deliberately won't",
+      "group": null,
+      "important": true,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "i9",
+      "name": "Open questions",
+      "description": "Everything you must answer, in one round, before work starts",
+      "group": null,
+      "important": true,
+      "approve": true,
+      "claude": false
+    },
+    {
+      "id": "i10",
+      "name": "Tests and their titles",
+      "description": "Which tests by name; bug = failing test first; text change = no test; time added",
+      "group": null,
+      "important": true,
+      "approve": false,
+      "claude": true
+    },
+    {
+      "id": "i11",
+      "name": "Screenshots",
+      "description": "Before / after, each platform, region and language",
+      "group": null,
+      "important": true,
+      "approve": false,
+      "claude": true
+    },
+    {
+      "id": "i13",
+      "name": "Input limits",
+      "description": "Every field: limits, red error with reason, save as draft",
+      "group": null,
+      "important": true,
+      "approve": false,
+      "claude": true
+    },
+    {
+      "id": "i14",
+      "name": "Security",
+      "description": "Who may see or change it; other users' data; abuse limits; tests",
+      "group": null,
+      "important": true,
+      "approve": false,
+      "claude": true
+    },
+    {
+      "id": "i15",
+      "name": "Double taps and retries",
+      "description": "Double press, retry, two devices at once",
+      "group": null,
+      "important": true,
+      "approve": false,
+      "claude": true
+    },
+    {
+      "id": "i17",
+      "name": "Deploy order",
+      "description": "Database → API → apps, each step safe on its own",
+      "group": null,
+      "important": true,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "i18",
+      "name": "When something we depend on is down",
+      "description": "Database host, sign-in, email, push: what the user sees",
+      "group": null,
+      "important": true,
+      "approve": true,
+      "claude": true
+    },
+    {
+      "id": "i19",
+      "name": "Test data",
+      "description": "What seed data local and test environments need",
+      "group": null,
+      "important": true,
+      "approve": false,
+      "claude": true
+    },
+    {
+      "id": "i20",
+      "name": "Accessibility",
+      "description": "Screen reader labels, touch size, contrast",
+      "group": null,
+      "important": true,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "i21",
+      "name": "Docs and roadmap",
+      "description": "Which docs change; follow-ups proposed, never added alone",
+      "group": null,
+      "important": true,
+      "approve": false,
+      "claude": true
+    },
+    {
+      "id": "i22",
+      "name": "Manual checks",
+      "description": "What you check by hand when no test can, with a reminder",
+      "group": null,
+      "important": true,
+      "approve": false,
+      "claude": true
+    },
+    {
+      "id": "r0",
+      "name": "Problem and context",
+      "description": "why now, who hurts, what happens if we do nothing?",
+      "group": "Scope and intent",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r1",
+      "name": "Acceptance criteria (Given/When/Then, happy path + edge cases)",
+      "description": "what exact behaviour must a test prove?",
+      "group": "Scope and intent",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r2",
+      "name": "Small and independent (INVEST)",
+      "description": "can it ship alone, in one PR/step, without a blocker?",
+      "group": "Scope and intent",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r3",
+      "name": "Which apps / surfaces / platforms",
+      "description": "which apps, the API, web or mobile, which regions?",
+      "group": "Scope and intent",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r4",
+      "name": "Alternatives considered (short)",
+      "description": "what else did we weigh and why not?",
+      "group": "Scope and intent",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r5",
+      "name": "UX sketch / screen list and copy",
+      "description": "what does each screen show, incl. empty, loading, error states?",
+      "group": "Scope and intent",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r6",
+      "name": "Formal estimate in points / sign-off board",
+      "description": "n/a for 1–2 people.",
+      "group": "Scope and intent",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r7",
+      "name": "API contract",
+      "description": "endpoints, request/response shapes, error codes, versioning; do old app builds still work?",
+      "group": "Design",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r8",
+      "name": "Data model and migration plan",
+      "description": "new tables/columns, expand-then-contract, backfill, can old code run on new schema?",
+      "group": "Design",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r9",
+      "name": "Domain rules location",
+      "description": "which business rule lives where (backend domain layer, not route/client)?",
+      "group": "Design",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r10",
+      "name": "Capacity / volume estimate",
+      "description": "expected requests, launch spike, DB size in 6 months?",
+      "group": "Design",
+      "important": false,
+      "approve": false,
+      "claude": true
+    },
+    {
+      "id": "r11",
+      "name": "Multi-datacenter N+2 redundancy, sharding, 10x growth plan",
+      "description": "overkill now.",
+      "group": "Design",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r12",
+      "name": "Field-level exposure / mass assignment",
+      "description": "does the response leak fields; can the client set fields it shouldn't?",
+      "group": "Security (OWASP ASVS / API Top 10 / MASVS)",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r13",
+      "name": "Secrets and tokens",
+      "description": "no secrets in bundle, logs, URLs; tokens stored in secure storage on device?",
+      "group": "Security (OWASP ASVS / API Top 10 / MASVS)",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r14",
+      "name": "Threat model (one paragraph: assets, attackers, abuse cases)",
+      "description": "what would a bad actor try?",
+      "group": "Security (OWASP ASVS / API Top 10 / MASVS)",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r16",
+      "name": "DPIA screening note",
+      "description": "is this high-risk processing (tracking, location, large scale)? Usually \"no\", write why.",
+      "group": "Privacy",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r21",
+      "name": "Feature flag / kill switch",
+      "description": "can we turn it off without a release; when is the flag removed?",
+      "group": "Rollout, flags, rollback",
+      "important": false,
+      "approve": true,
+      "claude": false
+    },
+    {
+      "id": "r22",
+      "name": "A/B experiment framework",
+      "description": "no traffic to make it meaningful.",
+      "group": "Rollout, flags, rollback",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r23",
+      "name": "Load test",
+      "description": "only for hot paths or bulk jobs.",
+      "group": "Testing",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r24",
+      "name": "Runbook line",
+      "description": "how to diagnose and fix if it breaks at night?",
+      "group": "Observability and operations",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r25",
+      "name": "On-call rotation, formal error-budget policy, monitoring-the-monitoring.",
+      "description": "",
+      "group": "Observability and operations",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r26",
+      "name": "Budget alert covers it",
+      "description": "is the new spend under an existing budget alert?",
+      "group": "Cost",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r27",
+      "name": "Dynamic font size / no text cut off; gestures have a tap alternative",
+      "description": "",
+      "group": "Accessibility",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r28",
+      "name": "Formal WCAG audit / VPAT.",
+      "description": "",
+      "group": "Accessibility",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r29",
+      "name": "Longer text",
+      "description": "translated strings fit; plurals, dates, currency via central formatters",
+      "group": "i18n / RTL / currency",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r30",
+      "name": "Server-sent text (push, email, SMS) localized by user's language",
+      "description": "",
+      "group": "i18n / RTL / currency",
+      "important": false,
+      "approve": false,
+      "claude": false
+    },
+    {
+      "id": "r31",
+      "name": "Changelog / release note line for testers and users",
+      "description": "",
+      "group": "Docs",
+      "important": false,
+      "approve": false,
+      "claude": false
+    }
+  ]
+}

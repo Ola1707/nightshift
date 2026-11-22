@@ -1,0 +1,3 @@
+#!/bin/sh
+# Runs the privacy check before every push (turned on with: git config core.hooksPath .githooks).
+exec node "$(git rev-parse --show-toplevel)/scripts/privacy-check.mjs"
