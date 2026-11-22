@@ -274,7 +274,7 @@ them. `nightshift config` prints the result.
 | `suites[].failureShot` | | where the runner saves a failed test's screenshot, e.g. `"test-failed-*.png"` |
 | `suites[].screenshot` | | how to take a screenshot: `{ how, viewport }` when the test runner takes it (e.g. `{ "how": "playwright", "viewport": "390x844" }`), or `{ command }`, a shell command that prints a PNG or writes the path given as `{file}` (e.g. `"adb exec-out screencap -p"`, `"xcrun simctl io booted screenshot {file}"`) |
 | `apps` | `[]` | the project's apps, by name |
-| `skills` | `{}` | the project's own skill names, by role: `run` (the night run), `prompt` (writing prompts), `tests` (running the suites); without one, the plugin's skills do it themselves |
+| `skills` | `{}` | the project's own skill names, by role: `run` (the night run), `prompt` (writing prompts; default `/nightshift:write-a-prompt`), `tests` (running the suites); without one, the plugin's skills do it themselves |
 | `gate.holdUntilReviewed` | `[]` | environments that get no deploy while a run waits for its review |
 | `reviewMode.alsoGuard` | `[]` | extra folders guarded during a review (absolute or relative to the project); in them only Markdown and `plugin/skills/` stay editable |
 

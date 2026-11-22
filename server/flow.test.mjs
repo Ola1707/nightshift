@@ -103,7 +103,7 @@ test("a changed step clears the approval", () => {
   writeOwn(p, { ...own, types: { feature } });
   assert.equal(readFlow(p.config, p.dir).types.find((t) => t.id === "feature").approved, true);
 
-  feature.steps[1].text = "plan, with a sketch";
+  feature.parts[1].steps[0].text = "plan, with a sketch";
   writeOwn(p, { ...own, types: { feature } });
   const after = readFlow(p.config, p.dir).types.find((t) => t.id === "feature");
   assert.equal(after.approved, false);

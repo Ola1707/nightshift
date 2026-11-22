@@ -25,7 +25,19 @@ checklist (`/checklist`).
   wins). If that port already answers, it is running.
 - Reply with the link only: `http://localhost:<port>`
 
-## 2. The user picks, then says "night board ready"
+## 2. Prompt planning (A, any day before the night run)
+
+When the user says "plan prompts" (or picks tasks with no prompt):
+
+1. List the open items with no prompt (`- [ ]`, `hasPrompt: false`) from the task files and roadmaps, short, one
+   line each, and let the user pick which to write prompts for (GUI, multi-select).
+2. **One item at a time:** ask that item's questions (AskUserQuestion, a recommended option first), let the user ask
+   and answer back, then write its prompt (the project's prompt skill, `skills.prompt`; without one,
+   `/nightshift:write-a-prompt`) and flip its line from `- [ ]` to `+ [ ]`. Only then go to the next item. Never
+   collect the questions of several items into one round.
+3. End with the list: each item, prompt written or skipped.
+
+## 3. The user picks, then says "night board ready"
 
 1. Read `board-picks.json` in the tasks folder (the same list is in the `nextRunFile` there, between the
    `<!-- board:picks -->` markers).
@@ -36,21 +48,18 @@ checklist (`/checklist`).
    **Decisions from last night** (top of the pick page, `GET /api/open-decisions`): read the `decision:<id>` and
    `failure:<test>` notes in each run's `qa.json` and answer or act on them in the chat, like the task notes. Never
    tick a decision: only the user does.
-3. **Prompts.** Every chosen task with `hasPrompt: false` gets its prompt, and its line flips from `- [ ]` to
-   `+ [ ]`. One subagent per task, in parallel, docs only.
-   - With the project's prompt skill (`skills.prompt`): use it; it says where the prompt goes.
-   - Without one: write the prompt yourself under the task, in its task file: what to change, which files, how
-     "done" is checked.
-   Tasks in a task file marked `planOnly` get a plan, never code.
-4. **Questions.** Collect what the prompts and the run need from the user into **one round** of GUI questions
+3. **Prompts.** Check every chosen task has a prompt (`hasPrompt: true`). One without: do the prompt planning (part
+   2) for those, one item at a time. Tasks in a task file marked `planOnly` get a plan, never code.
+4. **Questions.** Collect what the run needs from the user (not prompt questions: those were asked in part 2) into
+   **one round** of GUI questions
    (AskUserQuestion): real decisions only, short, a recommended option first. Add the reminders the project lists in
    project.md.
 5. Show the final list (task, prompt ready, decisions) in a few lines and wait for the user's OK.
 6. Then the night run follows the project's run skill (`skills.run`). Without one: make a branch, do each task by
    its type's steps in the flow (`pnpm exec nightshift flow`), run each suite in `suites`, write the summary and
-   `run.json` (part 3), and open one pull request, not merged.
+   `run.json` (part 4), and open one pull request, not merged.
 
-## 3. During the run: fill run.json
+## 4. During the run: fill run.json
 
 A subagent writes `<runs folder>/<night-run|day-run>-<date>/run.json`, next to the run's Markdown summary, in the
 format of `node_modules/nightshift-board/README.md`. Same content as the Markdown summary, plus:
@@ -80,7 +89,7 @@ lists the missing ones).
 
 Never write `qa.json`: that holds the user's ticks.
 
-## 4. Morning review
+## 5. Morning review
 
 Give the link `http://localhost:<port>/review`. When the user reviews, read `qa.json` in the run folder:
 
