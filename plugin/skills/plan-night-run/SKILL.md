@@ -50,12 +50,24 @@ When the user says "plan prompts" (or picks tasks with no prompt):
    tick a decision: only the user does.
 3. **Prompts.** Check every chosen task has a prompt (`hasPrompt: true`). One without: do the prompt planning (part
    2) for those, one item at a time. Tasks in a task file marked `planOnly` get a plan, never code.
-4. **Questions.** Collect what the run needs from the user (not prompt questions: those were asked in part 2) into
+4. **Subagents check.** The run hands work to subagents (Sonnet codes, Haiku runs fixed commands). Rules ranked
+   above Nightshift can stop that silently, and the run then does everything in the main model and costs far more.
+   Before the questions:
+   - Look for anything that forbids or limits subagents: your own instructions (for example "don't spawn agents
+     unless the user asks"), `~/.claude/CLAUDE.md`, the project's `CLAUDE.md` / `AGENTS.md`, and a `deny` on `Agent`
+     or `Task` in `~/.claude/settings.json` or the project's `.claude/settings*.json`.
+   - Test it: start one Haiku subagent that only replies "ok".
+   - Put one question first in the round of step 5: "Tonight's run uses subagents (Sonnet codes, Haiku runs
+     commands). Allow them for this run?" — "Yes (Recommended)" / "No". A yes is the user's explicit request to use
+     subagents for the whole run.
+   - Blocked (a rule found, the test failed, or "No"): say in one line what blocks it and where (file and line), and
+     how to fix it. Don't start the run until the user fixes it and the test passes again.
+5. **Questions.** Collect what the run needs from the user (not prompt questions: those were asked in part 2) into
    **one round** of GUI questions
    (AskUserQuestion): real decisions only, short, a recommended option first. Add the reminders the project lists in
    project.md.
-5. Show the final list (task, prompt ready, decisions) in a few lines and wait for the user's OK.
-6. Then the night run follows the project's run skill (`skills.run`). Without one: make a branch, do each task by
+6. Show the final list (task, prompt ready, decisions) in a few lines and wait for the user's OK.
+7. Then the night run follows the project's run skill (`skills.run`). Without one: make a branch, do each task by
    its type's steps in the flow (`pnpm exec nightshift flow`), run each suite in `suites`, write the summary and
    `run.json` (part 4), and open one pull request, not merged.
 

@@ -68,7 +68,9 @@ After that, the words you use:
 - "night board ready": the picks are saved, Claude prepares the run;
 - `/nightshift:do`: starts a new piece of work by its type's steps;
 - `/nightshift:start-review` and `/nightshift:review-done`: review mode on and off (code edits are blocked in
-  between, docs stay editable);
+  between, docs stay editable). `review-done` first goes over every remark and question you left in the review;
+- before a night run starts, Claude checks it can use subagents and asks you to allow them; a rule that blocks
+  them must be fixed before the run;
 - `/nightshift:doctor`: checks the setup again, for example after your test flow changes.
 
 ## Updates

@@ -25,8 +25,10 @@ When the user says they're starting a review, answer in one short line that you'
 summarize the run before the first point comes in. When the run has a `run.json`, the line carries the board link
 `http://localhost:<port>/review` (start the board first, skill `plan-night-run`); the user's QA ticks and problem notes
 are in `qa.json` next to it, and each note is a point like the ones below. Read `qa.json` of every run being
-reviewed (also older runs not yet "Review done") whenever the user says the review is done or comes back after using
-the board, and work through every note right away; never end the review with a note unhandled.
+reviewed (also older runs not yet "Review done") whenever the user comes back after using the board, and work
+through every note right away. The review ends with `/nightshift:review-done`: it goes over every remark and question
+left (board notes and chat points) before review mode turns off; never end the review with a note unhandled. When
+the user says the review is done without it, remind them in one line to type `/nightshift:review-done`.
 
 ## Each point in the message
 
