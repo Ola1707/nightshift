@@ -62,9 +62,9 @@
               "text": "after screenshots"
             },
             {
-              "who": "human",
-              "text": "approves ✅",
-              "note": "or reports a problem → Bug"
+              "who": "coder",
+              "text": "screenshots into the report",
+              "note": "before + after · Human sees them in the review"
             }
           ]
         }
@@ -130,9 +130,9 @@
               "text": "screenshots by hand only if the test wasn't e2e"
             },
             {
-              "who": "human",
-              "text": "approves ✅",
-              "note": "or reports a problem → Bug"
+              "who": "coder",
+              "text": "screenshots into the report",
+              "note": "before + after · Human sees them in the review"
             }
           ]
         }
@@ -196,9 +196,9 @@
               "note": "e2e saves the after screenshots"
             },
             {
-              "who": "human",
-              "text": "approves ✅",
-              "note": "or reports a problem → Bug"
+              "who": "coder",
+              "text": "screenshots into the report",
+              "note": "before + after · Human sees them in the review"
             }
           ]
         }
@@ -266,9 +266,9 @@
               ]
             },
             {
-              "who": "human",
-              "text": "approves ✅",
-              "note": "or reports a problem → Bug"
+              "who": "coder",
+              "text": "screenshots into the report",
+              "note": "before + after · Human sees them in the review"
             }
           ]
         }
