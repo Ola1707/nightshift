@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "owner": "you",
+  "port": 8096,
+  "taskFiles": [
+    { "file": "small-fix.md", "title": "Small fixes" },
+    { "file": "bug.md", "title": "Bugs" }
+  ],
+  "roadmaps": { "pattern": "^bakery-plan\\.md$", "titlePrefix": "^Corner Bakery " }
+}

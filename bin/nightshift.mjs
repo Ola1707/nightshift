@@ -5,6 +5,9 @@
 //   nightshift checklist          the plan checklist's three lists: { approve, claude, both }
 //   nightshift checklist-import   sets every checklist tick from a "Plan checklist choices" text on stdin
 //   nightshift config             the merged settings (board.config.json laid over the defaults)
+//   nightshift init               writes board.config.json and the folders and files the board needs
+//   nightshift doctor             checks the project, one OK or PROBLEM line per check
+//   nightshift demo               the board on an invented project (http://localhost:8096)
 // While developing: NIGHTSHIFT_DEV_DIR=<folder with bin/nightshift.mjs> runs that copy instead of this one.
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, realpathSync } from "node:fs";
@@ -28,7 +31,11 @@ const USAGE = `Usage: nightshift <command>
   flow [id]          print the merged flow of work, or one type
   checklist          print the plan checklist's lists (approve, claude, both)
   checklist-import   set the checklist ticks from a "Plan checklist choices" text on stdin
-  config             print the merged settings`;
+  config             print the merged settings
+  init [--answers <file>] [--force]
+                     write board.config.json (from a JSON answers file) and what the board needs; never overwrites
+  doctor [--shots]   check the project: one OK or PROBLEM line per check; --shots also checks the suites' screenshots
+  demo               serve the board on an invented project, http://localhost:8096`;
 
 const projectDir = () => resolve(process.env.BOARD_PROJECT ?? process.cwd());
 const print = (value) => console.log(JSON.stringify(value, null, 2));
@@ -82,6 +89,45 @@ async function main() {
       const { changed, skipped } = importChoices(loadConfig(dir), dir, text);
       console.log(`Changed ${changed} item${changed === 1 ? "" : "s"}.`);
       for (const name of skipped) console.log(`Skipped, unknown name: ${name}`);
+      return;
+    }
+    case "init": {
+      const { initProject, SetupError } = await server("setup.mjs");
+      const at = rest.indexOf("--answers");
+      try {
+        let answers = {};
+        if (at !== -1) {
+          if (!rest[at + 1]) throw new SetupError("--answers needs a file.");
+          const file = resolve(rest[at + 1]);
+          if (!existsSync(file)) throw new SetupError(`Answers file not found: ${file}`);
+          try {
+            answers = JSON.parse(readFileSync(file, "utf8"));
+          } catch (error) {
+            throw new SetupError(`The answers file is not valid JSON: ${error.message}`);
+          }
+        }
+        for (const line of initProject(projectDir(), { answers, force: rest.includes("--force") })) console.log(line);
+      } catch (error) {
+        if (!(error instanceof SetupError)) throw error;
+        console.error(error.message);
+        process.exit(1);
+      }
+      return;
+    }
+    case "doctor": {
+      const { doctor } = await server("setup.mjs");
+      const results = await doctor(projectDir(), { shots: rest.includes("--shots") });
+      for (const { text } of results) console.log(text);
+      process.exit(results.some((r) => !r.ok) ? 1 : 0);
+      return;
+    }
+    case "demo": {
+      const { prepareDemo, DEMO_PORT } = await server("setup.mjs");
+      const copy = prepareDemo();
+      process.env.BOARD_PROJECT = copy;
+      process.env.BOARD_PORT = String(DEMO_PORT);
+      console.log(`Demo project (a copy; your changes stay in ${copy}):`);
+      await server("server.mjs");
       return;
     }
     default:

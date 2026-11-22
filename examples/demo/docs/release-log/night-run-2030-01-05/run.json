@@ -1,0 +1,63 @@
+{
+  "title": "Night run 2030-01-05",
+  "date": "2030-01-05",
+  "links": [{ "label": "PR #12 (the run)", "url": "https://github.com/example/corner-bakery/pull/12" }],
+  "you": ["Check the opening hours on a phone"],
+  "notDeployed": "Nothing was deployed: the run only prepared the changes.",
+  "built": ["Opening hours on the home page", "Cart total with two coupons", "Order history list"],
+  "decisions": [{ "id": "run-1", "text": "Kept all three changes in one pull request." }],
+  "tasks": [
+    {
+      "id": "T.1",
+      "title": "Website: show the opening hours",
+      "type": "small-fix",
+      "status": "done",
+      "done": "The home page shows the opening hours under the logo.",
+      "decisions": [{ "id": "T.1-1", "text": "Kept the hours in one line on phones." }],
+      "missing": null,
+      "qa": "Website, home page, on a phone",
+      "before": [{ "label": "Home page", "path": "docs/release-log/night-run-2030-01-05/before/home.png" }],
+      "after": [{ "label": "Home page", "path": "docs/release-log/night-run-2030-01-05/after/home.png" }],
+      "tests": [{ "name": "web home.spec.ts 3", "what": "the hours show", "result": "failed before, passes after" }]
+    },
+    {
+      "id": "B.2",
+      "title": "Cart total is wrong with two coupons",
+      "type": "bug",
+      "status": "partial",
+      "done": "The total now applies each coupon once.",
+      "missing": "A coupon with a minimum order is not handled yet.",
+      "qa": "Website, cart, with two coupons",
+      "before": [{ "label": "Cart", "path": "docs/release-log/night-run-2030-01-05/before/cart.png" }],
+      "after": [{ "label": "Cart", "path": "docs/release-log/night-run-2030-01-05/after/cart.png" }],
+      "tests": [{ "name": "web cart.spec.ts 8", "what": "two coupons give the right total", "result": "failed before, passes after" }]
+    },
+    {
+      "id": "F.1",
+      "title": "Order history list",
+      "type": "feature",
+      "status": "not-done",
+      "done": "Planned only: the list and its empty state.",
+      "missing": "The list itself.",
+      "qa": null,
+      "questions": ["Show orders from the last 30 days, or all of them?"]
+    }
+  ],
+  "testRuns": [
+    { "suite": "Web", "result": "85 passed, 1 failed → fixed", "time": "4.1 min", "report": null }
+  ],
+  "failures": [
+    {
+      "test": "web checkout.spec.ts 12",
+      "app": "Shop",
+      "platform": "web",
+      "failedOn": "The Pay button was covered by the cookie banner.",
+      "failedStep": "click Pay",
+      "fixedIn": "app",
+      "fixFile": "checkout.tsx",
+      "explanation": "The cookie banner no longer covers the Pay button."
+    }
+  ],
+  "stillOpen": [{ "topic": "Bugs", "items": ["B.2: a coupon with a minimum order"] }],
+  "proposed": [{ "id": "P1", "text": "Add a sold-out label to the menu. Done when a sold-out bread shows the label." }]
+}
