@@ -33,7 +33,7 @@ In the same AskUserQuestion call, also ask:
 - **How far?** 1 · Report (the action item only) / up to 2 · Plan (action item + options or plan + prompt) / All 3
   stages (also execute it).
 
-Follow the type's stages only up to the chosen point, then stop. Chosen "1 · Report": the plan stage's "write the
+Follow the type's stages only up to the chosen point, then stop. Chosen "1 · Report": the report stage's "write the
 prompt now?" is already answered (later: it's written at the prompt planning before a night run).
 
 If the user already described the work in the `/do` message, use it as the description; still ask the type, and

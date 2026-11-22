@@ -7,7 +7,7 @@
     "tests": "Tests",
     "deploy": "Deploy"
   },
-  "intro": "Every change has **3 stages**: **1 · Report** (Human tells it, Opus writes the action item in its roadmap), **2 · Plan** (options or a plan if the type needs one, then Opus asks: write the prompt now? The prompt uses lower agents: Sonnet codes, Haiku runs fixed commands; all questions are asked here, one item at a time), **3 · Execute** (the work, from the before screenshots). Start with **/do**: Claude asks the type and how far to go. Prompts not written yet are written at the night run's prompt planning (A).",
+  "intro": "Every change has **3 stages**: **1 · Report** (Human tells it, Opus writes the action item in its roadmap and asks: write the prompt now?), **2 · Plan** (options or a plan if the type needs one, then the prompt uses lower agents: Sonnet codes, Haiku runs fixed commands; all questions are asked here, one item at a time), **3 · Execute** (the work, from the before screenshots). Start with **/do**: Claude asks the type and how far to go. Prompts not written yet are written at the night run's prompt planning (A).",
   "types": [
     {
       "id": "small-fix",
@@ -24,17 +24,17 @@
             {
               "who": "planner",
               "text": "action item in \"Small fixes\""
+            },
+            {
+              "who": "planner",
+              "text": "asks: write the prompt now?",
+              "note": "now · or later, at the prompt planning before a night run"
             }
           ]
         },
         {
           "title": "2 · Plan",
           "steps": [
-            {
-              "who": "planner",
-              "text": "asks: write the prompt now?",
-              "note": "now · or later, at the prompt planning before a night run"
-            },
             {
               "who": "planner",
               "text": "write a prompt",
@@ -85,17 +85,17 @@
             {
               "who": "planner",
               "text": "action item in \"Bugs\""
+            },
+            {
+              "who": "planner",
+              "text": "asks: write the prompt now?",
+              "note": "now · or later, at the prompt planning before a night run"
             }
           ]
         },
         {
           "title": "2 · Plan",
           "steps": [
-            {
-              "who": "planner",
-              "text": "asks: write the prompt now?",
-              "note": "now · or later, at the prompt planning before a night run"
-            },
             {
               "who": "planner",
               "text": "write a prompt",
@@ -153,6 +153,11 @@
             {
               "who": "planner",
               "text": "action item in \"Visual changes\""
+            },
+            {
+              "who": "planner",
+              "text": "asks: write the prompt now?",
+              "note": "now · or later, at the prompt planning before a night run"
             }
           ]
         },
@@ -166,11 +171,6 @@
             {
               "who": "human",
               "text": "chooses (always)"
-            },
-            {
-              "who": "planner",
-              "text": "asks: write the prompt now?",
-              "note": "now · or later, at the prompt planning before a night run"
             },
             {
               "who": "planner",
@@ -219,6 +219,11 @@
             {
               "who": "planner",
               "text": "action item in \"Features\""
+            },
+            {
+              "who": "planner",
+              "text": "asks: write the prompt now?",
+              "note": "now · or later, at the prompt planning before a night run"
             }
           ]
         },
@@ -232,11 +237,6 @@
             {
               "who": "human",
               "text": "goes over the plan"
-            },
-            {
-              "who": "planner",
-              "text": "asks: write the prompt now?",
-              "note": "now · or later, at the prompt planning before a night run"
             },
             {
               "who": "planner",
@@ -289,6 +289,11 @@
             {
               "who": "planner",
               "text": "action item in \"Big features\""
+            },
+            {
+              "who": "planner",
+              "text": "asks: write the prompt now?",
+              "note": "now · or later, at the prompt planning before a night run"
             }
           ]
         },
@@ -310,11 +315,6 @@
             {
               "who": "human",
               "text": "goes over the plan"
-            },
-            {
-              "who": "planner",
-              "text": "asks: write the prompt now?",
-              "note": "now · or later, at the prompt planning before a night run"
             },
             {
               "who": "planner",
@@ -350,6 +350,11 @@
             {
               "who": "planner",
               "text": "action item in \"Infrastructure\""
+            },
+            {
+              "who": "planner",
+              "text": "asks: write the prompt now?",
+              "note": "now · or later, at the prompt planning before a night run"
             }
           ]
         },
@@ -363,11 +368,6 @@
             {
               "who": "human",
               "text": "approves"
-            },
-            {
-              "who": "planner",
-              "text": "asks: write the prompt now?",
-              "note": "now · or later, at the prompt planning before a night run"
             },
             {
               "who": "planner",
