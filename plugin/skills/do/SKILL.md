@@ -8,6 +8,8 @@ disable-model-invocation: true
 
 ## 0. The project's settings first
 
+No `board.config.json` in the project yet: offer `/nightshift:setup` first.
+
 1. Run `pnpm exec nightshift config` (or `npx nightshift config`) for the project's settings: `port`, `paths`
    (`tasks`, `board`, `roadmaps`), `taskFiles`, `suites`, `skills`.
 2. Read `<paths.board>/project.md` if it exists: the project's own rules, grouped by skill. Where project.md and this

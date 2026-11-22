@@ -7,6 +7,8 @@ description: Run the Nightshift board (package nightshift-board), the local webs
 
 ## 0. The project's settings first
 
+No `board.config.json` in the project yet: offer `/nightshift:setup` first.
+
 1. Run `pnpm exec nightshift config` (or `npx nightshift config`). It prints the project's settings as JSON: `owner`,
    `port`, `paths` (`tasks`, `runs`, `board`, `roadmaps`), `taskFiles`, `suites`, `skills`, `gate`. Below, "the
    tasks folder" is `paths.tasks`, "the runs folder" is `paths.runs`, and so on.

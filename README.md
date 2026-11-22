@@ -1,31 +1,134 @@
 # Nightshift
 
-Nightshift is a small local website (the board) for unattended Claude Code runs. Before you leave, you pick the
-night's tasks from your roadmap files; Claude works through them and writes what it did into a `run.json`. In the
-morning you review the run on the board: before and after screenshots, tests, decisions Claude made alone, QA ticks.
+Nightshift lets Claude Code work through your tasks while you are away, and lets you check the result in the
+morning. It has two parts:
 
-Install and the Claude Code plugin: coming.
+- **The board**, a small local website (the npm package `nightshift-board`). Before you leave, you pick the night's
+  tasks from your roadmap files. In the morning you review the run: before and after screenshots, tests, decisions
+  Claude made alone, QA ticks.
+- **The Claude Code plugin** `nightshift`: the skills that tell Claude how to use the board, plan the work, run your
+  test suites and write the run's summary (`run.json`), plus a hook that blocks code edits while you review.
 
-## Start
+| Pick tonight's tasks | Tonight's list | Review a run |
+| --- | --- | --- |
+| ![Pick tasks](docs/screenshots/pick.png) | ![Tonight's list](docs/screenshots/list.png) | ![Review a run](docs/screenshots/review.png) |
+
+| How the work goes (Flow) | What goes in every plan (Checklist) |
+| --- | --- |
+| ![Flow](docs/screenshots/flow.png) | ![Checklist](docs/screenshots/checklist.png) |
+
+## Try it
+
+The board on an invented project ("Corner Bakery", with one finished night run to review), without installing
+anything into a project. You need Node 22 or later.
+
+```sh
+npx github:<owner>/nightshift demo
+```
+
+Open http://localhost:8096. It works on a copy in your temp folder, so you can tick and type freely; Ctrl+C stops it.
+
+`<owner>/nightshift` is this repository's address on GitHub (the part of its URL after `github.com/`). The package
+is not on the npm registry yet, so `npx nightshift-board demo` does not work; install from GitHub as shown here.
+
+## Install in a project
+
+Three steps, in your project's folder.
+
+1. **The board package**, as a dev dependency:
+
+   ```sh
+   pnpm add -D github:<owner>/nightshift      # or: npm install -D github:<owner>/nightshift
+   ```
+
+   Check it with `pnpm exec nightshift config` (or `npx nightshift config`): it prints the default settings.
+
+2. **The plugin.** A Claude Code plugin comes from a *marketplace*, which is just a Git repository with a list of
+   plugins; this repository is one. Start Claude Code in your project and type:
+
+   ```text
+   /plugin marketplace add <owner>/nightshift
+   /plugin install nightshift@nightshift
+   ```
+
+   The first line adds the marketplace (named `nightshift`), the second installs the plugin `nightshift` from it
+   and asks where to install it (choose the project, so everyone working on it gets the plugin). On Claude Code
+   2.1.275 or later, one line does both: `/plugin install nightshift --marketplace <owner>/nightshift`.
+
+3. **Setup.** Type `/nightshift:setup`. Claude reads your project (test scripts, Playwright, Cypress, Vitest, Jest,
+   Maestro or Detox configs, CI workflows, roadmap and docs folders, monorepo apps), asks one round of short
+   questions about what it could not find out, writes `board.config.json` and the board's files, and starts the
+   board. You approve the Flow page (how each type of change goes) and tick the Checklist page (what you approve in a
+   plan and what Claude does alone). It ends with `nightshift doctor --shots`, which checks everything, including
+   that each suite's screenshot command gives a real picture.
+
+After that, the words you use:
+
+- "night board": opens the board to pick tonight's tasks;
+- "night board ready": the picks are saved, Claude prepares the run;
+- `/nightshift:do`: starts a new piece of work by its type's steps;
+- `/nightshift:review-long-task` and `/nightshift:review-done`: review mode on and off (code edits are blocked in
+  between, docs stay editable);
+- `/nightshift:doctor`: checks the setup again, for example after your test flow changes.
+
+## Updates
+
+- **The plugin:** in `/plugin`, open the **Marketplaces** tab, choose `nightshift` and turn on auto-update (it is off
+  for marketplaces you add yourself). Or update by hand with `/plugin marketplace update nightshift`, then update
+  the plugin from the **Installed** tab (or `claude plugin update nightshift@nightshift` in a terminal).
+- **The board:** `pnpm up nightshift-board` (or `npm update nightshift-board`) moves it to the newest commit on
+  GitHub.
+
+## Working on Nightshift itself from another project
+
+To change Nightshift while using it in a project, clone this repository next to the project (`../nightshift`) and:
+
+1. **The plugin from your clone:** add the clone as a local marketplace instead of the GitHub one:
+
+   ```text
+   /plugin marketplace add ../nightshift
+   /plugin install nightshift@nightshift
+   ```
+
+   Claude Code then reads the skills and hooks straight from your clone; edits take effect in the next session or
+   after `/reload-plugins`. For a single session, `claude --plugin-dir ../nightshift/plugin` also works.
+2. **The board from your clone:** set `NIGHTSHIFT_DEV_DIR` to the clone, and the project's installed `nightshift`
+   command runs the clone's copy instead. In `.claude/settings.local.json` (not committed), so Claude's commands
+   get it too:
+
+   ```json
+   {
+     "env": { "NIGHTSHIFT_DEV_DIR": "/full/path/to/nightshift" },
+     "permissions": { "additionalDirectories": ["/full/path/to/nightshift"] }
+   }
+   ```
+
+3. **Let Claude edit the clone:** `additionalDirectories` (above) lets Claude read and change files in the clone
+   from the project's session. To keep review mode guarding it too, add it to `reviewMode.alsoGuard` in
+   `board.config.json` (there, only Markdown and `plugin/skills/` stay editable during a review).
+
+## The board's commands
 
 ```sh
 nightshift serve          # the board for the project in this folder: http://localhost:8095
 ```
 
-`BOARD_PROJECT=<folder>` serves another project folder, `BOARD_PORT=<port>` another port. The board listens on
-127.0.0.1 only and has no build step; its one package is `sharp` (decoding pictures for the blank-picture check).
+Run them with `pnpm exec nightshift ...` or `npx nightshift ...`. `BOARD_PROJECT=<folder>` serves another project
+folder, `BOARD_PORT=<port>` another port. The board listens on 127.0.0.1 only and has no build step; its one package
+is `sharp` (decoding pictures for the blank-picture check).
 
-Other commands, each for the project in the current folder (or `BOARD_PROJECT`):
+Each command works on the project in the current folder (or `BOARD_PROJECT`):
 
 | Command | What it does |
 | --- | --- |
+| `nightshift serve` | starts the board |
+| `nightshift config` | prints the merged settings |
 | `nightshift flow [id]` | prints the merged flow of work, or one type of change, as JSON |
 | `nightshift checklist` | prints the plan checklist's three lists: `{ approve, claude, both }` |
 | `nightshift checklist-import` | sets every checklist tick from a "Plan checklist choices" text on stdin |
-| `nightshift config` | prints the merged settings |
-
-While developing Nightshift itself, `NIGHTSHIFT_DEV_DIR=<your working copy>` makes any installed `nightshift` run
-that copy instead.
+| `nightshift init [--answers <file>] [--force]` | writes `board.config.json` (from a JSON file of settings) and the folders and files the board needs; never overwrites a file without `--force` |
+| `nightshift doctor [--shots]` | checks the project, one `OK` or `PROBLEM:` line per check; `--shots` also runs each suite's screenshot command and checks the picture is not blank |
+| `nightshift demo` | the board on the invented demo project, http://localhost:8096 |
 
 ## The pages
 
@@ -162,11 +265,21 @@ them. `nightshift config` prints the result.
 | `roadmaps.exclude` | `[]` | roadmap files to leave out |
 | `roadmaps.order` | `[]` | the default order of the roadmaps (the board's saved order wins) |
 | `roadmaps.titlePrefix` | `""` | a regular expression cut from the start of each roadmap's title |
-| `suites` | `[]` | the project's test suites: `[{ id, run, … }]` |
+| `suites` | `[]` | the project's test suites, in the order they run: `[{ id, run, … }]` (keys below) |
+| `suites[].id` | | required; a short name, e.g. `"web"` |
+| `suites[].run` | | required; the command that runs the suite |
+| `suites[].label` | | the name shown in summaries, e.g. `"Web"` |
+| `suites[].rerunFailed` | | how to rerun only the failed tests: a command or one plain sentence for Claude |
+| `suites[].report` | | the report file a run links to, e.g. `"failures.html"` |
+| `suites[].failureShot` | | where the runner saves a failed test's screenshot, e.g. `"test-failed-*.png"` |
+| `suites[].screenshot` | | how to take a screenshot: `{ how, viewport }` when the test runner takes it (e.g. `{ "how": "playwright", "viewport": "390x844" }`), or `{ command }`, a shell command that prints a PNG or writes the path given as `{file}` (e.g. `"adb exec-out screencap -p"`, `"xcrun simctl io booted screenshot {file}"`) |
 | `apps` | `[]` | the project's apps, by name |
-| `skills` | `{}` | the project's own skill names, by role |
+| `skills` | `{}` | the project's own skill names, by role: `run` (the night run), `prompt` (writing prompts), `tests` (running the suites); without one, the plugin's skills do it themselves |
 | `gate.holdUntilReviewed` | `[]` | environments that get no deploy while a run waits for its review |
-| `reviewMode.alsoGuard` | `[]` | extra folders guarded during a review |
+| `reviewMode.alsoGuard` | `[]` | extra folders guarded during a review (absolute or relative to the project); in them only Markdown and `plugin/skills/` stay editable |
+
+Next to it, `<paths.board>/project.md` (optional, written first by `/nightshift:setup`) holds the project's own
+rules for the skills, grouped by skill; where it and a skill differ, it wins.
 
 Example:
 
@@ -205,11 +318,21 @@ Also exported: `unreviewedRuns`, `isBlankPicture` (true when a screenshot is alm
 npm install
 npm test                  # node --test
 npm run privacy           # the privacy check
+claude plugin validate .  # the plugin and its marketplace file
 ```
 
-The privacy check fails, naming file and line, when a file git would commit holds a word from `.private-words` (one
-per line, `re:` for a regular expression). That file is git-ignored; without it the check is skipped. Turn on the
-pre-push hook that runs it with `git config core.hooksPath .githooks`.
+## The privacy check
+
+This repository is public, and it is often developed from inside a private project. The privacy check keeps that
+project's words out: it fails, naming file and line (never the word), when a file git would commit holds a word from
+`.private-words`. That file is yours and git-ignored: one word per line, matched case-sensitively anywhere in a line;
+a line starting with `re:` is a regular expression; empty lines and lines starting with `#` are skipped. Without the
+file the check is skipped and passes.
+
+```sh
+node scripts/privacy-check.mjs [folder]    # default: this repository
+git config core.hooksPath .githooks        # run it before every push
+```
 
 ## License
 
