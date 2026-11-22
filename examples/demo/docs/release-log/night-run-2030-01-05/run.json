@@ -49,10 +49,13 @@
   "failures": [
     {
       "test": "web checkout.spec.ts 12",
+      "name": "a customer pays for the order",
       "app": "Shop",
       "platform": "web",
-      "failedOn": "The Pay button was covered by the cookie banner.",
+      "stepsBefore": ["open the menu", "add a bread to the order", "open the order"],
       "failedStep": "click Pay",
+      "expected": "The payment page opens.",
+      "actual": "The Pay button was covered by the cookie banner; the click hit the banner.",
       "fixedIn": "app",
       "fixFile": "checkout.tsx",
       "explanation": "The cookie banner no longer covers the Pay button."

@@ -235,15 +235,18 @@ out.
   "failures": [
     {
       "test": "web checkout.spec.ts 12",
+      "name": "a customer pays for the order", // the test's title, read first on the card
       "app": "Shop",
       "platform": "web",
-      "failedOn": "What it failed on",
-      "failedStep": "The step that failed",
+      "stepsBefore": ["open the menu", "add a bread"], // the steps before the breaking point
+      "failedStep": "click Pay", // the step that broke
+      "expected": "The expected flow: the payment page opens",
+      "actual": "The actual flow: the Pay button is covered by the cookie banner",
       "report": "tests/e2e/runs/2030-01-05-web/failures.html#checkout-12", // the card's "Steps" link
-      "screenshot": "docs/release-log/night-run-2030-01-05/failures/checkout-12.png",
+      "screenshot": "docs/release-log/night-run-2030-01-05/failures/checkout-12.png", // the actual flow
       "fixedIn": "app", // app | test | not fixed
       "fixFile": "checkout.tsx",
-      "explanation": "One short line: what the fix was"
+      "explanation": "One short line: what the fix was (not fixed: why, and the proposed item)"
     }
   ],
   "sections": [{ "title": "Ruled out on the way", "items": ["Any other summary part, one list each"] }],

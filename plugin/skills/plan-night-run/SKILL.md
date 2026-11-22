@@ -83,8 +83,10 @@ format of `node_modules/nightshift-board/README.md`. Same content as the Markdow
   "Blank picture" or "Missing picture" chip on a bad shot, and each video as a silent loop labelled "Video · N s" (a
   click opens it with sound);
 - each new test, what it checks, and "failed before, passes after" when it reproduces a bug;
-- each failed test with a screenshot of the failure (the suite's `failureShot` file, or the screenshot its runner
-  saved), `fixedIn` app or test, and one short line on the fix;
+- each failed test, in this order: `name` (the test's title, not only its number), `stepsBefore` (the steps
+  before the breaking point) and `failedStep`, `expected` (the expected flow), `actual` (the actual flow), `fixedIn`
+  app, test or not fixed, `explanation` (one short line on the fix), and `screenshot` of the actual flow (the
+  suite's `failureShot` file, or the screenshot its runner saved);
 - `qa` only for changes the user can see in an app;
 - `stillOpen` grouped by category (one topic each), and `proposed: [{ id, text }]` (each gets an "Add as an action
   item" tick and a comment box on the review page);

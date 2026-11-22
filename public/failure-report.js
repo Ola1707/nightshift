@@ -20,3 +20,23 @@ export function stepsLink(failure, missing = {}) {
     return { gone: true, text: "page no longer on this computer" };
   return { href: failure.report, text: "Steps" };
 }
+
+/**
+ * The parts of a failure card, in the order the owner reads them: test name, steps before the break, expected flow,
+ * actual flow, the fix. Old run.json entries (no name/stepsBefore/expected/actual) fall back to failedStep/failedOn.
+ * @param {{ test: string, name?: string, stepsBefore?: string[], failedStep?: string, expected?: string,
+ *   actual?: string, failedOn?: string, fixedIn?: string, explanation?: string, fixFile?: string }} f
+ */
+export function failureParts(f) {
+  const steps = [...(f.stepsBefore ?? [])];
+  if (f.failedStep && !steps.includes(f.failedStep)) steps.push(`${f.failedStep} ← breaks here`);
+  return {
+    title: f.name || f.test,
+    id: f.name ? f.test : null,
+    steps,
+    expected: f.expected ?? null,
+    actual: f.actual ?? f.failedOn ?? null,
+    fix: f.fixedIn === "not fixed" ? `Not fixed. ${f.explanation ?? ""}`.trim() : (f.explanation ?? null),
+    fixFile: f.fixedIn === "not fixed" ? null : (f.fixFile ?? null),
+  };
+}

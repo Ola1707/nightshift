@@ -1,5 +1,5 @@
 import { $, api, decisionRow, el, href, nav, post, proposedItems, proposedKey, reviewWaiting } from "/common.js";
-import { stepsLink } from "/failure-report.js";
+import { failureParts, stepsLink } from "/failure-report.js";
 import { reviewSaver } from "/review-save.js";
 
 $("#nav").replaceWith(nav("/review"));
@@ -310,6 +310,7 @@ function fixedInChip(fixedIn) {
 }
 
 function failureCard(f, runName, qa, onChange) {
+  const p = failureParts(f);
   return el(
     "div",
     { class: "box", style: "margin-bottom: 12px" },
@@ -319,7 +320,7 @@ function failureCard(f, runName, qa, onChange) {
         class: "head",
         style: "display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap",
       },
-      el("h3", {}, el("code", {}, f.test)),
+      el("div", {}, el("h3", {}, p.title), p.id && el("code", { class: "muted small" }, p.id)),
       el(
         "div",
         { class: "chips", style: "margin: 0" },
@@ -328,20 +329,26 @@ function failureCard(f, runName, qa, onChange) {
         fixedInChip(f.fixedIn),
       ),
     ),
-    el("p", { class: "kv" }, el("b", {}, "Failed on"), f.failedOn),
-    f.failedStep &&
-      el("p", { class: "kv" }, el("b", {}, "Failed step"), el("code", {}, f.failedStep)),
+    p.steps.length > 0 &&
+      el(
+        "div",
+        { class: "kv" },
+        el("b", {}, "Steps before"),
+        el("ol", { style: "margin: 4px 0 0" }, ...p.steps.map((s) => el("li", {}, s))),
+      ),
     stepsLinkRow(f),
+    p.expected && el("p", { class: "kv" }, el("b", {}, "Expected"), p.expected),
+    p.actual && el("p", { class: "kv" }, el("b", {}, "Actual"), p.actual),
     el(
       "p",
       { class: "kv" },
-      el("b", {}, "Fix"),
-      f.explanation,
-      f.fixFile ? el("code", { style: "margin-left: 6px" }, f.fixFile) : "",
+      el("b", {}, "The fix"),
+      p.fix ?? "",
+      p.fixFile ? el("code", { style: "margin-left: 6px" }, p.fixFile) : "",
     ),
     f.screenshot
-      ? shots([{ label: "the failure", path: f.screenshot }])
-      : el("div", { class: "muted small" }, "No failure screenshot"),
+      ? shots([{ label: "actual flow", path: f.screenshot }])
+      : el("div", { class: "muted small" }, "No screenshot of the actual flow"),
     f.fixedIn !== "not fixed" && failureNote(runName, f, qa, onChange),
   );
 }
