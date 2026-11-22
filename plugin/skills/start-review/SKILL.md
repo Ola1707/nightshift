@@ -23,7 +23,7 @@ change, code cannot, until the user types `/nightshift:review-done`.
 
 When the user says they're starting a review, answer in one short line that you're ready. Don't read files or
 summarize the run before the first point comes in. When the run has a `run.json`, the line carries the board link
-`http://localhost:<port>/review` (start the board first, skill `night-board`); the user's QA ticks and problem notes
+`http://localhost:<port>/review` (start the board first, skill `plan-night-run`); the user's QA ticks and problem notes
 are in `qa.json` next to it, and each note is a point like the ones below. Read `qa.json` of every run being
 reviewed (also older runs not yet "Review done") whenever the user says the review is done or comes back after using
 the board, and work through every note right away; never end the review with a note unhandled.

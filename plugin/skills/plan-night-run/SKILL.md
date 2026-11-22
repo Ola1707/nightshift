@@ -1,9 +1,9 @@
 ---
-name: night-board
-description: Run the Nightshift board (package nightshift-board), the local website where the user picks the night run's tasks and reviews the finished run. Use whenever the user says "night board", "open the board", "I want to pick tonight's tasks", "night board ready", "I picked the tasks", or wants to see or review a run on the board — even if they don't say "board".
+name: plan-night-run
+description: Plan the night run on the Nightshift board (package nightshift-board): the user picks tonight's tasks, Claude writes the missing prompts one item at a time, asks the run's questions and starts the run; the board also shows the finished run for review. Use whenever the user types /nightshift:plan-night-run, says "plan night run", "plan tonight", "night board", "open the board", "I want to pick tonight's tasks", "night board ready", "I picked the tasks", or wants to see or review a run on the board — even if they don't say "board".
 ---
 
-# Night board
+# Plan night run
 
 ## 0. The project's settings first
 
