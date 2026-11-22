@@ -303,6 +303,12 @@ function stepsLinkRow(f) {
   );
 }
 
+// "not fixed" is its own state, not a place: never "fixed in the not fixed".
+function fixedInChip(fixedIn) {
+  if (fixedIn === "not fixed") return el("span", { class: "chip bad" }, "not fixed");
+  return el("span", { class: `chip ${fixedIn === "app" ? "warn" : "good"}` }, `fixed in the ${fixedIn}`);
+}
+
 function failureCard(f, runName, qa, onChange) {
   return el(
     "div",
@@ -319,11 +325,7 @@ function failureCard(f, runName, qa, onChange) {
         { class: "chips", style: "margin: 0" },
         f.app && el("span", { class: "chip" }, f.app),
         f.platform && el("span", { class: "chip" }, f.platform),
-        el(
-          "span",
-          { class: `chip ${f.fixedIn === "app" ? "bad" : "warn"}` },
-          `fixed in the ${f.fixedIn}`,
-        ),
+        fixedInChip(f.fixedIn),
       ),
     ),
     el("p", { class: "kv" }, el("b", {}, "Failed on"), f.failedOn),
