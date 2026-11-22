@@ -250,6 +250,16 @@
             },
             {
               "who": "planner",
+              "text": "2–4 options as pictures",
+              "note": "only if it changes the look"
+            },
+            {
+              "who": "human",
+              "text": "chooses",
+              "note": "only if it changes the look"
+            },
+            {
+              "who": "planner",
               "text": "shows Human the impact",
               "note": "CPU · memory · disk · native · policy · cost · security & privacy · database migration · older app versions"
             },
@@ -330,6 +340,16 @@
             {
               "who": "human",
               "text": "goes over the plan"
+            },
+            {
+              "who": "planner",
+              "text": "2–4 options as pictures",
+              "note": "only if it changes the look"
+            },
+            {
+              "who": "human",
+              "text": "chooses",
+              "note": "only if it changes the look"
             },
             {
               "who": "planner",
