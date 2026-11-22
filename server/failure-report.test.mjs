@@ -63,7 +63,7 @@ test("failure card reads name, steps before, expected, actual, fix", () => {
   assert.deepEqual(p.steps, ["open Programs", "tap Edit", "tap Translate ← breaks here"]);
   assert.equal(p.expected, "the translation box opens");
   assert.equal(p.actual, "the Android photo picker opens");
-  assert.equal(p.fix, "Not fixed. proposed item P2.");
+  assert.equal(p.fix, "proposed item P2.");
   assert.equal(p.fixFile, null);
 });
 

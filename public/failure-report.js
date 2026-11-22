@@ -36,7 +36,7 @@ export function failureParts(f) {
     steps,
     expected: f.expected ?? null,
     actual: f.actual ?? f.failedOn ?? null,
-    fix: f.fixedIn === "not fixed" ? `Not fixed. ${f.explanation ?? ""}`.trim() : (f.explanation ?? null),
+    fix: f.explanation ?? (f.fixedIn === "not fixed" ? "Not fixed" : null),
     fixFile: f.fixedIn === "not fixed" ? null : (f.fixFile ?? null),
   };
 }
