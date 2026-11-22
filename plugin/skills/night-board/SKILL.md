@@ -1,0 +1,108 @@
+---
+name: night-board
+description: Run the Nightshift board (package nightshift-board), the local website where the user picks the night run's tasks and reviews the finished run. Use whenever the user says "night board", "open the board", "I want to pick tonight's tasks", "night board ready", "I picked the tasks", or wants to see or review a run on the board — even if they don't say "board".
+---
+
+# Night board
+
+## 0. The project's settings first
+
+1. Run `pnpm exec nightshift config` (or `npx nightshift config`). It prints the project's settings as JSON: `owner`,
+   `port`, `paths` (`tasks`, `runs`, `board`, `roadmaps`), `taskFiles`, `suites`, `skills`, `gate`. Below, "the
+   tasks folder" is `paths.tasks`, "the runs folder" is `paths.runs`, and so on.
+2. Read `<paths.board>/project.md` if it exists: the project's own rules, grouped by skill. Where project.md and this
+   skill differ, project.md wins.
+
+The board is a local website in the package `nightshift-board` (file formats and pages:
+`node_modules/nightshift-board/README.md`). Its pages: pick (`/`), list (`/list`), review (`/review`), flow (`/flow`),
+checklist (`/checklist`).
+
+## 1. Open it
+
+- Start it in the background: `pnpm exec nightshift serve` (or `npx nightshift serve`), on `port` (`BOARD_PORT`
+  wins). If that port already answers, it is running.
+- Reply with the link only: `http://localhost:<port>`
+
+## 2. The user picks, then says "night board ready"
+
+1. Read `board-picks.json` in the tasks folder (the same list is in the `nextRunFile` there, between the
+   `<!-- board:picks -->` markers).
+2. **Notes.** Read `board-notes.json` in the tasks folder (task id → code, title, file, note). Answer every question
+   there in the chat, short, one per task; treat the rest as instructions for that task (they go into its prompt and
+   the run). Also do this whenever the user says "answer my notes" or "I left notes on the board". Never edit the
+   notes; the user clears a note by emptying it.
+   **Decisions from last night** (top of the pick page, `GET /api/open-decisions`): read the `decision:<id>` and
+   `failure:<test>` notes in each run's `qa.json` and answer or act on them in the chat, like the task notes. Never
+   tick a decision: only the user does.
+3. **Prompts.** Every chosen task with `hasPrompt: false` gets its prompt, and its line flips from `- [ ]` to
+   `+ [ ]`. One subagent per task, in parallel, docs only.
+   - With the project's prompt skill (`skills.prompt`): use it; it says where the prompt goes.
+   - Without one: write the prompt yourself under the task, in its task file: what to change, which files, how
+     "done" is checked.
+   Tasks in a task file marked `planOnly` get a plan, never code.
+4. **Questions.** Collect what the prompts and the run need from the user into **one round** of GUI questions
+   (AskUserQuestion): real decisions only, short, a recommended option first. Add the reminders the project lists in
+   project.md.
+5. Show the final list (task, prompt ready, decisions) in a few lines and wait for the user's OK.
+6. Then the night run follows the project's run skill (`skills.run`). Without one: make a branch, do each task by
+   its type's steps in the flow (`pnpm exec nightshift flow`), run each suite in `suites`, write the summary and
+   `run.json` (part 3), and open one pull request, not merged.
+
+## 3. During the run: fill run.json
+
+A subagent writes `<runs folder>/<night-run|day-run>-<date>/run.json`, next to the run's Markdown summary, in the
+format of `node_modules/nightshift-board/README.md`. Same content as the Markdown summary, plus:
+
+- before / after screenshots and videos per task, copied into the run folder (repo-relative paths). A screenshot is
+  the whole screen, taken with the suite's `screenshot` setting (a viewport, or a command for a device). Before
+  saving, wait for the network to go idle, fonts (`document.fonts.ready`) and images to load, then run
+  `isBlankPicture` (from the package `nightshift-board`) and retake once if blank. The review page shows a red
+  "Blank picture" or "Missing picture" chip on a bad shot, and each video as a silent loop labelled "Video · N s" (a
+  click opens it with sound);
+- each new test, what it checks, and "failed before, passes after" when it reproduces a bug;
+- each failed test with a screenshot of the failure (the suite's `failureShot` file, or the screenshot its runner
+  saved), `fixedIn` app or test, and one short line on the fix;
+- `qa` only for changes the user can see in an app;
+- `stillOpen` grouped by category (one topic each), and `proposed: [{ id, text }]` (each gets an "Add as an action
+  item" tick and a comment box on the review page);
+- every decision made alone in `decisions: [{ id, text }]`: on its task, or at the top of run.json for the run's
+  own. You write the `id` (e.g. "T.1-1"), unique within the run, so a tick stays on its decision when run.json is
+  written again. Not in the task's `done` text, and no "Decisions made alone" section. The user ticks them; never
+  tick one yourself. Only a choice made without the user that changes what they get: never something done with
+  their OK or decided together, and never temporary working steps that leave nothing behind (throwaway scripts,
+  rebuilds, removed test apps, merge conflicts).
+
+Commit `run.json` and the run's pictures together with the run's summary, and later `qa.json` and `review.json` with
+the review. Every picture `run.json` points to must exist (`pictureProblems` from the package `nightshift-board`
+lists the missing ones).
+
+Never write `qa.json`: that holds the user's ticks.
+
+## 4. Morning review
+
+Give the link `http://localhost:<port>/review`. When the user reviews, read `qa.json` in the run folder:
+
+- a tick = the user checked it;
+- a note on a QA task = a problem, which goes through the Bug flow (skill `review-long-task`);
+- a note on a task without QA = the user's answer to its questions or a note for Claude: answer or act on it in the
+  chat. Every task on the page has a text box;
+- a `decision:<id>` key = a decision: `checked` = the user is fine with it; a note = their question or remark on it
+  (a note without a tick leaves it open): answer or act on it in the chat;
+- a `failure:<test>` note = a remark on a fixed failed test: answer or act on it in the chat;
+- a `proposed:<id>` key = a proposed item: `checked` = write it as a new action item (in the roadmap or task file it
+  belongs to, with the user's comment folded in); a note = their comment or question on it: answer or act on it in
+  the chat.
+
+Never tick a decision yourself; an unticked one doesn't block Review done or a deploy, it shows on the pick page
+under "Decisions from last night" until the user ticks it.
+
+At the bottom of the page the user presses **Review done** (it writes `review.json` next to `run.json`; "Reopen the
+review" undoes it). Until then:
+
+- **Suggest the review every day:** at the start of a day's work or of planning a night run, check for runs still
+  waiting (`unreviewedRuns` from the package `nightshift-board`, or the ⏳ in the board's top bar) and offer the
+  review link first, in one line.
+- **No deploy to a held environment:** deploys to the environments in `gate.holdUntilReviewed` are refused while any
+  run waits for its review (`reviewGateProblem` from the package). Other environments are never held back. Don't
+  work around it: ask the user to finish the review.
+- Never write `review.json` yourself.
