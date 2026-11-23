@@ -79,6 +79,7 @@ test("the pick page lists open decisions of every run", () => {
         taskTitle: "Order form",
         id: "T.3-2",
         text: "Shadow only on web.",
+        options: [],
         note: "",
       },
       {
@@ -87,6 +88,7 @@ test("the pick page lists open decisions of every run", () => {
         taskTitle: null,
         id: "run-1",
         text: "Deployed to staging only.",
+        options: [],
         note: "Fine, but tell me first",
       },
       {
@@ -95,10 +97,32 @@ test("the pick page lists open decisions of every run", () => {
         taskTitle: "Flaky list",
         id: "B.2-1",
         text: "Six rows.",
+        options: [],
         note: "",
       },
     ]);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("a decision with options carries them; picking one closes it", () => {
+  const withOptions = {
+    tasks: [
+      {
+        id: "T.4",
+        title: "Menu",
+        decisions: [
+          {
+            id: "T.4-1",
+            text: "Sold-out breads are hidden.",
+            options: ["Hide them", { label: "Show them greyed out", description: "with a Sold out label" }],
+          },
+        ],
+      },
+    ],
+  };
+  assert.deepEqual(allDecisions(withOptions)[0].options.length, 2);
+  assert.equal(openDecisions(withOptions, {}).length, 1);
+  assert.equal(openDecisions(withOptions, { "decision:T.4-1": { checked: true, choice: 1, note: "" } }).length, 0);
 });

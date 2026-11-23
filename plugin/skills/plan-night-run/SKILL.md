@@ -45,8 +45,9 @@ When the user says "plan prompts" (or picks tasks with no prompt):
    there in the chat, short, one per task; treat the rest as instructions for that task (they go into its prompt and
    the run). Also do this whenever the user says "answer my notes" or "I left notes on the board". Never edit the
    notes; the user clears a note by emptying it.
-   **Decisions from last night** (top of the pick page, `GET /api/open-decisions`): read the `decision:<id>` and
-   `failure:<test>` notes in each run's `qa.json` and answer or act on them in the chat, like the task notes. Never
+   **Decisions from last night** (top of the pick page, `GET /api/open-decisions`): read the `decision:<id>` keys
+   (a picked `choice` other than 0 is a change to carry out, part 5) and `failure:<test>` notes in each run's
+   `qa.json` and answer or act on them in the chat, like the task notes. Never
    tick a decision: only the user does.
 3. **Prompts.** Check every chosen task has a prompt (`hasPrompt: true`). One without: do the prompt planning (part
    2) for those, one item at a time. Tasks in a task file marked `planOnly` get a plan, never code.
@@ -99,12 +100,14 @@ format of `node_modules/nightshift-board/README.md`. Same content as the Markdow
 - **each idea once:** every action item, open point or finding is written in one place only — never repeated in
   `stillOpen`, `sections`, a failure's `explanation` or the Markdown summary's other parts. Each context switch
   costs the user; the place closest to its task or failure wins;
-- every decision made alone in `decisions: [{ id, text }]`: on its task, or at the top of run.json for the run's
+- every decision made alone in `decisions: [{ id, text, options }]`: on its task, or at the top of run.json for the run's
   own. You write the `id` (e.g. "T.1-1"), unique within the run, so a tick stays on its decision when run.json is
   written again. Not in the task's `done` text, and no "Decisions made alone" section. The user ticks them; never
   tick one yourself. Only a choice made without the user that changes what they get: never something done with
   their OK or decided together, and never temporary working steps that leave nothing behind (throwaway scripts,
-  rebuilds, removed test apps, merge conflicts).
+  rebuilds, removed test apps, merge conflicts). `options` are 2–4 choices like a question's: the first is what was
+  done, the others what could be done instead, each `{ label, description }` (short label, one line why). The board
+  shows them as choices to pick from, plus a text box for "Other";
 
 Commit `run.json` and the run's pictures together with the run's summary, and later `qa.json` and `review.json` with
 the review. Every picture `run.json` points to must exist (`pictureProblems` from the package `nightshift-board`
@@ -120,8 +123,10 @@ Give the link `http://localhost:<port>/review`. When the user reviews, read `qa.
 - a note on a QA task = a problem, which goes through the Bug flow (skill `start-review`);
 - a note on a task without QA = the user's answer to its questions or a note for Claude: answer or act on it in the
   chat. Every task on the page has a text box;
-- a `decision:<id>` key = a decision: `checked` = the user is fine with it; a note = their question or remark on it
-  (a note without a tick leaves it open): answer or act on it in the chat;
+- a `decision:<id>` key = a decision: `checked` with `choice` 0 (or no options) = the user is fine with it;
+  `choice` 1 or more = the user picked another option: carry it out as a task (roadmap or task file, with a prompt
+  when its phase has prompts); a note = their own answer ("Other") or question: answer or act on it in the chat
+  (a note without a pick leaves it open);
 - a `failure:<test>` note = a remark on a fixed failed test: answer or act on it in the chat;
 - a `proposed:<id>` key = a proposed item: `checked` = write it as a new action item (in the roadmap or task file it
   belongs to, with the user's comment folded in); a note = their comment or question on it: answer or act on it in

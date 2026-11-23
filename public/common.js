@@ -93,9 +93,12 @@ export function flagChips(task) {
   return chips;
 }
 
-// A decision Claude made alone (run.json `decisions[]`): an "OK" checkbox and a text box under it, saved like the QA
-// boxes into the run's qa.json under `decision:<id>`. Used on the review page and the pick page; only the owner ticks it.
+// A decision Claude made alone (run.json `decisions[]`), saved like the QA boxes into the run's qa.json under
+// `decision:<id>`. With `options`: the choices, like a question's (the first is what was done); picking one ticks it
+// and saves `choice`. Without: an "OK" checkbox. A text box under it either way. Used on the review page and the pick
+// page; only the owner picks.
 export function decisionRow(runName, decision, state, onSaved, context = null) {
+  if (decision.options?.length) return choiceRow(runName, decision, state, onSaved, context);
   const check = el("input", { type: "checkbox", checked: Boolean(state?.checked) });
   const ok = el("label", { class: `decision-ok ${state?.checked ? "done" : ""}` }, check, "OK");
   const note = el(
@@ -119,6 +122,52 @@ export function decisionRow(runName, decision, state, onSaved, context = null) {
     onSaved?.(qa, check.checked, row);
   };
   check.addEventListener("change", save);
+  note.addEventListener("change", save);
+  return row;
+}
+
+const optionText = (o) =>
+  typeof o === "string" ? { label: o, description: "" } : { label: o.label, description: o.description ?? "" };
+
+function choiceRow(runName, decision, state, onSaved, context) {
+  let choice = state?.checked && Number.isInteger(state.choice) ? state.choice : null;
+  const note = el(
+    "textarea",
+    { placeholder: "Other: your own answer, or a question about this decision", rows: 1 },
+    state?.note ?? "",
+  );
+  const buttons = decision.options.map((o, i) => {
+    const { label, description } = optionText(o);
+    return el(
+      "button",
+      { type: "button", class: `choice ${choice === i ? "picked" : ""}` },
+      el("b", {}, label, i === 0 ? el("span", { class: "chip" }, "what was done") : ""),
+      description && el("span", { class: "muted small" }, description),
+    );
+  });
+  const row = el(
+    "div",
+    { class: "decision", "data-decision": decision.id },
+    el("div", { class: "decision-head" }, el("div", {}, context, decision.text)),
+    el("div", { class: "choices" }, ...buttons),
+    note,
+  );
+  const save = async () => {
+    const qa = await post(`/api/runs/${runName}/qa`, {
+      taskId: `decision:${decision.id}`,
+      checked: choice !== null,
+      note: note.value,
+      ...(choice !== null ? { choice } : {}),
+    });
+    buttons.forEach((b, i) => b.classList.toggle("picked", i === choice));
+    onSaved?.(qa, choice !== null, row, choice);
+  };
+  buttons.forEach((b, i) =>
+    b.addEventListener("click", () => {
+      choice = choice === i ? null : i;
+      save();
+    }),
+  );
   note.addEventListener("change", save);
   return row;
 }

@@ -13,7 +13,8 @@ this command.
    `<paths.board>/project.md` if it exists. Where project.md and this skill differ, project.md wins.
 2. **Go over everything the review left.** Read `qa.json` of every run being reviewed and of older runs still
    without "Review done" (`unreviewedRuns` from the package `nightshift-board`): every note (on a QA task, a task, a
-   `decision:<id>`, a `failure:<test>`, a `proposed:<id>`) and every ticked `proposed:<id>`. Add the points from
+   `decision:<id>`, a `failure:<test>`, a `proposed:<id>`), every ticked `proposed:<id>` and every decision whose
+   picked `choice` isn't 0 (another option: a change to carry out). Add the points from
    this chat's review that weren't handled yet. Handle each one by the rules of skill `start-review` ("Each point in
    the message", "Proposed items"): answer questions from evidence, add tasks and bugs to the roadmap or task file,
    ask the user's decisions in one GUI round. Never tick a decision and never write `qa.json` or `review.json`.

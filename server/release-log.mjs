@@ -2,7 +2,7 @@
 // git): the QA column of each change that names a reviewed task's code, and a "## Review" section with every QA task.
 // The run folder itself (run.json, qa.json, screenshots) is in git too, except its videos. The section also lists
 // each decision made alone (ticked or open, with its note) and each fixed test the owner wrote a note on.
-import { allDecisions, decisionKey } from "./decisions.mjs";
+import { allDecisions, decisionKey, optionLabel } from "./decisions.mjs";
 
 const REVIEW_HEADING = "## Review";
 
@@ -76,7 +76,9 @@ function decisionRows(run, qa) {
     "| --- | --- | --- | --- |",
     ...decisions.map((d) => {
       const state = qa[decisionKey(d.id)];
-      return `| ${cell(d.text)} | ${cell(d.taskId ?? "run")} | ${state?.checked ? "✓" : "open"} | ${cell(state?.note || "")} |`;
+      const changed = state?.checked && state.choice > 0 && d.options[state.choice];
+      const ok = changed ? `→ ${optionLabel(changed)}` : state?.checked ? "✓" : "open";
+      return `| ${cell(d.text)} | ${cell(d.taskId ?? "run")} | ${cell(ok)} | ${cell(state?.note || "")} |`;
     }),
     "",
   ];

@@ -262,7 +262,7 @@ function renderDecisions(open) {
   const recount = () => {
     const left = box.querySelectorAll(".decision").length;
     if (!left) return root.replaceChildren();
-    count.textContent = `${left} open · tick OK when it's fine`;
+    count.textContent = `${left} open · pick a choice or tick OK`;
   };
   box.append(
     ...open.map((d) =>
@@ -270,10 +270,12 @@ function renderDecisions(open) {
         d.run,
         d,
         { checked: false, note: d.note },
-        (_qa, checked, row) => {
+        (_qa, checked, row, choice) => {
           if (!checked) return;
           // It leaves the open list as one short line without a box, so a second click never ticks the next one.
-          row.replaceWith(el("div", { class: "decision-ticked" }, `✓ ${d.text}`));
+          const picked = choice > 0 ? d.options[choice] : null;
+          const label = picked ? (typeof picked === "string" ? picked : picked.label) : null;
+          row.replaceWith(el("div", { class: "decision-ticked" }, label ? `→ ${label} · ${d.text}` : `✓ ${d.text}`));
           toast("Decision ticked");
           recount();
         },

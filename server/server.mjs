@@ -224,12 +224,14 @@ createServer(async (req, res) => {
         }));
     }
     if (run && req.method === "POST" && run[2] === "/qa") {
-      const { taskId, checked, note } = await body(req);
+      const { taskId, checked, note, choice } = await body(req);
       const qaFile = runPath(run[1], "qa.json");
       const qa = readJson(qaFile, {});
       qa[taskId] = {
         checked: Boolean(checked),
         note: String(note ?? ""),
+        // A decision's picked option (its index in `options`); 0 = keep what was done.
+        ...(Number.isInteger(choice) ? { choice } : {}),
         at: new Date().toISOString(),
       };
       writeJson(qaFile, qa);

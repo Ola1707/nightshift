@@ -159,3 +159,16 @@ test("proposed items on a task or a failed test count too, with the run's own", 
   assert.match(review, /\| Find the leak\. \| ☐ no \| Ask me first \|/);
   assert.match(review, /\| Delete the old DNS records\. \| ☑ yes \|/);
 });
+
+test("a decision changed to another option shows the picked option", () => {
+  const out = writeReview(
+    log,
+    {
+      ...run,
+      decisions: [{ id: "run-1", text: "Deployed to staging only.", options: ["Staging only", "Staging and demo"] }],
+    },
+    { "decision:run-1": { checked: true, choice: 1, note: "" } },
+    "2030-01-07T16:00:00.000Z",
+  );
+  assert.match(out, /\| Deployed to staging only\. \| run \| → Staging and demo \|/);
+});

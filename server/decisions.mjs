@@ -1,9 +1,13 @@
-// Decisions Claude made alone during a run (run.json `decisions: [{ id, text }]`, on a task or at the top for the
-// run's own). The owner ticks each one on the review page; the tick and note are saved in the run's qa.json under
+// Decisions Claude made alone during a run (run.json `decisions: [{ id, text, options? }]`, on a task or at the top
+// for the run's own). `options` (when given) are the choices, like a question's: the first is what was done, the
+// others what could be done instead; picking one saves `choice` (its index) with the tick. The owner ticks each one on the review page; the tick and note are saved in the run's qa.json under
 // `decision:<id>`. An unticked decision never blocks "Review done" or a deploy: it shows on the pick page under
 // "Decisions from last night" until it is ticked.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+
+/** An option's label: options are strings or { label, description }. */
+export const optionLabel = (o) => (typeof o === "string" ? o : (o?.label ?? ""));
 
 /** The qa.json key of a decision. */
 export const decisionKey = (id) => `decision:${id}`;
@@ -11,13 +15,14 @@ export const decisionKey = (id) => `decision:${id}`;
 /**
  * Every decision of a run: the tasks' ones (with the task's id and title) first, then the run's own (task null).
  * @param {object} run the parsed run.json
- * @returns {{ id: string, text: string, taskId: string | null, taskTitle: string | null }[]}
+ * @returns {{ id: string, text: string, options: (string | { label: string, description?: string })[], taskId: string | null, taskTitle: string | null }[]}
  */
 export function allDecisions(run) {
   const fromTasks = (run?.tasks ?? []).flatMap((task) =>
     (task.decisions ?? []).map((d) => ({
       id: d.id,
       text: d.text,
+      options: d.options ?? [],
       taskId: task.id ?? null,
       taskTitle: task.title ?? null,
     })),
@@ -25,6 +30,7 @@ export function allDecisions(run) {
   const own = (run?.decisions ?? []).map((d) => ({
     id: d.id,
     text: d.text,
+    options: d.options ?? [],
     taskId: null,
     taskTitle: null,
   }));
@@ -62,6 +68,7 @@ export function openDecisionsOfRuns(runsDir) {
         taskTitle: d.taskTitle,
         id: d.id,
         text: d.text,
+        options: d.options,
         note: qa[decisionKey(d.id)]?.note ?? "",
       }));
     });

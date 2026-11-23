@@ -139,7 +139,8 @@ through those once when starting with Nightshift (`/nightshift:setup` opens them
 changes.
 
 1. **Pick tasks** (`/`). At the top, **Decisions from last night**: every decision Claude made alone that you have
-   not ticked yet, from every run, with an "OK" checkbox and a text box (saved into that run's `qa.json`). Then every
+   not ticked yet, from every run: its choices to pick from (the first is what was done), or an "OK" checkbox when
+   it has none, and a text box (saved into that run's `qa.json`). Then every
    open task in the task files (one section per type of change), with **Check all night work** (every open task
    except Manual ones) and **Uncheck all**, then the other roadmaps grouped by phase. Drag a roadmap or a phase by
    its **⠿** handle to reorder it; **Send order to Claude** saves `board-order.json`, and Claude reorders the files
@@ -182,7 +183,7 @@ Paths are the defaults; each can be changed in the settings file.
 | `docs/board/flow.json` | you, Claude, board | your changes to the flow of work, and the approvals |
 | `docs/board/plan-checklist.json` | board | your checklist ticks and added items |
 
-Keys in `qa.json`: a task's id (QA tick, problem or answer), `decision:<id>`, `failure:<test>` (a note on a fixed
+Keys in `qa.json`: a task's id (QA tick, problem or answer), `decision:<id>` (with `choice`, the picked option), `failure:<test>` (a note on a fixed
 test) and `proposed:<id>` (ticked = add it as an action item).
 
 The phrases Claude listens for: "night board ready" (the picks are saved), "order sent" (reorder the roadmaps),
@@ -205,7 +206,17 @@ out.
   "deploys": [{ "env": "Staging", "what": "API and website", "log": "docs/release-log/staging-2030-01-05_0300.md" }],
   "built": ["Short bullet per thing built"],
   // The run's own decisions (not one task's).
-  "decisions": [{ "id": "run-1", "text": "Deployed to staging only." }],
+  // `options` (optional): choices like a question's, the first is what was done; the pick is saved as `choice`.
+  "decisions": [
+    {
+      "id": "run-1",
+      "text": "Deployed to staging only.",
+      "options": [
+        { "label": "Staging only", "description": "what was done" },
+        { "label": "Staging and demo", "description": "the demo gets tonight's fixes too" }
+      ]
+    }
+  ],
   "tasks": [
     {
       "id": "T.1", // the task's code; the QA tick is saved under it
