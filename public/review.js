@@ -142,8 +142,8 @@ function answerBox(runName, task, qa, onChange) {
     "textarea",
     {
       placeholder: task.questions?.length
-        ? "Your answer, or a note for Claude"
-        : "A note or a question for Claude",
+        ? "Your answer to the questions, or a note on this task"
+        : "A note or a question on this task",
       rows: 1,
     },
     qa[task.id]?.note ?? "",
@@ -226,6 +226,8 @@ function taskCard(runName, task, qa, onChange) {
           ),
         ),
       ),
+    // The task's own note comes before its ways forward and decisions.
+    qaParts ? qaParts.note : answerBox(runName, task, qa, onChange),
     task.solutions?.length > 0 &&
       el(
         "div",
@@ -242,7 +244,6 @@ function taskCard(runName, task, qa, onChange) {
           decisionRow(runName, d, qa[`decision:${d.id}`], (next) => onChange(next)),
         ),
       ),
-    qaParts ? qaParts.note : answerBox(runName, task, qa, onChange),
   );
 }
 
