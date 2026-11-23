@@ -521,7 +521,7 @@
             {
               "who": "planner",
               "text": "one round of questions (GUI)",
-              "note": "commit today's docs? · deploy to the test environment? · scope · computer to sleep?"
+              "note": "commit today's docs? · deploy to the test environment? · scope"
             },
             {
               "who": "planner",
@@ -544,13 +544,18 @@
           "steps": [
             {
               "who": "runner",
+              "text": "keeps the computer and screen awake, and checks it",
+              "note": "caffeinate -dims in the background · pmset -g assertions shows system and display sleep prevented · not → fix it before any task"
+            },
+            {
+              "who": "runner",
               "text": [
                 "merge waiting branches, no questions",
                 "run branch from main"
               ],
               "note": [
                 "conflicts → Sonnet",
-                "free ports · keep the computer awake · timeline"
+                "free ports · timeline"
               ]
             },
             {
@@ -614,7 +619,8 @@
             },
             {
               "who": "runner",
-              "text": "computer to sleep (if asked)"
+              "text": "stops caffeinate, puts the computer to sleep",
+              "note": "pmset sleepnow · always, the last step"
             },
             {
               "who": "human",

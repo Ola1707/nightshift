@@ -70,6 +70,10 @@ When the user says "plan prompts" (or picks tasks with no prompt):
 7. Then the night run follows the project's run skill (`skills.run`). Without one: make a branch, do each task by
    its type's steps in the flow (`pnpm exec nightshift flow`), run each suite in `suites`, write the summary and
    `run.json` (part 4), and open one pull request, not merged.
+8. **Awake, then asleep** (with or without a run skill): before the first task, keep the computer and screen awake
+   for the whole run (macOS: `caffeinate -dims` in the background) and check it worked (`pmset -g assertions` shows
+   `PreventUserIdleSystemSleep` and `PreventUserIdleDisplaySleep` at 1); not working → fix it before any task. The
+   last step of the run, always: stop it and put the computer to sleep (`pmset sleepnow`). No question about it.
 
 ## 4. During the run: fill run.json
 
