@@ -12,8 +12,9 @@ No `board.config.json` in the project yet: offer `/nightshift:setup` first.
 1. Run `pnpm exec nightshift config` (or `npx nightshift config`). It prints the project's settings as JSON: `owner`,
    `port`, `paths` (`tasks`, `runs`, `board`, `roadmaps`), `taskFiles`, `suites`, `skills`, `gate`. Below, "the
    tasks folder" is `paths.tasks`, "the runs folder" is `paths.runs`, and so on.
-2. Read `<paths.board>/project.md` if it exists: the project's own rules, grouped by skill. Where project.md and this
-   skill differ, project.md wins.
+2. Then the project's own rules: run `pnpm exec nightshift rules plan-night-run --plugin <plugin>` (`<plugin>` is two folders
+   up from this skill's base directory) and follow `<plugin>/project-rules.md`: read each `OK` file (it adds to this
+   skill and wins where they differ); a `CHANGED` file is gone through first.
 
 The board is a local website in the package `nightshift-board` (file formats and pages:
 `node_modules/nightshift-board/README.md`). Its pages: pick (`/`), list (`/list`), review (`/review`), flow (`/flow`),
@@ -50,12 +51,16 @@ When the user says "plan prompts" (or picks tasks with no prompt):
    tick a decision: only the user does.
 3. **Prompts.** Check every chosen task has a prompt (`hasPrompt: true`). One without: do the prompt planning (part
    2) for those, one item at a time. Tasks in a task file marked `planOnly` get a plan, never code.
-4. **Questions.** Collect what the run needs from the user (not prompt questions: those were asked in part 2) into
+4. **The skills' rules, before the run.** Run `pnpm exec nightshift rules --plugin <plugin>` (every skill: the run
+   uses several). For each `CHANGED` file, go through it now (`<plugin>/project-rules.md`, "After the plugin
+   changed"); its conflicts join the round of questions below, and `--mark` follows the answers. The run never
+   starts with a `CHANGED` file.
+5. **Questions.** Collect what the run needs from the user (not prompt questions: those were asked in part 2) into
    **one round** of GUI questions
-   (AskUserQuestion): real decisions only, short, a recommended option first. Add the reminders the project lists in
-   project.md.
-5. Show the final list (task, prompt ready, decisions) in a few lines and wait for the user's OK.
-6. Then the night run follows the project's run skill (`skills.run`). Without one: make a branch, do each task by
+   (AskUserQuestion): real decisions only, short, a recommended option first. Add the reminders the project's
+   rules files list.
+6. Show the final list (task, prompt ready, decisions) in a few lines and wait for the user's OK.
+7. Then the night run follows the project's run skill (`skills.run`). Without one: make a branch, do each task by
    its type's steps in the flow (`pnpm exec nightshift flow`), run each suite in `suites`, write the summary and
    `run.json` (part 4), and open one pull request, not merged.
 

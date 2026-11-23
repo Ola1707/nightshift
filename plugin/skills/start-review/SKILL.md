@@ -9,8 +9,9 @@ description: Help the user review a finished long task (a day run, night run, re
 
 1. Run `pnpm exec nightshift config` (or `npx nightshift config`) for the project's settings: `port`, `paths`
    (`runs`, `tasks`, `roadmaps`, `board`), `skills`.
-2. Read `<paths.board>/project.md` if it exists: the project's own rules, grouped by skill. Where project.md and this
-   skill differ, project.md wins.
+2. Then the project's own rules: run `pnpm exec nightshift rules start-review --plugin <plugin>` (`<plugin>` is two folders
+   up from this skill's base directory) and follow `<plugin>/project-rules.md`: read each `OK` file (it adds to this
+   skill and wins where they differ); a `CHANGED` file is gone through first.
 
 The user reads the summary of a long task (for example `<runs folder>/day-run-<date>.md`) and comes back with
 questions, remarks and small fixes, often several in one message, often about a quoted or selected line. Work
@@ -62,7 +63,9 @@ items the user already handled in the review.
 
 - Don't commit unless the user asks. At the end of each reply, say what's changed and not committed yet.
 - Use the roadmap's exact item names; no new names.
-- A new lasting rule from the review goes into the skill or doc it's about; a rule about how this project uses the
-  board goes into `<paths.board>/project.md`. Memory only for a personal preference written nowhere else.
+- A new lasting rule from the review goes into the skill or doc it's about. A rule for a Nightshift skill: only
+  after the owner's yes, into the project's `<paths.board>/skills/<skill>.md` if only this project needs it, or
+  into Nightshift itself if any project would (`<plugin>/project-rules.md`, "Adding a rule"). Memory only for a
+  personal preference written nowhere else.
 - Items or decisions still open when the user presses "Review done": list them under "Carried to the next review"
   in that run's summary and raise them at the start of the next review.

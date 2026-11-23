@@ -10,8 +10,9 @@ model does each part**, so no part runs on a bigger model than it needs.
 
 ## 1. Learn the task and the code
 
-- Read the project's own prompt rules first: the **Prompts** section of `<paths.board>/project.md` (where prompts
-  go, their format, the checks, what never goes in a prompt). They win over the defaults below.
+- Read the project's own prompt rules first (where prompts go, their format, the checks, what never goes in a
+  prompt): run `pnpm exec nightshift rules write-a-prompt --plugin <plugin>` (`<plugin>` is two folders up from this
+  skill's base directory) and follow `<plugin>/project-rules.md`. They win over the defaults below.
 - Read the task where it's written (its task file or roadmap section) and only the parts of the code and docs it
   touches. Find the real file paths, function names, keys and tests to name in the prompt.
 - List every question the coder could ask. Answer each from the task or the code and write the answer in as a fact.

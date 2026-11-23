@@ -7,6 +7,7 @@
 //   nightshift config             the merged settings (board.config.json laid over the defaults)
 //   nightshift init               writes board.config.json and the folders and files the board needs
 //   nightshift doctor             checks the project, one OK or PROBLEM line per check
+//   nightshift rules              which project rules files to read, and which need checking after a plugin change
 //   nightshift demo               the board on an invented project (http://localhost:8096)
 // While developing: NIGHTSHIFT_DEV_DIR=<folder with bin/nightshift.mjs> runs that copy instead of this one.
 import { spawnSync } from "node:child_process";
@@ -35,6 +36,9 @@ const USAGE = `Usage: nightshift <command>
   init [--answers <file>] [--force]
                      write board.config.json (from a JSON answers file) and what the board needs; never overwrites
   doctor [--shots]   check the project: one OK or PROBLEM line per check; --shots also checks the suites' screenshots
+  rules --plugin <dir> [skill...] [--mark]
+                     the project's rules files for those skills (default all) and all.md: OK, NONE, or CHANGED
+                     (the plugin skill changed since the file was checked; exit 1); --mark records them as checked
   demo               serve the board on an invented project, http://localhost:8096`;
 
 const projectDir = () => resolve(process.env.BOARD_PROJECT ?? process.cwd());
@@ -119,6 +123,32 @@ async function main() {
       const results = await doctor(projectDir(), { shots: rest.includes("--shots") });
       for (const { text } of results) console.log(text);
       process.exit(results.some((r) => !r.ok) ? 1 : 0);
+      return;
+    }
+    case "rules": {
+      const { loadConfig } = await server("config.mjs");
+      const { rulesStatus, markChecked, formatStatus } = await server("rules.mjs");
+      const at = rest.indexOf("--plugin");
+      const pluginDir = at === -1 ? undefined : rest[at + 1];
+      if (!pluginDir) {
+        console.error("rules needs --plugin <the plugin folder, with skills/ inside>.");
+        process.exit(2);
+      }
+      const names = rest.filter((arg, i) => !arg.startsWith("--") && i !== at + 1);
+      const dir = projectDir();
+      const board = loadConfig(dir).paths.board;
+      try {
+        if (rest.includes("--mark")) {
+          for (const entry of rulesStatus(dir, board, resolve(pluginDir), names))
+            if (entry.state !== "none") markChecked(dir, board, resolve(pluginDir), entry.name);
+        }
+        const entries = rulesStatus(dir, board, resolve(pluginDir), names);
+        for (const line of formatStatus(entries)) console.log(line);
+        process.exit(entries.some((e) => e.state === "changed" || e.state === "unchecked") ? 1 : 0);
+      } catch (error) {
+        console.error(error.message);
+        process.exit(2);
+      }
       return;
     }
     case "demo": {

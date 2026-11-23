@@ -9,6 +9,9 @@ description: Checks that the Nightshift board still fits the project (settings, 
    `OK ...` or `PROBLEM: ...`, and exits 1 when there is a problem. `--shots` runs each suite's
    `screenshot.command` and checks the picture is not blank; a suite whose screenshots are taken by its test runner
    shows as skipped.
+   Also run `pnpm exec nightshift rules --plugin <plugin>` (`<plugin>` is two folders up from this skill's base
+   directory): each `CHANGED` line is a problem too, fixed by going through that file
+   (`<plugin>/project-rules.md`, "After the plugin changed").
 2. No problem: say so in one line.
 3. For each `PROBLEM:` line, one plain line: what is wrong and the fix, for example:
    - a missing path or task file: create it, or fix the key in `board.config.json`;

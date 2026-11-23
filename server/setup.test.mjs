@@ -159,3 +159,9 @@ test("the demo runs on a copy in the temp folder", () => {
   assert.ok(existsSync(join(copy, "board.config.json")));
   rmSync(copy, { recursive: true, force: true });
 });
+
+test("doctor names the old one-file project.md", async () => {
+  const dir = prepareDemo();
+  writeFileSync(join(dir, "docs/board/project.md"), "# Rules\n");
+  assert.match(problems(await doctor(dir, { port: 1 })).join("\n"), /project\.md is the old one-file form/);
+});

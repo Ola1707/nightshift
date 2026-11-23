@@ -128,6 +128,7 @@ Each command works on the project in the current folder (or `BOARD_PROJECT`):
 | `nightshift checklist-import` | sets every checklist tick from a "Plan checklist choices" text on stdin |
 | `nightshift init [--answers <file>] [--force]` | writes `board.config.json` (from a JSON file of settings) and the folders and files the board needs; never overwrites a file without `--force` |
 | `nightshift doctor [--shots]` | checks the project, one `OK` or `PROBLEM:` line per check; `--shots` also runs each suite's screenshot command and checks the picture is not blank |
+| `nightshift rules --plugin <dir> [skill...] [--mark]` | the project's rules files for those skills (default all) plus `all.md`: `OK`, `NONE`, or `CHANGED` (the plugin skill changed since the file was checked; exit 1); `--mark` records them as checked |
 | `nightshift demo` | the board on the invented demo project, http://localhost:8096 |
 
 ## The pages
@@ -285,8 +286,12 @@ them. `nightshift config` prints the result.
 | `gate.holdUntilReviewed` | `[]` | environments that get no deploy while a run waits for its review |
 | `reviewMode.alsoGuard` | `[]` | extra folders guarded during a review (absolute or relative to the project); in them only Markdown and `plugin/skills/` stay editable |
 
-Next to it, `<paths.board>/project.md` (optional, written first by `/nightshift:setup`) holds the project's own
-rules for the skills, grouped by skill; where it and a skill differ, it wins.
+Next to it, `<paths.board>/skills/` (optional, written first by `/nightshift:setup`) holds the project's own rules
+for the skills: one file per skill (`do.md`, `plan-night-run.md`, ...) and `all.md` for every skill. They only add
+to the plugin's skills (where they differ, the project's file wins); a fix to how a skill works goes into Nightshift.
+A rule is added only after the owner's yes. Each file records the plugin skill it was checked against; after a plugin
+update, `nightshift rules --plugin <plugin folder>` prints `CHANGED` for the files to go through again, and the
+night run doesn't start until they are (`plugin/project-rules.md`).
 
 Example:
 

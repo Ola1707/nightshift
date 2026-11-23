@@ -183,6 +183,10 @@ export async function doctor(dir, { shots = false, port } = {}) {
     problem(`the flow does not load: ${error.message}. Fix ${join(config.paths.board, "flow.json")}.`);
   }
 
+  const oldRules = join(config.paths.board, "project.md");
+  if (isFile(join(dir, oldRules)))
+    problem(`${oldRules} is the old one-file form of the project's rules. Split it into one file per skill in ${join(config.paths.board, "skills")}/ (all.md for every skill), then delete it.`);
+
   const boardPort = port ?? Number(process.env.BOARD_PORT ?? config.port);
   const state = await portState(boardPort);
   if (state === "free") ok(`port ${boardPort} is free`);

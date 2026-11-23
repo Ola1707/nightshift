@@ -12,8 +12,9 @@ No `board.config.json` in the project yet: offer `/nightshift:setup` first.
 
 1. Run `pnpm exec nightshift config` (or `npx nightshift config`) for the project's settings: `port`, `paths`
    (`tasks`, `board`, `roadmaps`), `taskFiles`, `suites`, `skills`.
-2. Read `<paths.board>/project.md` if it exists: the project's own rules, grouped by skill. Where project.md and this
-   skill differ, project.md wins.
+2. Then the project's own rules: run `pnpm exec nightshift rules do --plugin <plugin>` (`<plugin>` is two folders
+   up from this skill's base directory) and follow `<plugin>/project-rules.md`: read each `OK` file (it adds to this
+   skill and wins where they differ); a `CHANGED` file is gone through first.
 3. Run `pnpm exec nightshift flow` (or `npx nightshift flow`): the flow of work as JSON. Each type has an `id`, a
    `title`, an `example`, `steps` or `parts` (stages, each with a `title` and `steps`; a step has `who` + `text`, `who`
    is a key of `roles`) and `approved`. A change type has three stages: **1 · Report**, **2 · Plan**, **3 · Execute**. `always` holds the rules
