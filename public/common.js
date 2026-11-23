@@ -93,12 +93,12 @@ export function flagChips(task) {
   return chips;
 }
 
-// A decision is answered by OK or a revert ("now" or "task"); same rule as server/decisions.mjs.
-export const answered = (state) => state?.checked === true || (state?.revert === "now" || state?.revert === "task");
+// A decision is answered by OK or a revert ("now" or "later"); same rule as server/decisions.mjs.
+export const answered = (state) => state?.checked === true || state?.revert === "now" || state?.revert === "later";
 
-// A decision Claude made alone (run.json `decisions[]`): "OK", "Revert now" or "Revert as task" (one or none) and a
+// A decision Claude made alone (run.json `decisions[]`): "OK", "Revert now" or "Revert later" (one or none) and a
 // text box under it, saved like the QA boxes into the run's qa.json under `decision:<id>`. Used on the review page and
-// the pick page; only the owner answers it. onSaved(qa, answer, row): answer is "ok", "now", "task" or null.
+// the pick page; only the owner answers it. onSaved(qa, answer, row): answer is "ok", "now", "later" or null.
 export function decisionRow(runName, decision, state, onSaved, context = null) {
   const check = el("input", { type: "checkbox", checked: Boolean(state?.checked) });
   const ok = el("label", { class: `decision-ok ${state?.checked ? "done" : ""}` }, check, "OK");
@@ -107,7 +107,7 @@ export function decisionRow(runName, decision, state, onSaved, context = null) {
     const box = el("input", { type: "checkbox", checked: was === how });
     return { how, box, label: el("label", { class: `decision-ok decision-revert ${was === how ? "done" : ""}` }, box, label) };
   };
-  const reverts = [revertBox("now", "Revert now"), revertBox("task", "Revert as task")];
+  const reverts = [revertBox("now", "Revert now"), revertBox("later", "Revert later")];
   const note = el(
     "textarea",
     { placeholder: "A note or a question about this decision", rows: 1 },
@@ -139,6 +139,40 @@ export function decisionRow(runName, decision, state, onSaved, context = null) {
       save();
     });
   note.addEventListener("change", save);
+  return row;
+}
+
+// A solution: one way forward on a task that isn't done (run.json `solutions: [{ id, text }]`). Two toggles,
+// "Do it now" and "Do it later" (Claude adds a task); neither means don't. Saved in qa.json under `solution:<id>` as
+// `do: "now" | "later"`.
+export function solutionRow(runName, solution, state, onSaved) {
+  let pick = state?.do === "now" || state?.do === "later" ? state.do : null;
+  const toggle = (how, label) =>
+    el("button", { type: "button", class: "seg", "data-how": how, "aria-pressed": String(pick === how) }, label);
+  const now = toggle("now", "Do it now");
+  const later = toggle("later", "Do it later");
+  const row = el(
+    "div",
+    { class: `solution ${pick ? "picked" : ""}`, "data-solution": solution.id },
+    el("div", { class: "segs", role: "group" }, now, later),
+    el("div", { class: "solution-text" }, solution.text),
+  );
+  const show = () => {
+    for (const b of [now, later]) b.setAttribute("aria-pressed", String(b.dataset.how === pick));
+    row.classList.toggle("picked", Boolean(pick));
+  };
+  for (const b of [now, later])
+    b.addEventListener("click", async () => {
+      pick = pick === b.dataset.how ? null : b.dataset.how;
+      show();
+      const qa = await post(`/api/runs/${runName}/qa`, {
+        taskId: `solution:${solution.id}`,
+        checked: false,
+        do: pick,
+        note: state?.note ?? "",
+      });
+      onSaved?.(qa, pick);
+    });
   return row;
 }
 

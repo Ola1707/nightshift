@@ -51,8 +51,8 @@ When the user says "plan prompts" (or picks tasks with no prompt):
    **Decisions from last night** (top of the pick page, `GET /api/open-decisions`): read the `decision:<id>` and
    `failure:<test>` notes in each run's `qa.json` and answer or act on them in the chat, like the task notes. Never
    tick a decision: only the user does.
-   **To revert** (`GET /api/reverts`): handle each by `<plugin>/reverts.md` (`<plugin>` is two folders up from this
-   skill's base directory): a "now" one before the run starts, a "task" one becomes a task the user can pick.
+   **Waiting for Claude** (`GET /api/waiting`): handle each by `<plugin>/review-actions.md` (`<plugin>` is two
+   folders up from this skill's base directory): a "now" one before the run starts, a "later" one becomes a task.
 3. **Prompts.** Check every chosen task has a prompt (`hasPrompt: true`). One without: do the prompt planning (part
    2) for those, one item at a time. Tasks in a task file marked `planOnly` get a plan, never code.
 4. **The skills' rules, before the run.** Run `pnpm exec nightshift rules --plugin <plugin>` (every skill: the run
@@ -87,6 +87,9 @@ Same content as the Markdown summary, plus:
 - `qa` only for changes the user can see in an app;
 - `stillOpen` grouped by category (one topic each), and `proposed: [{ id, text }]` (each gets an "Add as an action
   item" tick and a comment box on the review page);
+- a task not done (or partly) with more than one way forward: each in `solutions: [{ id, text }]` on the task (one
+  short line each: what it is and what it costs), not in `missing`. The owner picks Do it now, Do it later or
+  neither per solution;
 - every decision made alone in `decisions: [{ id, text }]`: on its task, or at the top of run.json for the run's
   own. You write the `id` (e.g. "T.1-1"), unique within the run, so a tick stays on its decision when run.json is
   written again. Not in the task's `done` text, and no "Decisions made alone" section. The user ticks them; never

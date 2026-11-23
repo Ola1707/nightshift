@@ -599,6 +599,52 @@ button:disabled {
 .decision-ticked.reverted {
   color: var(--bad);
 }
+/* Ways forward on a task: "Do it now" / "Later" toggles; neither = don't. */
+.solutions {
+  margin-top: 12px;
+}
+.solution {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+.solution.picked {
+  color: var(--ink);
+}
+.solution + .solution {
+  border-top: 1px solid var(--line);
+}
+.segs {
+  display: inline-flex;
+  flex: none;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.seg {
+  padding: 3px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.seg + .seg {
+  border-left: 2px solid var(--line);
+}
+.seg[aria-pressed="true"][data-how="now"] {
+  background: var(--good-soft);
+  color: var(--good);
+}
+.seg[aria-pressed="true"][data-how="later"] {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
 .decision-ticked {
   padding: 6px 0;
   color: var(--good);

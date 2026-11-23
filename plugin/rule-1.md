@@ -12,6 +12,7 @@ ask: does the owner learn something new from it? Would they decide or check some
 - **No process:** no file paths, function names, commit hashes, test names, "failed first, then passed", counts from
   the run, docs that were fixed on the way. The board already shows the tests, failures and pictures.
 - Not done or partly done: what's missing and why, in a line. What was tried only if it changes the next step.
+  Several ways forward → one `solution` each (the owner picks), not a list in the text.
 
 ## Decisions made alone
 

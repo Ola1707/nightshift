@@ -277,9 +277,9 @@ function renderDecisions(open) {
           row.replaceWith(
             el("div", { class: `decision-ticked ${revert ? "reverted" : ""}` }, `${revert ? "↩ To revert:" : "✓"} ${d.text}`),
           );
-          toast(answer === "now" ? 'Tell Claude "revert now"' : answer === "task" ? "Claude adds a task to revert it" : "Decision ticked");
+          toast(answer === "now" ? 'Tell Claude "do it now"' : answer === "later" ? "Claude adds a task to revert it" : "Decision ticked");
           recount();
-          if (revert) api("/api/reverts").then(renderReverts);
+          if (revert) api("/api/waiting").then(renderWaiting);
         },
         el(
           "span",
@@ -296,28 +296,31 @@ function renderDecisions(open) {
   );
 }
 
-// "To revert": decisions marked Revert now or Revert as task that Claude hasn't handled yet (<board>/reverts.json).
-function renderReverts(list) {
-  const root = $("#reverts");
+// "Waiting for Claude": decisions to revert and ways forward picked on the review page that Claude hasn't handled yet
+// (<board>/handled.json). "now" ones: tell Claude "do it now"; "later" ones become tasks.
+function renderWaiting(list) {
+  const root = $("#waiting");
   if (!list.length) return root.replaceChildren();
+  const label = (x) =>
+    x.kind === "revert" ? (x.how === "now" ? "Revert now" : "Revert later") : x.how === "now" ? "Do it now" : "Do it later";
   root.replaceChildren(
     el(
       "div",
       { class: "section-head" },
-      el("h2", {}, "To revert"),
-      el("span", { class: "muted small" }, `${list.length} · tell Claude "revert now"`),
+      el("h2", {}, "Waiting for Claude"),
+      el("span", { class: "muted small" }, `${list.length} · tell Claude "do it now"; the later ones become tasks`),
     ),
     el(
       "div",
       { class: "box decisions" },
-      list.map((d) =>
+      list.map((x) =>
         el(
           "div",
           { class: "decision" },
-          el("span", { class: "decision-context" }, `${d.run} · ${d.taskId ? `${d.taskId} ${d.taskTitle ?? ""}` : "the run"}`),
-          el("span", { class: "chip bad" }, d.how === "now" ? "Now" : "As task"),
-          ` ${d.text}`,
-          d.note ? el("div", { class: "muted small" }, d.note) : null,
+          el("span", { class: "decision-context" }, `${x.run} · ${x.taskId ? `${x.taskId} ${x.taskTitle ?? ""}` : "the run"}`),
+          el("span", { class: `chip ${x.how === "now" ? "bad" : ""}` }, label(x)),
+          ` ${x.kind === "revert" ? "↩ " : ""}${x.text}`,
+          x.note ? el("div", { class: "muted small" }, x.note) : null,
         ),
       ),
     ),
@@ -327,7 +330,7 @@ function renderReverts(list) {
 $("#nav").replaceWith(nav("/"));
 reviewWaiting();
 api("/api/open-decisions").then(renderDecisions);
-api("/api/reverts").then(renderReverts);
+api("/api/waiting").then(renderWaiting);
 const [roadmaps, picks, savedNotes] = await Promise.all([
   api("/api/roadmaps"),
   api("/api/picks"),

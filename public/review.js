@@ -1,4 +1,4 @@
-import { $, answered, api, decisionRow, el, href, nav, post, proposedItems, proposedKey, reviewWaiting } from "/common.js";
+import { $, answered, api, decisionRow, solutionRow, el, href, nav, post, proposedItems, proposedKey, reviewWaiting } from "/common.js";
 import { stepsLink } from "/failure-report.js";
 import { reviewSaver } from "/review-save.js";
 
@@ -225,6 +225,13 @@ function taskCard(runName, task, qa, onChange) {
             ),
           ),
         ),
+      ),
+    task.solutions?.length > 0 &&
+      el(
+        "div",
+        { class: "solutions" },
+        el("div", { class: "label" }, "Ways forward", el("span", { class: "muted small" }, " · none picked = don't")),
+        task.solutions.map((s) => solutionRow(runName, s, qa[`solution:${s.id}`], (next) => onChange(next))),
       ),
     task.decisions?.length > 0 &&
       el(

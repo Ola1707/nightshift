@@ -1,6 +1,6 @@
 ---
 name: start-review
-description: Help the user review a finished long task (a day run, night run, release, or any unattended run) line by line, from its summary in the runs folder or the task and roadmap files. Use whenever the user types /nightshift:start-review, says "start review", says they are reviewing a run or a long task, quotes or selects lines from a run summary, or says "revert now", or comes with questions, remarks and small fixes about what a run did — even if they don't say "review".
+description: Help the user review a finished long task (a day run, night run, release, or any unattended run) line by line, from its summary in the runs folder or the task and roadmap files. Use whenever the user types /nightshift:start-review, says "start review", says they are reviewing a run or a long task, quotes or selects lines from a run summary, or says "do it now" or "revert now", or comes with questions, remarks and small fixes about what a run did — even if they don't say "review".
 ---
 
 # Review a long task
@@ -69,7 +69,7 @@ items the user already handled in the review.
   after the owner's yes, into the project's `<paths.board>/skills/<skill>.md` if only this project needs it, or
   into Nightshift itself if any project would (`<plugin>/project-rules.md`, "Adding a rule"). Memory only for a
   personal preference written nowhere else.
-- A decision marked **Revert now** or **Revert as task**, or the user says "revert now": follow
-  `<plugin>/reverts.md`.
+- A decision marked **Revert now** / **Revert later**, a way forward marked **Do it now** / **Do it later**, or the
+  user says "do it now" or "revert now": follow `<plugin>/review-actions.md`.
 - Items or decisions still open when the user presses "Review done": list them under "Carried to the next review"
   in that run's summary and raise them at the start of the next review.
