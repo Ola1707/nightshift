@@ -34,7 +34,10 @@ When the user says "plan prompts" (or picks tasks with no prompt):
 
 1. List the open items with no prompt (`- [ ]`, `hasPrompt: false`) from the task files and roadmaps, short, one
    line each, and let the user pick which to write prompts for (GUI, multi-select).
-2. **One item at a time:** ask that item's questions (AskUserQuestion, a recommended option first), let the user ask
+2. **One item at a time:** first one line on its impact: the list in the flow's Plan step "shows Human the impact"
+   (`nightshift flow`; e.g. CPU · memory · disk · native · policy · cost · security & privacy · database migration ·
+   older app versions), each named with what it costs or needs, or "OK" (e.g. "CPU OK · memory OK · cost: one Cloud
+   Run job per run"). Then ask that item's questions (AskUserQuestion, a recommended option first), let the user ask
    and answer back, then write its prompt (the project's prompt skill, `skills.prompt`; without one,
    `/nightshift:write-a-prompt`) and flip its line from `- [ ]` to `+ [ ]`. Only then go to the next item. Never
    collect the questions of several items into one round.
@@ -63,7 +66,7 @@ When the user says "plan prompts" (or picks tasks with no prompt):
    **one round** of GUI questions
    (AskUserQuestion): real decisions only, short, a recommended option first. Add the reminders the project's
    rules files list.
-6. Show the final list (task, prompt ready, decisions) in a few lines and wait for the user's OK.
+6. Show the final list (task, prompt ready, decisions, the impact line) in a few lines and wait for the user's OK.
 7. Then the night run follows the project's run skill (`skills.run`). Without one: make a branch, do each task by
    its type's steps in the flow (`pnpm exec nightshift flow`), run each suite in `suites`, write the summary and
    `run.json` (part 4), and open one pull request, not merged.
