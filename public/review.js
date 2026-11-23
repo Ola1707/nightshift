@@ -1,5 +1,5 @@
 import { $, answered, api, decisionRow, solutionRow, el, href, nav, post, proposedItems, proposedKey, reviewWaiting } from "/common.js";
-import { stepsLink } from "/failure-report.js";
+import { failureAttempts, stepsLink } from "/failure-report.js";
 import { reviewSaver } from "/review-save.js";
 
 $("#nav").replaceWith(nav("/review"));
@@ -310,6 +310,30 @@ function stepsLinkRow(f) {
   );
 }
 
+// Every failed run of the test: its picture with its label, and its failed step and steps page when given.
+function failurePictures(f) {
+  const attempts = failureAttempts(f);
+  if (!attempts.length) return el("div", { class: "muted small" }, "No failure screenshot");
+  const many = attempts.length > 1;
+  return el(
+    "div",
+    {},
+    many && el("p", { class: "kv" }, el("b", {}, `Failed ${attempts.length} times`)),
+    attempts.map((a, i) => {
+      const label = a.label || (many ? `run ${i + 1}` : "the failure");
+      return el(
+        "div",
+        { class: "attempt" },
+        many && a.failedStep && el("p", { class: "kv" }, el("b", {}, "Failed step"), el("code", {}, a.failedStep)),
+        many && a.report && el("p", { class: "kv" }, el("a", { href: href(a.report), target: "_blank", rel: "noopener" }, "Steps")),
+        a.screenshot
+          ? shots([{ label, path: a.screenshot }])
+          : el("div", { class: "muted small" }, `${label}: no screenshot`),
+      );
+    }),
+  );
+}
+
 function failureCard(f, runName, qa, onChange) {
   return el(
     "div",
@@ -344,9 +368,7 @@ function failureCard(f, runName, qa, onChange) {
       f.explanation,
       f.fixFile ? el("code", { style: "margin-left: 6px" }, f.fixFile) : "",
     ),
-    f.screenshot
-      ? shots([{ label: "the failure", path: f.screenshot }])
-      : el("div", { class: "muted small" }, "No failure screenshot"),
+    failurePictures(f),
     f.fixedIn !== "not fixed" && failureNote(runName, f, qa, onChange),
   );
 }

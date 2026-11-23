@@ -150,7 +150,8 @@ changes.
 2. **Tonight's list** (`/list`): what was saved, with the next step: tell Claude "night board ready".
 3. **Review a run** (`/review`): reads `<runs>/<run>/run.json`. QA ticks and problem notes, answers to questions,
    ticks on decisions and notes on fixed tests are saved in `<runs>/<run>/qa.json`. A shot that is almost one color
-   shows a "Blank picture" chip, a shot whose file is gone a "Missing picture" chip; a video plays as a silent loop.
+   shows a "Blank picture" chip, a shot whose file is gone a "Missing picture" chip; a video plays as a silent loop. A failed test shows every
+   failed run's picture in order with its label ("Failed 4 times" above them), each with its own chip.
    **Review done** writes `review.json` and the review into each release log the run names; **Reopen the review**
    asks first. Until a run's review is done, every page shows ⏳ for it, and deploys to the environments in
    `gate.holdUntilReviewed` are refused by `reviewGateProblem` (see "Use in your scripts").
@@ -245,7 +246,16 @@ out.
       "failedOn": "What it failed on",
       "failedStep": "The step that failed",
       "report": "tests/e2e/runs/2030-01-05-web/failures.html#checkout-12", // the card's "Steps" link
-      "screenshot": "docs/release-log/night-run-2030-01-05/failures/checkout-12.png",
+      // One entry per failed run of this test, in order, each with the picture taken when the step failed
+      // (4 failed runs = 4 pictures). An old run.json with a single "screenshot" still works: it counts as one attempt.
+      "attempts": [
+        {
+          "label": "run 1 (02:14)",
+          "screenshot": "docs/release-log/night-run-2030-01-05/failures/checkout-12-run1.png",
+          "failedStep": "Tap Pay",
+          "report": "tests/e2e/runs/2030-01-05-web/failures.html#checkout-12"
+        }
+      ],
       "fixedIn": "app", // app | test | not fixed
       "fixFile": "checkout.tsx",
       "explanation": "One short line: what the fix was"
