@@ -101,10 +101,16 @@ function fixedTestRows(run, qa) {
 }
 
 /** Proposed items: strings (older runs, id = their number) or { id, text }; the owner's tick and note under `proposed:<id>`. */
-export const proposedItems = (run) =>
-  (run?.proposed ?? []).map((p, i) =>
+// An item about one task or one failed test sits on it (`proposed` on that task or failure), not in the run's list.
+export const ownProposed = (list) =>
+  (list ?? []).map((p, i) =>
     typeof p === "string" ? { id: String(i + 1), text: p } : { id: String(p.id), text: p.text },
   );
+export const proposedItems = (run) => [
+  ...ownProposed(run?.proposed),
+  ...(run?.tasks ?? []).flatMap((t) => ownProposed(t.proposed)),
+  ...(run?.failures ?? []).flatMap((f) => ownProposed(f.proposed)),
+];
 
 // Proposed items the owner ticked ("add as an action item") or wrote on; Claude adds the ticked ones to a roadmap or bugs file.
 function proposedRows(run, qa) {

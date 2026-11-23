@@ -1,4 +1,4 @@
-import { $, api, decisionRow, el, href, nav, post, proposedItems, proposedKey, reviewWaiting } from "/common.js";
+import { $, api, decisionRow, el, href, nav, ownProposed, post, proposedKey, reviewWaiting } from "/common.js";
 import { failureParts, stepsLink } from "/failure-report.js";
 import { reviewSaver } from "/review-save.js";
 
@@ -235,7 +235,22 @@ function taskCard(runName, task, qa, onChange) {
           decisionRow(runName, d, qa[`decision:${d.id}`], (next) => onChange(next)),
         ),
       ),
+    proposedBlock(runName, task.proposed, qa, onChange),
     qaParts ? qaParts.note : answerBox(runName, task, qa, onChange),
+  );
+}
+
+// The proposed items of one task or one failed test, on its own card.
+function proposedBlock(runName, list, qa, onChange) {
+  const items = ownProposed(list);
+  return (
+    items.length > 0 &&
+    el(
+      "div",
+      { class: "decisions" },
+      el("div", { class: "label" }, "Proposed items (you decide)"),
+      items.map((p) => proposedRow(runName, p, qa[proposedKey(p.id)], onChange)),
+    )
   );
 }
 
@@ -349,6 +364,7 @@ function failureCard(f, runName, qa, onChange) {
     f.screenshot
       ? shots([{ label: "actual flow", path: f.screenshot }])
       : el("div", { class: "muted small" }, "No screenshot of the actual flow"),
+    proposedBlock(runName, f.proposed, qa, onChange),
     f.fixedIn !== "not fixed" && failureNote(runName, f, qa, onChange),
   );
 }
@@ -570,7 +586,7 @@ async function show(runName) {
           el(
             "div",
             { class: "box decisions" },
-            proposedItems(run).map((p) => proposedRow(runName, p, qa[proposedKey(p.id)], onChange)),
+            ownProposed(run.proposed).map((p) => proposedRow(runName, p, qa[proposedKey(p.id)], onChange)),
           ),
         )
       : []),

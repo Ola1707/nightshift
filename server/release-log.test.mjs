@@ -137,3 +137,25 @@ test("the Review section lists proposed items the owner ticked or wrote on, by i
   const older = writeReview(log, { ...run, proposed: ["A plain string item."] }, { "proposed:1": { checked: true, note: "" } }, "2030-01-07T16:00:00.000Z");
   assert.match(older, /\| A plain string item\. \| ☑ yes \|/);
 });
+
+test("proposed items on a task or a failed test count too, with the run's own", () => {
+  const out = writeReview(
+    log,
+    {
+      ...run,
+      tasks: [{ ...run.tasks[0], proposed: [{ id: "P1", text: "Raise the memory limit." }] }, ...run.tasks.slice(1)],
+      failures: [{ test: "android setup 8", fixedIn: "flaky", proposed: [{ id: "P2", text: "Find the leak." }] }],
+      proposed: [{ id: "P3", text: "Delete the old DNS records." }],
+    },
+    {
+      "proposed:P1": { checked: true, note: "" },
+      "proposed:P2": { checked: false, note: "Ask me first" },
+      "proposed:P3": { checked: true, note: "" },
+    },
+    "2030-01-07T16:00:00.000Z",
+  );
+  const review = out.slice(out.indexOf("## Review"));
+  assert.match(review, /\| Raise the memory limit\. \| ☑ yes \|/);
+  assert.match(review, /\| Find the leak\. \| ☐ no \| Ask me first \|/);
+  assert.match(review, /\| Delete the old DNS records\. \| ☑ yes \|/);
+});

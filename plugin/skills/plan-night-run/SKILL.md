@@ -89,7 +89,12 @@ format of `node_modules/nightshift-board/README.md`. Same content as the Markdow
   suite's `failureShot` file, or the screenshot its runner saved);
 - `qa` only for changes the user can see in an app;
 - `stillOpen` grouped by category (one topic each), and `proposed: [{ id, text }]` (each gets an "Add as an action
-  item" tick and a comment box on the review page);
+  item" tick and a comment box on the review page). An item about one task or one failed test goes in that task's
+  or failure's own `proposed`, shown on its card; the run's top-level `proposed` is only for items that belong to
+  none. Ids are unique across the run;
+- **each idea once:** every action item, open point or finding is written in one place only — never repeated in
+  `stillOpen`, `sections`, a failure's `explanation` or the Markdown summary's other parts. Each context switch
+  costs the user; the place closest to its task or failure wins;
 - every decision made alone in `decisions: [{ id, text }]`: on its task, or at the top of run.json for the run's
   own. You write the `id` (e.g. "T.1-1"), unique within the run, so a tick stays on its decision when run.json is
   written again. Not in the task's `done` text, and no "Decisions made alone" section. The user ticks them; never

@@ -220,7 +220,9 @@ out.
       "before": [{ "label": "Home page", "path": "docs/release-log/night-run-2030-01-05/before/home.jpg" }],
       "after": [{ "label": "Home page", "path": "docs/release-log/night-run-2030-01-05/after/home.jpg" }],
       "videos": [{ "label": "Menu opens", "when": "after", "path": "docs/release-log/night-run-2030-01-05/after/menu.mp4" }],
-      "tests": [{ "name": "web home.spec.ts 3", "what": "the hours show", "result": "failed before, passes after" }]
+      "tests": [{ "name": "web home.spec.ts 3", "what": "the hours show", "result": "failed before, passes after" }],
+      // An item about this task sits here, not in the run's list below.
+      "proposed": [{ "id": "P1", "text": "What, where, done when" }]
     }
   ],
   "testRuns": [
@@ -246,13 +248,16 @@ out.
       "screenshot": "docs/release-log/night-run-2030-01-05/failures/checkout-12.png", // the actual flow
       "fixedIn": "app", // app | test | not fixed
       "fixFile": "checkout.tsx",
-      "explanation": "One short line: what the fix was (not fixed: why, and the proposed item)"
+      "explanation": "One short line: what the fix was (not fixed: why)",
+      // An item about this failed test sits here, not in the run's list below.
+      "proposed": [{ "id": "P2", "text": "What, where, done when" }]
     }
   ],
   "sections": [{ "title": "Ruled out on the way", "items": ["Any other summary part, one list each"] }],
   "stillOpen": [{ "topic": "Bugs", "items": ["B.2: waits for your answer"] }],
-  // Items Claude would add to a roadmap; you decide. Plain strings count by their number (1, 2, …).
-  "proposed": [{ "id": "P1", "text": "What, where, done when" }]
+  // Items Claude would add to a roadmap that belong to no task or failed test; you decide. Ids are unique across
+  // the run. Plain strings count by their number (1, 2, …).
+  "proposed": [{ "id": "P3", "text": "What, where, done when" }]
 }
 ```
 

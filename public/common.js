@@ -124,10 +124,11 @@ export function decisionRow(runName, decision, state, onSaved, context = null) {
 }
 
 // Proposed items in run.json: strings (older runs, id = their number) or { id, text }. Kept in step with
-// proposedItems in server/release-log.mjs.
+// ownProposed in server/release-log.mjs.
 export const proposedKey = (id) => `proposed:${id}`;
-export const proposedItems = (run) =>
-  (run?.proposed ?? []).map((p, i) =>
+// An item about one task or one failed test sits on it (`proposed` on that task or failure), not in the run's list.
+export const ownProposed = (list) =>
+  (list ?? []).map((p, i) =>
     typeof p === "string" ? { id: String(i + 1), text: p } : { id: String(p.id), text: p.text },
   );
 
