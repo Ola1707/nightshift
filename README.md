@@ -147,7 +147,9 @@ changes.
 2. **Tonight's list** (`/list`): what was saved, with the next step: tell Claude "night board ready".
 3. **Review a run** (`/review`): reads `<runs>/<run>/run.json`. QA ticks and problem notes, answers to questions,
    ticks on decisions and notes on fixed tests are saved in `<runs>/<run>/qa.json`. A shot that is almost one color
-   shows a "Blank picture" chip, a shot whose file is gone a "Missing picture" chip; a video plays as a silent loop.
+   shows a "Blank picture" chip, a shot whose file is gone a "Missing picture" chip; a video plays as a silent loop. A task that isn't plainly done (not done, waiting, partly done, done with
+   something missing) gets a large chip as its first chip, a coloured left border and its missing text in a tinted box
+   under the title.
    **Review done** writes `review.json` and the review into each release log the run names; **Reopen the review**
    asks first. Until a run's review is done, every page shows ⏳ for it, and deploys to the environments in
    `gate.holdUntilReviewed` are refused by `reviewGateProblem` (see "Use in your scripts").
