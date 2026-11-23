@@ -678,8 +678,13 @@
         },
         {
           "who": "human",
-          "text": "/nightshift:review-done",
-          "note": "Opus goes over every remark and question (board notes + chat) · what's still open carries to the next review · then \"Review done\" on the board"
+          "text": "finished answering → types /nightshift:review-done",
+          "note": "step 1 at the bottom of the review page · Opus goes over every note and answer, answers the questions, opens the ticked tasks · what's still open carries to the next review"
+        },
+        {
+          "who": "human",
+          "text": "presses \"Review done\" on the board",
+          "note": "step 2 · held deploys go ahead"
         }
       ]
     }

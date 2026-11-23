@@ -596,6 +596,8 @@ async function show(runName) {
 
 // Until this is pressed the run is offered for review every day, and deploys to the held environments are refused.
 // One save at a time (a double-click never lands on "Reopen the review"), and reopening asks first.
+const REVIEW_DONE_COMMAND = "/nightshift:review-done";
+
 function doneBar(runName, review, uncheckedCount) {
   let reloading = false;
   const saver = reviewSaver({
@@ -626,14 +628,38 @@ function doneBar(runName, review, uncheckedCount) {
       el("button", { class: "link", onclick: press(() => saver.reopen()) }, "Reopen the review"),
     );
   }
+  // Step 1: Claude goes over the answers (the board can't tell Claude itself). Step 2: the button.
+  const copy = el(
+    "button",
+    {
+      class: "link",
+      onclick: () =>
+        navigator.clipboard.writeText(REVIEW_DONE_COMMAND).then(() => (copy.textContent = "Copied ✓")),
+    },
+    "Copy",
+  );
   return el(
     "div",
-    { class: "done-bar" },
+    { class: "done-bar steps" },
     el(
-      "span",
-      {},
-      el("b", {}, "Finished reviewing? "),
-      "Until you press the button, this run comes back for review every day and held deploys wait.",
+      "div",
+      { class: "done-step" },
+      el("b", {}, "1 · Finished answering? "),
+      "Type in Claude ",
+      el("code", {}, REVIEW_DONE_COMMAND),
+      " ",
+      copy,
+      el(
+        "div",
+        { class: "muted small" },
+        "Claude goes over every note and answer here, answers your questions and opens the tasks you ticked.",
+      ),
+    ),
+    el(
+      "div",
+      { class: "done-step" },
+      el("b", {}, "2 · Then press Review done. "),
+      "Until then this run comes back for review every day and held deploys wait.",
     ),
     el(
       "button",

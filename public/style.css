@@ -683,6 +683,13 @@ nav.top a.waiting {
   border: 2px solid var(--warn);
   background: var(--warn-soft);
 }
+.done-bar.steps {
+  flex-direction: column;
+  align-items: flex-start;
+}
+.done-step code {
+  font-weight: 600;
+}
 .done-bar.done {
   border-color: var(--good);
   background: var(--good-soft);
