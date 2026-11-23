@@ -951,3 +951,29 @@ table.checklist tr.grp td {
   font-size: 14px;
   min-height: 1em;
 }
+
+/* Review: a task that isn't plainly done (not done, waiting, partly done, something left). */
+.review-task.attention-bad {
+  border-left: 4px solid var(--bad);
+}
+.review-task.attention-warn {
+  border-left: 4px solid var(--warn);
+}
+.chip.big {
+  font-size: 14px;
+  font-weight: 700;
+  padding: 4px 12px;
+}
+.attention-text {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+.attention-text.bad {
+  background: var(--bad-soft);
+  color: var(--bad);
+}
+.attention-text.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}

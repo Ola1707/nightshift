@@ -1,6 +1,7 @@
 import { $, api, decisionRow, el, href, nav, post, proposedItems, proposedKey, reviewWaiting } from "/common.js";
 import { stepsLink } from "/failure-report.js";
 import { reviewSaver } from "/review-save.js";
+import { taskAttention } from "/task-attention.js";
 
 $("#nav").replaceWith(nav("/review"));
 reviewWaiting();
@@ -158,13 +159,14 @@ function answerBox(runName, task, qa, onChange) {
 
 function taskCard(runName, task, qa, onChange) {
   const [tone, statusText] = STATUS[task.status] ?? ["", task.status ?? ""];
+  const attention = taskAttention(task);
   const qaParts = task.qa ? qaBox(runName, task, qa, onChange) : null;
   const before = task.videos?.filter((v) => v.when === "before") ?? [];
   const after = task.videos?.filter((v) => v.when !== "before") ?? [];
   return el(
     "div",
     {
-      class: `box review-task ${qa[task.id]?.checked ? "qa-done" : ""}`,
+      class: `box review-task ${attention ? `attention-${attention.tone}` : ""} ${qa[task.id]?.checked ? "qa-done" : ""}`,
       style: "margin-bottom: 12px",
     },
     el(
@@ -177,15 +179,16 @@ function taskCard(runName, task, qa, onChange) {
         el(
           "div",
           { class: "chips" },
+          attention && el("span", { class: `chip big ${attention.tone}` }, attention.label),
           task.id && el("span", { class: "chip code" }, task.id),
           task.type && el("span", { class: "chip" }, task.type),
-          statusText && el("span", { class: `chip ${tone}` }, statusText),
+          !attention && statusText && el("span", { class: `chip ${tone}` }, statusText),
         ),
       ),
       qaParts?.label,
     ),
+    attention?.text && el("p", { class: `attention-text ${attention.tone}` }, attention.text),
     task.done && el("p", { class: "kv" }, el("b", {}, "Done"), task.done),
-    task.missing && el("p", { class: "kv" }, el("b", {}, "Missing"), task.missing),
     task.qa && el("p", { class: "kv" }, el("b", {}, "Where to check"), task.qa),
     task.questions?.length > 0 &&
       el(
