@@ -262,7 +262,7 @@ function renderDecisions(open) {
   const recount = () => {
     const left = box.querySelectorAll(".decision").length;
     if (!left) return root.replaceChildren();
-    count.textContent = `${left} open · tick OK when it's fine`;
+    count.textContent = `${left} open · OK when it's fine, or revert it now or as a task`;
   };
   box.append(
     ...open.map((d) =>
@@ -270,12 +270,16 @@ function renderDecisions(open) {
         d.run,
         d,
         { checked: false, note: d.note },
-        (_qa, checked, row) => {
-          if (!checked) return;
+        (_qa, answer, row) => {
+          if (!answer) return;
           // It leaves the open list as one short line without a box, so a second click never ticks the next one.
-          row.replaceWith(el("div", { class: "decision-ticked" }, `✓ ${d.text}`));
-          toast("Decision ticked");
+          const revert = answer !== "ok";
+          row.replaceWith(
+            el("div", { class: `decision-ticked ${revert ? "reverted" : ""}` }, `${revert ? "↩ To revert:" : "✓"} ${d.text}`),
+          );
+          toast(answer === "now" ? 'Tell Claude "revert now"' : answer === "task" ? "Claude adds a task to revert it" : "Decision ticked");
           recount();
+          if (revert) api("/api/reverts").then(renderReverts);
         },
         el(
           "span",
@@ -292,9 +296,38 @@ function renderDecisions(open) {
   );
 }
 
+// "To revert": decisions marked Revert now or Revert as task that Claude hasn't handled yet (<board>/reverts.json).
+function renderReverts(list) {
+  const root = $("#reverts");
+  if (!list.length) return root.replaceChildren();
+  root.replaceChildren(
+    el(
+      "div",
+      { class: "section-head" },
+      el("h2", {}, "To revert"),
+      el("span", { class: "muted small" }, `${list.length} · tell Claude "revert now"`),
+    ),
+    el(
+      "div",
+      { class: "box decisions" },
+      list.map((d) =>
+        el(
+          "div",
+          { class: "decision" },
+          el("span", { class: "decision-context" }, `${d.run} · ${d.taskId ? `${d.taskId} ${d.taskTitle ?? ""}` : "the run"}`),
+          el("span", { class: "chip bad" }, d.how === "now" ? "Now" : "As task"),
+          ` ${d.text}`,
+          d.note ? el("div", { class: "muted small" }, d.note) : null,
+        ),
+      ),
+    ),
+  );
+}
+
 $("#nav").replaceWith(nav("/"));
 reviewWaiting();
 api("/api/open-decisions").then(renderDecisions);
+api("/api/reverts").then(renderReverts);
 const [roadmaps, picks, savedNotes] = await Promise.all([
   api("/api/roadmaps"),
   api("/api/picks"),

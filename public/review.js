@@ -1,4 +1,4 @@
-import { $, api, decisionRow, el, href, nav, post, proposedItems, proposedKey, reviewWaiting } from "/common.js";
+import { $, answered, api, decisionRow, el, href, nav, post, proposedItems, proposedKey, reviewWaiting } from "/common.js";
 import { stepsLink } from "/failure-report.js";
 import { reviewSaver } from "/review-save.js";
 
@@ -387,9 +387,9 @@ async function show(runName) {
               el(
                 "b",
                 {},
-                `${decisions.filter((d) => qa[`decision:${d.id}`]?.checked).length} / ${decisions.length}`,
+                `${decisions.filter((d) => answered(qa[`decision:${d.id}`])).length} / ${decisions.length}`,
               ),
-              "decisions ticked",
+              "decisions answered",
             ),
           ]
         : []),

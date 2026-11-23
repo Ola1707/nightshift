@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { unreviewedRuns } from "./review-gate.mjs";
 import { addItem, readChecklist, removeItem, setTick } from "./checklist.mjs";
 import { loadConfig } from "./config.mjs";
-import { openDecisions, openDecisionsOfRuns } from "./decisions.mjs";
+import { openDecisions, openDecisionsOfRuns, revertsOfRuns } from "./decisions.mjs";
 import { approveType, readFlow } from "./flow.mjs";
 import { readRoadmaps } from "./roadmaps.mjs";
 import { pictureProblems, reportProblems } from "./run-pictures.mjs";
@@ -186,6 +186,8 @@ const routes = {
   "GET /api/runs": () => runFolders(),
   // The pick page's "Decisions from last night": every unticked decision of every run.
   "GET /api/open-decisions": () => openDecisionsOfRuns(RUNS),
+  // The pick page's "To revert": decisions marked Revert that no run has undone yet.
+  "GET /api/reverts": () => revertsOfRuns(RUNS, join(REPO, CONFIG.paths.board, "reverts.json")),
 };
 
 createServer(async (req, res) => {
@@ -224,11 +226,13 @@ createServer(async (req, res) => {
         }));
     }
     if (run && req.method === "POST" && run[2] === "/qa") {
-      const { taskId, checked, note } = await body(req);
+      const { taskId, checked, revert, note } = await body(req);
       const qaFile = runPath(run[1], "qa.json");
       const qa = readJson(qaFile, {});
       qa[taskId] = {
         checked: Boolean(checked),
+        // Only decisions have Revert; OK and Revert never both.
+        ...((revert === "now" || revert === "task") && !checked ? { revert } : {}),
         note: String(note ?? ""),
         at: new Date().toISOString(),
       };

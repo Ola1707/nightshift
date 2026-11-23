@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { allDecisions, openDecisions, openDecisionsOfRuns } from "./decisions.mjs";
+import { allDecisions, openDecisions, openDecisionsOfRuns, revertsOfRuns } from "./decisions.mjs";
 
 const run = {
   title: "Night run 2030-01-06",
@@ -98,6 +98,35 @@ test("the pick page lists open decisions of every run", () => {
         note: "",
       },
     ]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("a revert answers a decision; it stays under To revert until reverts.json records it", () => {
+  const qa = {
+    "decision:T.3-1": { checked: false, revert: "now", note: "too slow" },
+    "decision:T.3-2": { checked: false, revert: "task", note: "" },
+    "decision:run-1": { checked: true, note: "" },
+  };
+  assert.deepEqual(openDecisions(run, qa), []);
+  assert.equal(openDecisions(run, { "decision:T.3-1": { checked: false, revert: "later" } }).length, 3, "only now or task");
+
+  const dir = mkdtempSync(join(tmpdir(), "nightshift-reverts-"));
+  try {
+    mkdirSync(join(dir, "night-run-2030-01-06"));
+    writeFileSync(join(dir, "night-run-2030-01-06", "run.json"), JSON.stringify(run));
+    writeFileSync(join(dir, "night-run-2030-01-06", "qa.json"), JSON.stringify(qa));
+    const file = join(dir, "reverts.json");
+    assert.deepEqual(
+      revertsOfRuns(dir, file).map((d) => [d.ref, d.how, d.note]),
+      [
+        ["night-run-2030-01-06/T.3-1", "now", "too slow"],
+        ["night-run-2030-01-06/T.3-2", "task", ""],
+      ],
+    );
+    writeFileSync(file, JSON.stringify({ "night-run-2030-01-06/T.3-1": { how: "now", done: "abc123" } }));
+    assert.deepEqual(revertsOfRuns(dir, file).map((d) => d.ref), ["night-run-2030-01-06/T.3-2"]);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

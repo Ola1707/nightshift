@@ -138,7 +138,8 @@ through those once when starting with Nightshift (`/nightshift:setup` opens them
 changes.
 
 1. **Pick tasks** (`/`). At the top, **Decisions from last night**: every decision Claude made alone that you have
-   not ticked yet, from every run, with an "OK" checkbox and a text box (saved into that run's `qa.json`). Then every
+   not answered yet, from every run, with **OK**, **Revert now** and **Revert as task** and a text box (saved into
+   that run's `qa.json`). Under it, **To revert**: the reverts Claude hasn't handled yet (`plugin/reverts.md`). Then every
    open task in the task files (one section per type of change), with **Check all night work** (every open task
    except Manual ones) and **Uncheck all**, then the other roadmaps grouped by phase. Drag a roadmap or a phase by
    its **⠿** handle to reorder it; **Send order to Claude** saves `board-order.json`, and Claude reorders the files
@@ -180,8 +181,10 @@ Paths are the defaults; each can be changed in the settings file.
 | `docs/release-log/<run>/review.json` | board | `{ done, at }`, written by "Review done" |
 | `docs/board/flow.json` | you, Claude, board | your changes to the flow of work, and the approvals |
 | `docs/board/plan-checklist.json` | board | your checklist ticks and added items |
+| `docs/board/reverts.json` | Claude | the reverted decisions Claude has handled: `{ "<run>/<id>": { how, done, at } }` |
 
-Keys in `qa.json`: a task's id (QA tick, problem or answer), `decision:<id>`, `failure:<test>` (a note on a fixed
+Keys in `qa.json`: a task's id (QA tick, problem or answer), `decision:<id>` (`checked` for OK, or
+`revert: "now" | "task"`), `failure:<test>` (a note on a fixed
 test) and `proposed:<id>` (ticked = add it as an action item).
 
 The phrases Claude listens for: "night board ready" (the picks are saved), "order sent" (reorder the roadmaps),

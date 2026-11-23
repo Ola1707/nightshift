@@ -583,6 +583,22 @@ button:disabled {
   height: 16px;
   accent-color: var(--good);
 }
+.decision-answers {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 6px;
+}
+.decision-revert.done {
+  background: var(--bad-soft);
+  color: var(--bad);
+}
+.decision-revert.done input {
+  accent-color: var(--bad);
+}
+.decision-ticked.reverted {
+  color: var(--bad);
+}
 .decision-ticked {
   padding: 6px 0;
   color: var(--good);

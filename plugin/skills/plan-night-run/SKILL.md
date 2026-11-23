@@ -51,6 +51,8 @@ When the user says "plan prompts" (or picks tasks with no prompt):
    **Decisions from last night** (top of the pick page, `GET /api/open-decisions`): read the `decision:<id>` and
    `failure:<test>` notes in each run's `qa.json` and answer or act on them in the chat, like the task notes. Never
    tick a decision: only the user does.
+   **To revert** (`GET /api/reverts`): handle each by `<plugin>/reverts.md` (`<plugin>` is two folders up from this
+   skill's base directory): a "now" one before the run starts, a "task" one becomes a task the user can pick.
 3. **Prompts.** Check every chosen task has a prompt (`hasPrompt: true`). One without: do the prompt planning (part
    2) for those, one item at a time. Tasks in a task file marked `planOnly` get a plan, never code.
 4. **The skills' rules, before the run.** Run `pnpm exec nightshift rules --plugin <plugin>` (every skill: the run

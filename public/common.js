@@ -93,11 +93,21 @@ export function flagChips(task) {
   return chips;
 }
 
-// A decision Claude made alone (run.json `decisions[]`): an "OK" checkbox and a text box under it, saved like the QA
-// boxes into the run's qa.json under `decision:<id>`. Used on the review page and the pick page; only the owner ticks it.
+// A decision is answered by OK or a revert ("now" or "task"); same rule as server/decisions.mjs.
+export const answered = (state) => state?.checked === true || (state?.revert === "now" || state?.revert === "task");
+
+// A decision Claude made alone (run.json `decisions[]`): "OK", "Revert now" or "Revert as task" (one or none) and a
+// text box under it, saved like the QA boxes into the run's qa.json under `decision:<id>`. Used on the review page and
+// the pick page; only the owner answers it. onSaved(qa, answer, row): answer is "ok", "now", "task" or null.
 export function decisionRow(runName, decision, state, onSaved, context = null) {
   const check = el("input", { type: "checkbox", checked: Boolean(state?.checked) });
   const ok = el("label", { class: `decision-ok ${state?.checked ? "done" : ""}` }, check, "OK");
+  const was = state?.checked ? null : state?.revert;
+  const revertBox = (how, label) => {
+    const box = el("input", { type: "checkbox", checked: was === how });
+    return { how, box, label: el("label", { class: `decision-ok decision-revert ${was === how ? "done" : ""}` }, box, label) };
+  };
+  const reverts = [revertBox("now", "Revert now"), revertBox("task", "Revert as task")];
   const note = el(
     "textarea",
     { placeholder: "A note or a question about this decision", rows: 1 },
@@ -106,19 +116,28 @@ export function decisionRow(runName, decision, state, onSaved, context = null) {
   const row = el(
     "div",
     { class: "decision", "data-decision": decision.id },
-    el("div", { class: "decision-head" }, ok, el("div", {}, context, decision.text)),
+    el("div", { class: "decision-head" }, el("div", { class: "decision-answers" }, ok, reverts.map((r) => r.label)), el("div", {}, context, decision.text)),
     note,
   );
   const save = async () => {
+    const revert = reverts.find((r) => r.box.checked)?.how ?? null;
     const qa = await post(`/api/runs/${runName}/qa`, {
       taskId: `decision:${decision.id}`,
       checked: check.checked,
+      revert,
       note: note.value,
     });
     ok.classList.toggle("done", check.checked);
-    onSaved?.(qa, check.checked, row);
+    for (const r of reverts) r.label.classList.toggle("done", r.box.checked);
+    onSaved?.(qa, check.checked ? "ok" : revert, row);
   };
-  check.addEventListener("change", save);
+  // One answer at most: ticking one unticks the others.
+  const boxes = [check, ...reverts.map((r) => r.box)];
+  for (const box of boxes)
+    box.addEventListener("change", () => {
+      if (box.checked) for (const other of boxes) if (other !== box) other.checked = false;
+      save();
+    });
   note.addEventListener("change", save);
   return row;
 }

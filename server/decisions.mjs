@@ -1,7 +1,9 @@
 // Decisions Claude made alone during a run (run.json `decisions: [{ id, text }]`, on a task or at the top for the
-// run's own). The owner ticks each one on the review page; the tick and note are saved in the run's qa.json under
-// `decision:<id>`. An unticked decision never blocks "Review done" or a deploy: it shows on the pick page under
-// "Decisions from last night" until it is ticked.
+// run's own). The owner answers each one: OK (`checked: true`), Revert now (`revert: "now"`, Claude undoes it at
+// once) or Revert as task (`revert: "task"`, Claude adds a task that undoes it), saved with a note in the run's qa.json
+// under `decision:<id>`. An unanswered decision never blocks "Review done" or a deploy: it shows on the pick page under
+// "Decisions from last night" until it is answered. A revert shows under "To revert" until Claude handles it and
+// records it in <paths.board>/reverts.json: { "<run>/<id>": { how, done, at } }.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -32,12 +34,45 @@ export function allDecisions(run) {
 }
 
 /**
- * The decisions the owner has not ticked: `qa["decision:" + id]?.checked` is not true. A note without a tick is still open.
+ * The decisions the owner has not answered (neither OK nor Revert). A note without an answer is still open.
  * @param {object} run the parsed run.json
  * @param {Record<string, { checked?: boolean, note?: string }>} qa the parsed qa.json
  */
 export function openDecisions(run, qa = {}) {
-  return allDecisions(run).filter((d) => qa[decisionKey(d.id)]?.checked !== true);
+  return allDecisions(run).filter((d) => !answered(qa[decisionKey(d.id)]));
+}
+
+/** How the owner wants a decision undone: "now", "task", or null. */
+export const revertOf = (state) => (state?.checked ? null : state?.revert === "now" || state?.revert === "task" ? state.revert : null);
+
+/** OK or a revert. */
+export const answered = (state) => state?.checked === true || revertOf(state) !== null;
+
+const readJsonOr = (path, fallback) => (existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : fallback);
+const runNames = (runsDir) =>
+  existsSync(runsDir)
+    ? readdirSync(runsDir)
+        .filter((name) => existsSync(join(runsDir, name, "run.json")))
+        .sort()
+        .reverse()
+    : [];
+
+/**
+ * "To revert": every decision marked Revert now or Revert as task that Claude hasn't handled yet (not in
+ * reverts.json), newest run first. `ref` is "<run>/<id>", the key Claude records in reverts.json.
+ * @param {string} runsDir the runs folder (paths.runs)
+ * @param {string} revertsFile <paths.board>/reverts.json
+ */
+export function revertsOfRuns(runsDir, revertsFile) {
+  const handled = readJsonOr(revertsFile, {});
+  return runNames(runsDir).flatMap((name) => {
+    const run = readJsonOr(join(runsDir, name, "run.json"), {});
+    const qa = readJsonOr(join(runsDir, name, "qa.json"), {});
+    return allDecisions(run)
+      .map((d) => ({ d, how: revertOf(qa[decisionKey(d.id)]) }))
+      .filter(({ d, how }) => how && !handled[`${name}/${d.id}`])
+      .map(({ d, how }) => ({ run: name, ref: `${name}/${d.id}`, how, ...d, note: qa[decisionKey(d.id)]?.note ?? "" }));
+  });
 }
 
 /**
