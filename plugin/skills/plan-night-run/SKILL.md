@@ -16,6 +16,8 @@ No `board.config.json` in the project yet: offer `/nightshift:setup` first.
    up from this skill's base directory) and follow `<plugin>/project-rules.md`: read each `OK` file (it adds to this
    skill and wins where they differ); a `CHANGED` file is gone through first.
 
+**Rule 1:** everything you write for the owner follows `<plugin>/rule-1.md` (new information only).
+
 The board is a local website in the package `nightshift-board` (file formats and pages:
 `node_modules/nightshift-board/README.md`). Its pages: pick (`/`), list (`/list`), review (`/review`), flow (`/flow`),
 checklist (`/checklist`).
@@ -67,7 +69,9 @@ When the user says "plan prompts" (or picks tasks with no prompt):
 ## 4. During the run: fill run.json
 
 A subagent writes `<runs folder>/<night-run|day-run>-<date>/run.json`, next to the run's Markdown summary, in the
-format of `node_modules/nightshift-board/README.md`. Same content as the Markdown summary, plus:
+format of `node_modules/nightshift-board/README.md`, following Rule 1 (`<plugin>/rule-1.md`): a task done as agreed
+is "Done as planned.", no process, decisions say what changes for the owner, leftovers of old code are named.
+Same content as the Markdown summary, plus:
 
 - before / after screenshots and videos per task, copied into the run folder (repo-relative paths). A screenshot is
   the whole screen, taken with the suite's `screenshot` setting (a viewport, or a command for a device). Before

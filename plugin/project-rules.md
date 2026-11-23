@@ -1,5 +1,7 @@
 # The project's own rules
 
+Rule 1 comes before all of these: `rule-1.md` (new information only).
+
 Every Nightshift skill has two files:
 
 - **The plugin's** `skills/<skill>/SKILL.md`: the tool, the same for every project. A project never edits it. A fix

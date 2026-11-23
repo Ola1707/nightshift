@@ -13,6 +13,8 @@ description: Help the user review a finished long task (a day run, night run, re
    up from this skill's base directory) and follow `<plugin>/project-rules.md`: read each `OK` file (it adds to this
    skill and wins where they differ); a `CHANGED` file is gone through first.
 
+**Rule 1:** everything you write for the owner follows `<plugin>/rule-1.md` (new information only).
+
 The user reads the summary of a long task (for example `<runs folder>/day-run-<date>.md`) and comes back with
 questions, remarks and small fixes, often several in one message, often about a quoted or selected line. Work
 through each point in turn.

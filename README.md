@@ -286,6 +286,9 @@ them. `nightshift config` prints the result.
 | `gate.holdUntilReviewed` | `[]` | environments that get no deploy while a run waits for its review |
 | `reviewMode.alsoGuard` | `[]` | extra folders guarded during a review (absolute or relative to the project); in them only Markdown and `plugin/skills/` stay editable |
 
+**Rule 1** for everything the skills write for the owner (summaries, run.json, review replies): new information
+only, no process, decisions say what changes for the owner (`plugin/rule-1.md`).
+
 Next to it, `<paths.board>/skills/` (optional, written first by `/nightshift:setup`) holds the project's own rules
 for the skills: one file per skill (`do.md`, `plan-night-run.md`, ...) and `all.md` for every skill. They only add
 to the plugin's skills (where they differ, the project's file wins); a fix to how a skill works goes into Nightshift.

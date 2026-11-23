@@ -10,5 +10,7 @@ disable-model-invocation: true
    the project's own rules: run `pnpm exec nightshift rules review-done --plugin <plugin>` (`<plugin>` is two folders
    up from this skill's base directory) and follow `<plugin>/project-rules.md`: read each `OK` file (it adds to this
    skill and wins where they differ); a `CHANGED` file is gone through first.
+
+**Rule 1:** everything you write for the owner follows `<plugin>/rule-1.md` (new information only).
 2. The plugin's review-mode hook already turned review mode off when the user typed this command. Reply in one line:
    review mode is off and code edits are allowed again, plus what's changed and not committed yet from the review.
