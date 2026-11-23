@@ -76,7 +76,10 @@ is "Done as planned.", no process, decisions say what changes for the owner, lef
 Same content as the Markdown summary, plus:
 
 - before / after screenshots and videos per task, copied into the run folder (repo-relative paths). A screenshot is
-  the whole screen, taken with the suite's `screenshot` setting (a viewport, or a command for a device). Before
+  taken with the suite's `screenshot` setting (a viewport, or a command for a device) and shows only the part that
+  changed, so the difference is seen at a glance: on a page bigger than a phone screen, crop to the changed element
+  (an element screenshot, e.g. the one task row with its new chip), never the full page or site; a phone screen
+  stays whole. Before and after crop the same area (user, 2026-11-23). Before
   saving, wait for the network to go idle, fonts (`document.fonts.ready`) and images to load, then run
   `isBlankPicture` (from the package `nightshift-board`) and retake once if blank. The review page shows a red
   "Blank picture" or "Missing picture" chip on a bad shot, and each video as a silent loop labelled "Video · N s" (a
