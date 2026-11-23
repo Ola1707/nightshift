@@ -65,6 +65,11 @@
               "who": "coder",
               "text": "screenshots into the report",
               "note": "before + after · Human sees them in the review"
+            },
+            {
+              "who": "runner",
+              "text": "tick it done",
+              "note": "\"[x]\" on its line in the roadmap or task file · only with evidence: a passing test, a file or command output · none → left open, marked QA for Human"
             }
           ]
         }
@@ -138,6 +143,11 @@
               "who": "coder",
               "text": "screenshots into the report",
               "note": "before + after · Human sees them in the review"
+            },
+            {
+              "who": "runner",
+              "text": "tick it done",
+              "note": "\"[x]\" on its line in the roadmap or task file · only with evidence: a passing test, a file or command output · none → left open, marked QA for Human"
             }
           ]
         }
@@ -209,6 +219,11 @@
               "who": "coder",
               "text": "screenshots into the report",
               "note": "before + after · Human sees them in the review"
+            },
+            {
+              "who": "runner",
+              "text": "tick it done",
+              "note": "\"[x]\" on its line in the roadmap or task file · only with evidence: a passing test, a file or command output · none → left open, marked QA for Human"
             }
           ]
         }
@@ -294,6 +309,11 @@
               "who": "coder",
               "text": "screenshots into the report",
               "note": "before + after · Human sees them in the review"
+            },
+            {
+              "who": "runner",
+              "text": "tick it done",
+              "note": "\"[x]\" on its line in the roadmap or task file · only with evidence: a passing test, a file or command output · none → left open, marked QA for Human"
             }
           ]
         }
@@ -441,6 +461,11 @@
             {
               "who": "tests",
               "text": "checks + health checks"
+            },
+            {
+              "who": "runner",
+              "text": "tick it done",
+              "note": "\"[x]\" on its line in the roadmap or task file · only with evidence: a passing test, a file or command output · none → left open, marked QA for Human"
             }
           ]
         }
