@@ -1,4 +1,4 @@
-import { $, answered, api, decisionRow, solutionRow, el, href, nav, post, proposedItems, proposedKey, reviewWaiting } from "/common.js";
+import { $, answered, api, decisionRow, impactRow, loadImpactItems, solutionRow, el, href, nav, post, proposedItems, proposedKey, reviewWaiting } from "/common.js";
 import { failureAttempts, stepsLink } from "/failure-report.js";
 import { reviewSaver } from "/review-save.js";
 
@@ -156,6 +156,8 @@ function answerBox(runName, task, qa, onChange) {
   return note;
 }
 
+let impactItems = [];
+
 function taskCard(runName, task, qa, onChange) {
   const [tone, statusText] = STATUS[task.status] ?? ["", task.status ?? ""];
   const qaParts = task.qa ? qaBox(runName, task, qa, onChange) : null;
@@ -184,6 +186,7 @@ function taskCard(runName, task, qa, onChange) {
       ),
       qaParts?.label,
     ),
+    impactRow(task, impactItems, true),
     task.done && el("p", { class: "kv" }, el("b", {}, "Done"), task.done),
     task.missing && el("p", { class: "kv" }, el("b", {}, "Missing"), task.missing),
     task.qa && el("p", { class: "kv" }, el("b", {}, "Where to check"), task.qa),
@@ -377,6 +380,7 @@ function failureCard(f, runName, qa, onChange) {
 async function show(runName) {
   const { run, qa: initialQa, review, pictures, reports } = await api(`/api/runs/${runName}`);
   pictureProblems = pictures ?? {};
+  impactItems = await loadImpactItems().catch(() => []);
   missingReports = reports ?? {};
   let qa = initialQa;
   $("#title").textContent = run.title;

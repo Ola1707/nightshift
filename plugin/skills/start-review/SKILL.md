@@ -55,6 +55,17 @@ Sort each point into one of these and handle it:
    technical details yourself.
 5. **A sentence that's cut off or unclear:** say where it stopped and ask what they meant. Don't guess.
 
+## JSON task files
+
+A project with `<paths.tasks>/<type>.json` files keeps tasks there, not as checkboxes:
+
+- Accepted in the review: the task moves to `<type>-done.json` (same shape: `{ "title", "tasks": [] }`).
+- Not accepted: `status: "open"` and a `reviews[]` entry `{ on, run, accepted: false, note }` with the owner's note.
+- Dropped: moves to the done file with the reason.
+- A new task (point 2): add it to the JSON file, fields as `/nightshift:do` says.
+
+Markdown projects keep the way above.
+
 ## Proposed items
 
 When the review reaches the summary's "Proposed items", ask about them with AskUserQuestion: one question per item,

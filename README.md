@@ -71,7 +71,9 @@ After that, the words you use:
 - `/nightshift:do`: starts a new piece of work by its type's steps;
 - `/nightshift:start-review` and `/nightshift:review-done`: review mode on and off (code edits are blocked in
   between, docs stay editable);
-- `/nightshift:doctor`: checks the setup again, for example after your test flow changes.
+- `/nightshift:doctor`: checks the setup again, for example after your test flow changes;
+- `/nightshift:update`: after updating Nightshift, asks which of the new updates to apply (nothing changes in your
+  project until you say yes).
 
 ## Updates
 
@@ -228,7 +230,10 @@ out.
       "before": [{ "label": "Home page", "path": "docs/release-log/night-run-2030-01-05/before/home.jpg" }],
       "after": [{ "label": "Home page", "path": "docs/release-log/night-run-2030-01-05/after/home.jpg" }],
       "videos": [{ "label": "Menu opens", "when": "after", "path": "docs/release-log/night-run-2030-01-05/after/menu.mp4" }],
-      "tests": [{ "name": "web home.spec.ts 3", "what": "the hours show", "result": "failed before, passes after" }]
+      "tests": [{ "name": "web home.spec.ts 3", "what": "the hours show", "result": "failed before, passes after" }],
+      // The task's answers to the flow's impact list, as in its task file; left out when textOnly is true.
+      "impact": { "memory": { "effect": "better", "note": "cards unload after the animation" } },
+      "textOnly": false
     }
   ],
   "testRuns": [
@@ -270,6 +275,45 @@ out.
 }
 ```
 
+## Task files as JSON
+
+A project can keep its tasks in `<paths.tasks>/<type>.json` instead of `<type>.md` (the board reads the `.json` when
+it exists, else the `.md`; `taskFiles[].file` may say either). Roadmaps stay Markdown. `/nightshift:update` offers
+the conversion (update `tasks-json`); it deletes the `.md`, git keeps it.
+
+```jsonc
+{
+  "title": "Bugs",
+  "intro": "Markdown",
+  "tasks": [
+    {
+      "id": "8A.2cv",
+      "title": "Tap cooldown: one default",
+      "status": "open", // open | built (a run did it, waits for the review)
+      "asked": { "by": "Ola", "on": "2026-11-23", "from": "review of day run 2026-11-12" },
+      "quote": "the owner's own words",
+      "details": "Markdown: what's wrong today, what's wanted",
+      "doneWhen": "what proves it is done",
+      "textOnly": false, // true: the task only changes wording and skips the impact list
+      "impact": { "native": { "effect": "worse", "note": "new store build", "approved": "2026-11-24" } },
+      "prompt": "Markdown",
+      "done": { "on": "2026-11-23", "in": "night run 2026-11-23", "evidence": "the test failed first, then passed" },
+      "reviews": [{ "on": "2026-11-23", "run": "night run 2026-11-23", "accepted": false, "note": "what to change" }],
+      "links": ["https://github.com/example/corner-bakery/pull/4"]
+    }
+  ]
+}
+```
+
+- **Done file:** a task accepted in the review moves to `<type>-done.json` (same shape), so the open file stays
+  short. A task not accepted goes back to `open` with a `reviews[]` note; a dropped one moves there with the reason.
+- **Impact:** every task answers each item of the flow's `impactItems` (`nightshift flow`) with `none`, `better` or
+  `worse` and a short note, while its prompt is written. A `worse` item needs the owner's OK, saved on it as
+  `approved: <date>`; without it the task is never coded, not even on a night run. Only a `textOnly` task skips this.
+- **On the board** every task (pick and review pages) shows one icon per impact item, the note on hover: grey dot
+  none, green ▲ better, red ▼ worse. A task with no answers shows "Impact not checked"; a `worse` item without an OK
+  shows "Needs your OK".
+
 ## Settings: board.config.json
 
 In the project's root folder. Every key is optional; objects merge key by key with the defaults, lists replace
@@ -301,6 +345,7 @@ them. `nightshift config` prints the result.
 | `suites[].screenshot` | | how to take a screenshot: `{ how, viewport }` when the test runner takes it (e.g. `{ "how": "playwright", "viewport": "390x844" }`), or `{ command }`, a shell command that prints a PNG or writes the path given as `{file}` (e.g. `"adb exec-out screencap -p"`, `"xcrun simctl io booted screenshot {file}"`) |
 | `apps` | `[]` | the project's apps, by name |
 | `skills` | `{}` | the project's own skill names, by role: `run` (the night run; default `/nightshift:run-night-run`), `prompt` (writing prompts; default `/nightshift:write-a-prompt`), `tests` (running the suites); without one, the plugin's skills do it themselves |
+| `updates` | `{}` | which updates of a new Nightshift version were answered: `{ "<id>": "applied" \| "skipped" }`. Written by `nightshift update`, never by hand |
 | `gate.holdUntilReviewed` | `[]` | environments that get no deploy while a run waits for its review |
 | `reviewMode.alsoGuard` | `[]` | extra folders guarded during a review (absolute or relative to the project); in them only Markdown and `plugin/skills/` stay editable |
 

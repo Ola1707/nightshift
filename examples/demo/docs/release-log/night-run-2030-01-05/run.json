@@ -13,6 +13,7 @@
       "type": "small-fix",
       "status": "done",
       "done": "The home page shows the opening hours under the logo.",
+      "impact": { "cpu": { "effect": "none" },"memory": { "effect": "none" },"disk": { "effect": "none" },"native": { "effect": "none" },"policy": { "effect": "none" },"cost": { "effect": "none" },"security-privacy": { "effect": "none" },"database-migration": { "effect": "none" },"older-app-versions": { "effect": "none" } },
       "decisions": [{ "id": "T.1-1", "text": "Kept the hours in one line on phones." }],
       "missing": null,
       "qa": "Website, home page, on a phone",
@@ -26,6 +27,7 @@
       "type": "bug",
       "status": "partial",
       "done": "The total now applies each coupon once.",
+      "impact": { "cpu": { "effect": "better", "note": "the total is computed once" }, "memory": { "effect": "none" }, "native": { "effect": "worse", "note": "needs a new store build", "approved": "2030-01-04" } },
       "missing": "A coupon with a minimum order is not handled yet.",
       "qa": "Website, cart, with two coupons",
       "before": [{ "label": "Cart", "path": "docs/release-log/night-run-2030-01-05/before/cart.png" }],
@@ -38,9 +40,27 @@
       "type": "feature",
       "status": "not-done",
       "done": "Planned only: the list and its empty state.",
+      "impact": { "database-migration": { "effect": "worse", "note": "new orders index" } },
       "missing": "The list itself.",
       "qa": null,
       "questions": ["Show orders from the last 30 days, or all of them?"]
+    },
+    {
+      "id": "T.9",
+      "title": "Rename a button label",
+      "type": "small-fix",
+      "status": "done",
+      "done": "The button now says Order.",
+      "textOnly": true,
+      "qa": null
+    },
+    {
+      "id": "T.10",
+      "title": "Footer link to the privacy page",
+      "type": "small-fix",
+      "status": "done",
+      "done": "The footer links to the privacy page.",
+      "qa": null
     }
   ],
   "testRuns": [

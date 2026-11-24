@@ -105,11 +105,45 @@ export function taskId(file, task) {
   return `${file}#${task.code ?? ""}/${task.title.slice(0, 60)}`;
 }
 
+// A JSON task file: { title, intro, tasks: [task] } (docs/plan-tasks-json.md). Same task shape as a Markdown
+// task, plus source "json", status, textOnly, impact, asked and doneWhen. The prompt text stays in the file.
+export function parseTaskJson(data, file) {
+  const seen = new Set();
+  return (data.tasks ?? [])
+    .filter((t) => t.status !== "dropped")
+    .map((t) => {
+      const task = { code: t.id ?? null, title: t.title ?? "", details: t.details ?? "" };
+      let id = taskId(file, task);
+      for (let n = 2; seen.has(id); n++) id = `${taskId(file, task)}~${n}`;
+      seen.add(id);
+      return {
+        ...task,
+        hasPrompt: Boolean(t.prompt),
+        file,
+        phase: "Tasks",
+        section: null,
+        id,
+        source: "json",
+        status: t.status ?? "open",
+        textOnly: Boolean(t.textOnly),
+        impact: t.impact ?? {},
+        asked: t.asked ?? null,
+        doneWhen: t.doneWhen ?? "",
+      };
+    });
+}
+
 // order: { roadmaps: [file], phases: { [file]: [phase name] } }, saved by the board's "Send order to Claude".
 // config: the board settings (config.mjs): taskFiles, roadmaps { pattern, exclude, order, titlePrefix }.
 export function readRoadmaps(roadmapDir, order = {}, config) {
   const night = config.taskFiles.map(({ file: name, title, planOnly = false }) => {
-    const file = `night-run/${name}`;
+    const base = name.replace(/\.(md|json)$/, "");
+    const jsonFile = `night-run/${base}.json`;
+    if (existsSync(join(roadmapDir, jsonFile))) {
+      const data = JSON.parse(readFileSync(join(roadmapDir, jsonFile), "utf8"));
+      return { file: jsonFile, title, planOnly, tasks: parseTaskJson(data, jsonFile) };
+    }
+    const file = `night-run/${base}.md`;
     const path = join(roadmapDir, file);
     const tasks = existsSync(path)
       ? parseRoadmap(readFileSync(path, "utf8"), file).flatMap((p) => p.tasks)

@@ -217,3 +217,50 @@ document.addEventListener("click", (e) => {
   e.preventDefault();
   openPicture(link.href, link.querySelector("img")?.alt || link.textContent.trim());
 });
+
+// The impact items from /api/flow: [{ key, label }]. An older server only sends flow.impact ("CPU · memory · ...").
+let impactItemsCache;
+export async function loadImpactItems() {
+  if (!impactItemsCache) {
+    const flow = await api("/api/flow");
+    impactItemsCache =
+      flow.impactItems ??
+      String(flow.impact ?? "")
+        .split(" · ")
+        .map((label) => label.trim())
+        .filter(Boolean)
+        .map((label) => ({
+          key: label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""),
+          label,
+        }));
+  }
+  return impactItemsCache;
+}
+
+const IMPACT_ICON = { none: ["●", "none"], better: ["▲", "better"], worse: ["▼", "worse"] };
+
+// One small icon per impact item (grey dot, green ▲, red ▼; the note on hover), "Impact not checked" when answers
+// are missing, "Needs your OK" for a `worse` item without `approved`. Markdown tasks (no `source`) show nothing,
+// run.json tasks are told apart by having `impact`, `textOnly` or being passed `forced`.
+export function impactRow(task, impactItems, forced = false) {
+  if (task.textOnly) return null;
+  if (!forced && task.source !== "json" && !task.impact) return null;
+  const answers = task.impact ?? {};
+  const items = impactItems ?? [];
+  const missing = items.some((item) => !answers[item.key]);
+  const needsOk = Object.values(answers).some((a) => a?.effect === "worse" && !a.approved);
+  return el(
+    "div",
+    { class: "impact-row" },
+    items
+      .filter((item) => answers[item.key])
+      .map((item) => {
+        const answer = answers[item.key];
+        const [icon, cls] = IMPACT_ICON[answer.effect] ?? IMPACT_ICON.none;
+        const note = answer.note ? `: ${answer.note}` : answer.effect === "none" ? ": no impact" : "";
+        return el("span", { class: `impact ${cls}`, title: `${item.label}${note}` }, icon);
+      }),
+    missing && el("span", { class: "chip warn" }, "Impact not checked"),
+    needsOk && el("span", { class: "chip bad" }, "Needs your OK"),
+  );
+}

@@ -71,7 +71,9 @@ A Haiku step that fails or needs judgment hands back to the main session, which 
    use. Keep the computer and screen awake for the whole run (macOS: `caffeinate -dims` in the background; check
    `pmset -g assertions`; not awake → fix it before any task). Keep a timeline of `date` lines in the scratchpad so times are real.
 2. **Stay on the run's branch.** One branch, one pull request at the end.
-3. **Prompts:** missing ones are written first by an Opus subagent with the prompt skill (`skills.prompt`, default
+3. **Impact:** never code a task with a `worse` impact item that has no `approved`; list it under "Not in tonight".
+   Every task in the summary and in run.json carries its `impact`.
+   **Prompts:** missing ones are written first by an Opus subagent with the prompt skill (`skills.prompt`, default
    `nightshift:write-a-prompt`), docs only.
 4. **Code in parallel, each agent in its own worktree.** Sonnet subagents (`model: "sonnet"`: the prompts are
    written for Sonnet, faster and fewer credits) with
@@ -84,6 +86,8 @@ A Haiku step that fails or needs judgment hands back to the main session, which 
    screenshots → done. **Before** screenshots are taken first, on the old code. Never take after screenshots of code
    that hasn't passed its tests; never leave several tasks half done: if the run stops, every finished task is done
    with its pictures.
+   JSON task files: a finished task gets `status: "built"` and `done: { on, in, evidence }` in its task file
+   (`<paths.tasks>/<type>.json`), not a ticked checkbox.
 6. **Merge** (Haiku; conflicts → Sonnet) each agent's branch into the run's branch, then remove its worktree
    (`git worktree remove`) and delete its branch. Leftover worktrees break lint and tests.
 7. **Checks after all merges** (Haiku): the project's checks (its rules file). Output to logs, PASS/FAIL only; read
@@ -143,7 +147,7 @@ Write `<paths.runs>/<night-run|day-run>-<date>.md`:
    owner's "Review done" on the board, and `gate.holdUntilReviewed` deploys are refused until then.
 
 Then:
-- Tick finished roadmap items, only with evidence, by their exact names.
+- Tick finished roadmap items, only with evidence, by their exact names. Tasks in JSON task files: see step 5.
 - Never add roadmap or task items on your own (new failures, ideas, follow-ups): list them under "Proposed items"
   in run.json (`proposed: [{ id, text }]`, ids P1, P2, … unique in the run), each a concrete task (what, where,
   done when), on the task or failed test it is about, at the top level only when it belongs to none. Leave out

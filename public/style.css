@@ -1013,3 +1013,29 @@ table.checklist tr.grp td {
   font-size: 14px;
   min-height: 1em;
 }
+
+/* Impact row: one icon per impact item (docs/plan-tasks-json.md). */
+.impact-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.impact {
+  font-size: 11px;
+  line-height: 1;
+  width: 14px;
+  text-align: center;
+  cursor: help;
+}
+.impact.none {
+  color: var(--muted);
+  opacity: 0.55;
+}
+.impact.better {
+  color: var(--good);
+}
+.impact.worse {
+  color: var(--bad);
+}

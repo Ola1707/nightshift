@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadConfig } from "./config.mjs";
-import { approveType, projectFlowPath, readFlow } from "./flow.mjs";
+import { approveType, impactKey, projectFlowPath, readFlow } from "./flow.mjs";
 
 const DEFAULT_IDS = [
   "small-fix",
@@ -122,4 +122,20 @@ test("impact: the list lives once in the default flow; a step with impact: true 
   assert.ok(parts.some((part) => part.steps.some((s) => s.note === flow.impact)));
   const own = project({ impact: "CPU · cost" });
   assert.equal(readFlow(own.config, own.dir).impact, "CPU · cost");
+});
+
+test("impactKey lowercases and joins with dashes", () => {
+  assert.equal(impactKey("security & privacy"), "security-privacy");
+  assert.equal(impactKey("CPU"), "cpu");
+  assert.equal(impactKey(" older app versions "), "older-app-versions");
+});
+
+test("readFlow lists the impact items with keys", () => {
+  const { dir, config } = project({ impact: "CPU · security & privacy · database migration" });
+  const { impactItems } = readFlow(config, dir);
+  assert.deepEqual(impactItems, [
+    { key: "cpu", label: "CPU" },
+    { key: "security-privacy", label: "security & privacy" },
+    { key: "database-migration", label: "database migration" },
+  ]);
 });

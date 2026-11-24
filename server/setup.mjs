@@ -147,7 +147,9 @@ export async function doctor(dir, { shots = false, port } = {}) {
   }
 
   for (const { file } of config.taskFiles) {
-    const path = join(config.paths.tasks, file);
+    // A task file converted to JSON (`nightshift update tasks-json`) counts as present.
+    const json = join(config.paths.tasks, file.replace(/\.(md|json)$/, ".json"));
+    const path = isFile(join(dir, json)) ? json : join(config.paths.tasks, file);
     if (isFile(join(dir, path))) ok(`task file ${path}`);
     else problem(`task file ${path} does not exist. Create it or remove "${file}" from taskFiles.`);
   }

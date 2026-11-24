@@ -54,6 +54,9 @@ Follow the type's stages and their `steps` in order. Stop after each step whose 
 
 - **Where it is written:** the task file in `taskFiles` whose `file` is `<type id>.md`, in the tasks folder, from the
   start. A file marked `planOnly`: plan only, never done unattended.
+- **JSON task files:** when `<paths.tasks>/<type id>.json` exists, write the new task there (`id`, `title`,
+  `status: "open"`, `asked: { by, on, from }`, `quote`, `details`, `doneWhen`, `textOnly`, `impact`, `prompt`;
+  `done`, `reviews` and `links` come later), not into the `.md`. Without it, the Markdown way.
 - **Questions** (plan stage and prompt): one item at a time. Ask that item's questions, let the user ask and answer
   back, and only then go to the next item.
 - **Prompt:** with the project's prompt skill (`skills.prompt`), use it. Without one, use `/nightshift:write-a-prompt`:

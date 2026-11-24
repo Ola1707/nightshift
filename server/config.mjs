@@ -28,6 +28,7 @@ export const DEFAULTS = {
   skills: {},
   gate: { holdUntilReviewed: [] },
   reviewMode: { alsoGuard: [] },
+  updates: {},
 };
 
 const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
@@ -76,6 +77,8 @@ function check(config) {
   if (!isStrings(config.apps)) fail("apps", "a list of strings");
   if (!isObject(config.skills)) fail("skills", "an object");
   if (!isStrings(config.gate.holdUntilReviewed)) fail("gate.holdUntilReviewed", "a list of strings");
+  if (!isObject(config.updates) || !Object.values(config.updates).every((v) => v === "applied" || v === "skipped"))
+    fail("updates", 'an object of "applied" or "skipped"');
   if (!isStrings(config.reviewMode.alsoGuard)) fail("reviewMode.alsoGuard", "a list of strings");
 }
 

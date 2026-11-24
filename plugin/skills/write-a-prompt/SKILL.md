@@ -20,6 +20,14 @@ model does each part**, so no part runs on a bigger model than it needs.
   time**: this item's questions, let the user ask and answer back, write this item's prompt, then the next item. Decide small
   technical details yourself. No "if X, do Y or ask me" hedges.
 
+## 1b. Answer the impact list
+
+- Run `pnpm exec nightshift flow`: its `impactItems` is the list (CPU, memory, native, policy, ...). Answer each
+  item for this task: `none`, `better` or `worse`, plus a short note when it isn't `none`. The only exception is a
+  task that just changes wording: mark it `"textOnly": true` and skip the list. A spacing tweak still answers.
+- Each `worse` item needs the owner's OK: ask it with AskUserQuestion, **one question per `worse` item**, in this
+  task's questions. An OK is saved on the item as `approved: <date>`. No OK: the task isn't coded; say so.
+
 ## 2. Split the work by model
 
 Give each part of the task to the smallest model that does it well:
@@ -55,6 +63,11 @@ A task that is only a few lines or one command: one agent, no split, and say so 
   - Out of scope: the nearby tasks, named, so they aren't started.
   - "Everything is decided in this prompt; don't ask about choices. Stop only if the code contradicts it."
   - End: the checks to run, don't commit, final message = changed files and follow-ups only.
-- Flip the task's line from `- [ ]` to `+ [ ]` (it has a prompt now).
+- Flip the task's line from `- [ ]` to `+ [ ]` (it has a prompt now). Markdown projects: also one impact line
+  under it (as before the list: each item named, or "OK").
+- A project with JSON task files (`<paths.tasks>/<type>.json`): no flipping and no separate prompt file. Write the
+  prompt (Markdown) into the task's `prompt` field and the answers into its `impact`:
+  `"impact": { "memory": { "effect": "better", "note": "..." }, "native": { "effect": "worse", "note": "...",
+  "approved": "<date>" } }`. A task with a `prompt` has a prompt.
 - Don't show the prompt in chat. End with one line: where it was saved and the model split in a few words
   (e.g. "Sonnet codes, Haiku runs the suites" or "one agent, too small to split").

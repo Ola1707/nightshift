@@ -118,3 +118,61 @@ test("readRoadmaps takes task files and roadmap rules from the config; a missing
     [["roadmap-a.md", "Alpha"]],
   );
 });
+
+test("a JSON task file wins over the Markdown one and keeps the board's task shape", () => {
+  const dir = mkdtempSync(join(tmpdir(), "roadmaps-json-"));
+  mkdirSync(join(dir, "night-run"));
+  writeFileSync(join(dir, "night-run", "bug.md"), "# Bugs\n\n- [ ] Markdown bug\n");
+  writeFileSync(
+    join(dir, "night-run", "bug.json"),
+    JSON.stringify({
+      title: "Bugs",
+      intro: "",
+      tasks: [
+        {
+          id: "B.1",
+          title: "Json bug",
+          status: "built",
+          asked: { by: "Ola", on: "2030-01-01" },
+          details: "What is wrong",
+          doneWhen: "a test",
+          textOnly: true,
+          impact: { cpu: { effect: "none" } },
+          prompt: "do it",
+        },
+        { id: "B.2", title: "Dropped", status: "dropped" },
+        { id: "B.3", title: "No prompt" },
+      ],
+    }),
+  );
+  writeFileSync(join(dir, "night-run", "feature.md"), "# F\n\n+ [ ] **Md feature (F.1).** More\n");
+  const config = {
+    ...loadConfig(dir),
+    taskFiles: [
+      { file: "bug.md", title: "Bugs" },
+      { file: "feature.md", title: "Features" },
+    ],
+  };
+  const { night } = readRoadmaps(dir, {}, config);
+  assert.equal(night[0].file, "night-run/bug.json");
+  assert.equal(night[0].tasks.length, 2);
+  const [task, plain] = night[0].tasks;
+  assert.equal(task.code, "B.1");
+  assert.equal(task.hasPrompt, true);
+  assert.equal(plain.hasPrompt, false);
+  assert.equal(plain.status, "open");
+  assert.equal(task.source, "json");
+  assert.equal(task.phase, "Tasks");
+  assert.equal(task.section, null);
+  assert.equal(task.id, "night-run/bug.json#B.1/Json bug");
+  assert.equal(task.status, "built");
+  assert.equal(task.textOnly, true);
+  assert.deepEqual(task.impact, { cpu: { effect: "none" } });
+  assert.equal(task.asked.by, "Ola");
+  assert.equal(task.doneWhen, "a test");
+  assert.equal("prompt" in task, false);
+  // Markdown stays as it was
+  assert.equal(night[1].file, "night-run/feature.md");
+  assert.equal(night[1].tasks[0].code, "F.1");
+  assert.equal("source" in night[1].tasks[0], false);
+});

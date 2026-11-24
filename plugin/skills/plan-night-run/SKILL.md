@@ -34,10 +34,14 @@ When the user says "plan prompts" (or picks tasks with no prompt):
 
 1. List the open items with no prompt (`- [ ]`, `hasPrompt: false`) from the task files and roadmaps, short, one
    line each, and let the user pick which to write prompts for (GUI, multi-select).
-2. **One item at a time:** first one line on its impact: each item of the flow's `impact` list (`nightshift flow`), named
-   with what it costs or needs, or "OK" (e.g. "CPU OK · memory OK · cost: one Cloud Run job per run"). Then ask that item's questions (AskUserQuestion, a recommended option first), let the user ask
+2. **One item at a time:** first its impact: every item of the flow's `impactItems` (`nightshift flow`) answered
+   `none` / `better` / `worse` with a short note, except a task that only changes wording (`textOnly: true`). Each
+   `worse` item gets its own question for the owner's OK in that item's questions (AskUserQuestion); an OK is saved
+   as `approved: <date>` on the item, no OK means the task isn't coded. JSON task files: the answers and the prompt
+   go into the task in `<paths.tasks>/<type>.json` (`impact`, `prompt`); Markdown: one impact line, as before (e.g.
+   "CPU OK · memory OK · cost: one Cloud Run job per run"). Then ask that item's questions (AskUserQuestion, a recommended option first), let the user ask
    and answer back, then write its prompt (the project's prompt skill, `skills.prompt`; without one,
-   `/nightshift:write-a-prompt`) and flip its line from `- [ ]` to `+ [ ]`. Only then go to the next item. Never
+   `/nightshift:write-a-prompt`) and flip its line from `- [ ]` to `+ [ ]` (JSON: its `prompt` is filled). Only then go to the next item. Never
    collect the questions of several items into one round.
 3. End with the list: each item, prompt written or skipped.
 
@@ -75,6 +79,7 @@ format of `node_modules/nightshift-board/README.md`, following Rule 1 (`<plugin>
 is "Done as planned.", no process, decisions say what changes for the owner, leftovers of old code are named.
 Same content as the Markdown summary, plus:
 
+- each task's `impact` (as answered in the prompt planning), and `textOnly` when set;
 - before / after screenshots and videos per task, copied into the run folder (repo-relative paths). A screenshot is
   taken with the suite's `screenshot` setting (a viewport, or a command for a device) and shows only the part that
   changed, so the difference is seen at a glance: on a page bigger than a phone screen, crop to the changed element

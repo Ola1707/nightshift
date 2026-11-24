@@ -1,0 +1,179 @@
+{
+  "title": "Small fixes",
+  "intro": "Wording, a label, a spacing tweak.",
+  "tasks": [
+    {
+      "id": "T.1",
+      "title": "Website: show the opening hours",
+      "status": "built",
+      "asked": {
+        "by": "you",
+        "on": "2030-01-02"
+      },
+      "details": "Done in night-run-2030-01-05.",
+      "doneWhen": "the hours show on the home page",
+      "textOnly": false,
+      "impact": {
+        "cpu": {
+          "effect": "none"
+        },
+        "memory": {
+          "effect": "none"
+        },
+        "disk": {
+          "effect": "none"
+        },
+        "native": {
+          "effect": "none"
+        },
+        "policy": {
+          "effect": "none"
+        },
+        "cost": {
+          "effect": "none"
+        },
+        "security-privacy": {
+          "effect": "none"
+        },
+        "database-migration": {
+          "effect": "none"
+        },
+        "older-app-versions": {
+          "effect": "none"
+        }
+      },
+      "prompt": "Show the opening hours in the website footer.",
+      "done": {
+        "on": "2030-01-05",
+        "in": "night run 2030-01-05",
+        "evidence": "footer test passes"
+      },
+      "reviews": [],
+      "links": []
+    },
+    {
+      "id": "T.2",
+      "title": "Website: the phone number is a link",
+      "status": "open",
+      "asked": {
+        "by": "you",
+        "on": "2030-01-03"
+      },
+      "details": "Tapping it on a phone starts a call.",
+      "doneWhen": "the number is a tel: link",
+      "textOnly": false,
+      "impact": {
+        "cpu": {
+          "effect": "none"
+        },
+        "memory": {
+          "effect": "better",
+          "note": "drops the call-widget script"
+        },
+        "disk": {
+          "effect": "none"
+        },
+        "native": {
+          "effect": "none"
+        },
+        "policy": {
+          "effect": "none"
+        },
+        "cost": {
+          "effect": "none"
+        },
+        "security-privacy": {
+          "effect": "none"
+        },
+        "database-migration": {
+          "effect": "none"
+        },
+        "older-app-versions": {
+          "effect": "worse",
+          "note": "old phones without a dialer show a plain number",
+          "approved": "2030-01-04"
+        }
+      },
+      "prompt": "Turn the phone number into a tel: link.",
+      "reviews": [],
+      "links": []
+    },
+    {
+      "id": "T.3",
+      "title": "Order page: the Send button says \"Submit\"",
+      "status": "open",
+      "asked": {
+        "by": "you",
+        "on": "2030-01-03"
+      },
+      "details": "Change it to \"Send order\".",
+      "doneWhen": "the button says Send order",
+      "textOnly": false,
+      "impact": {
+        "cpu": {
+          "effect": "none"
+        },
+        "memory": {
+          "effect": "none"
+        },
+        "disk": {
+          "effect": "none"
+        },
+        "native": {
+          "effect": "none"
+        },
+        "policy": {
+          "effect": "none"
+        },
+        "cost": {
+          "effect": "worse",
+          "note": "the new translation costs a paid review"
+        },
+        "security-privacy": {
+          "effect": "none"
+        },
+        "database-migration": {
+          "effect": "none"
+        },
+        "older-app-versions": {
+          "effect": "none"
+        }
+      },
+      "prompt": "",
+      "reviews": [],
+      "links": []
+    },
+    {
+      "id": "T.4",
+      "title": "Contact page: fix the typo in the heading",
+      "status": "open",
+      "asked": {
+        "by": "you",
+        "on": "2030-01-04"
+      },
+      "details": "\"Contcat us\" should be \"Contact us\".",
+      "doneWhen": "the heading is spelled right",
+      "textOnly": true,
+      "impact": {},
+      "prompt": "Fix the heading text.",
+      "reviews": [],
+      "links": []
+    },
+    {
+      "id": "T.5",
+      "title": "Menu page: the bread photos load slowly",
+      "status": "open",
+      "asked": {
+        "by": "you",
+        "on": "2030-01-04"
+      },
+      "details": "Make the photos smaller.",
+      "doneWhen": "",
+      "textOnly": false,
+      "impact": {},
+      "prompt": "",
+      "reviews": [],
+      "links": []
+    }
+  ]
+}

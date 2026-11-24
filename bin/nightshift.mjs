@@ -8,6 +8,8 @@
 //   nightshift init               writes board.config.json and the folders and files the board needs
 //   nightshift doctor             checks the project, one OK or PROBLEM line per check
 //   nightshift rules              which project rules files to read, and which need checking after a plugin change
+//   nightshift updates            the updates of this Nightshift version you haven't answered yet
+//   nightshift update <id> [--skip]  applies one update (or skips it) and records the answer in board.config.json
 //   nightshift demo               the board on an invented project (http://localhost:8096)
 // While developing: NIGHTSHIFT_DEV_DIR=<folder with bin/nightshift.mjs> runs that copy instead of this one.
 import { spawnSync } from "node:child_process";
@@ -39,6 +41,9 @@ const USAGE = `Usage: nightshift <command>
   rules --plugin <dir> [skill...] [--mark]
                      the project's rules files for those skills (default all) and all.md: OK, NONE, or CHANGED
                      (the plugin skill changed since the file was checked; exit 1); --mark records them as checked
+  updates            list the updates not answered yet
+  update <id> [--skip]
+                     apply one update (or skip it); the answer is saved in board.config.json
   demo               serve the board on an invented project, http://localhost:8096`;
 
 const projectDir = () => resolve(process.env.BOARD_PROJECT ?? process.cwd());
@@ -148,6 +153,33 @@ async function main() {
       } catch (error) {
         console.error(error.message);
         process.exit(2);
+      }
+      return;
+    }
+    case "updates": {
+      const { loadConfig } = await server("config.mjs");
+      const { pendingUpdates } = await server("updates.mjs");
+      const dir = projectDir();
+      for (const u of pendingUpdates(loadConfig(dir)))
+        console.log(`${u.id}: ${u.title}. ${u.what.replace(/\s*\n\s*/g, " ")}`);
+      return;
+    }
+    case "update": {
+      const { loadConfig } = await server("config.mjs");
+      const { runUpdate } = await server("updates.mjs");
+      const id = rest.find((a) => !a.startsWith("--"));
+      if (!id) {
+        console.error("update needs an id (see: nightshift updates).");
+        process.exit(2);
+      }
+      const dir = projectDir();
+      try {
+        const { answer, report } = runUpdate(dir, loadConfig(dir), id, { skip: rest.includes("--skip") });
+        console.log(`${id}: ${answer}.`);
+        if (report) print(report);
+      } catch (error) {
+        console.error(error.message);
+        process.exit(1);
       }
       return;
     }

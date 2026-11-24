@@ -61,12 +61,22 @@ function mergedFlow(config, projectDir) {
   };
 }
 
+/** "security & privacy" -> "security-privacy": the key of an impact item. */
+export const impactKey = (label) => label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+const impactItems = (impact) =>
+  (Array.isArray(impact) ? impact : String(impact ?? "").split(" · "))
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((label) => ({ key: impactKey(label), label }));
+
 /** The merged flow; each type carries approved, approvedAt and changed (approved before, but the type changed since). */
 export function readFlow(config, projectDir) {
   const { own, flow } = mergedFlow(config, projectDir);
   const approvals = own.approved ?? {};
   return {
     ...flow,
+    impactItems: impactItems(flow.impact),
     types: flow.types.map((type) => {
       const approval = approvals[type.id];
       const same = Boolean(approval) && approval.hash === typeHash(type);

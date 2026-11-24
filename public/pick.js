@@ -4,7 +4,9 @@ import {
   decisionRow,
   el,
   flagChips,
+  impactRow,
   isManual,
+  loadImpactItems,
   nav,
   post,
   reviewWaiting,
@@ -46,6 +48,8 @@ function refresh() {
   });
 }
 
+let impactItems = [];
+
 function taskBox(task, extraChips = []) {
   const box = el(
     "div",
@@ -70,6 +74,7 @@ function taskBox(task, extraChips = []) {
       extraChips,
       flagChips(task),
     ),
+    impactRow(task, impactItems),
     task.details &&
       el("details", { class: "more" }, el("summary", {}, "more"), el("p", {}, task.details)),
     noteBox(task),
@@ -337,6 +342,7 @@ const [roadmaps, picks, savedNotes] = await Promise.all([
   api("/api/notes"),
 ]);
 notes = savedNotes;
+impactItems = await loadImpactItems().catch(() => []);
 renderNight(roadmaps.night);
 renderOther(roadmaps.other);
 const all = [
