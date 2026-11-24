@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadConfig } from "./config.mjs";
-import { parseRoadmap, readRoadmaps, sortPhases, sortRoadmapFiles } from "./roadmaps.mjs";
+import { parseRoadmap, parseTaskJson, readRoadmaps, sortPhases, sortRoadmapFiles } from "./roadmaps.mjs";
 
 const defaultOrder = ["roadmap-launch.md", "roadmap-ops.md", "roadmap-shop.md"];
 
@@ -175,4 +175,13 @@ test("a JSON task file wins over the Markdown one and keeps the board's task sha
   assert.equal(night[1].file, "night-run/feature.md");
   assert.equal(night[1].tasks[0].code, "F.1");
   assert.equal("source" in night[1].tasks[0], false);
+});
+
+test("a JSON task returns its number, a hand-written one without a number returns none", () => {
+  const tasks = parseTaskJson(
+    { tasks: [{ id: "A.1", number: 7, title: "With number" }, { id: "A.2", title: "Without" }] },
+    "night-run/bug.json",
+  );
+  assert.equal(tasks[0].number, 7);
+  assert.equal("number" in tasks[1], false);
 });

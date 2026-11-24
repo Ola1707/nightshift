@@ -140,7 +140,7 @@ Write `<paths.runs>/<night-run|day-run>-<date>.md`:
 5. **Test runs: a separate table** with real times. Each failed test: which test, what it failed on, a link to its
    screenshot, the app, and **Fixed** (the test / the app / not fixed / flaky).
 6. **Still open**, grouped by category (built and waits for a deploy, waits for your answer, then one group per
-   subject), each by its name and a short description, never a code alone.
+   subject), each by its name and a short description, never a code alone (JSON tasks: "#<number> <title>"; a new JSON task gets `number` = highest number in all task files and done files + 1).
 7. **run.json** in the run's folder: the same content, nothing only in the Markdown ("You" → `you`, no deploy →
    `notDeployed`, ruled out and other notes → `sections`, decisions made alone → `decisions`; format in
    `node_modules/nightshift-board/README.md`; skill `nightshift:plan-night-run`, part 4). A new run waits for the

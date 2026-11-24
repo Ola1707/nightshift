@@ -104,6 +104,12 @@ export function toast(text) {
   setTimeout(() => node.remove(), 2000);
 }
 
+// Page icons for the pick page's "Prompt" row: a written prompt, and one not written yet (dashed).
+export const ICON_DOC =
+  '<svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 1.8h5.2L12.5 5v9.2H4z" fill="currentColor" fill-opacity=".12"/><path d="M9 1.8V5h3.5M6 8h4.5M6 10.6h4.5"/></svg>';
+export const ICON_DOC_EMPTY =
+  '<svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 2" aria-hidden="true"><path d="M4 1.8h5.2L12.5 5v9.2H4z"/></svg>';
+
 export function promptChip(task) {
   return task.hasPrompt
     ? el("span", { class: "chip good" }, "prompt ✓")
@@ -312,7 +318,7 @@ export function impactRow(task, impactItems, forced = false, onOk = null) {
     });
     row.replaceChildren(
       ...chips,
-      ...[none > 0 && el("span", { class: "chip", title: "no impact" }, changing.length === 0 && missing === 0 ? "✓ No impact" : `${none} OK`),
+      ...[none > 0 && el("span", { class: "chip none", title: "no impact" }, changing.length === 0 && missing === 0 ? "✓ No impact" : `${none} OK`),
       missing > 0 && el("span", { class: "chip warn" }, `${missing} not checked`)].filter(Boolean),
     );
   };

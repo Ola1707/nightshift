@@ -287,6 +287,7 @@ the conversion (update `tasks-json`); it deletes the `.md`, git keeps it.
   "intro": "Markdown",
   "tasks": [
     {
+      "number": 12, // permanent, 1, 2, 3 … across all task files and done files; shown on the board instead of the code
       "id": "8A.2cv",
       "title": "Tap cooldown: one default",
       "status": "open", // open | built (a run did it, waits for the review)
@@ -305,6 +306,10 @@ the conversion (update `tasks-json`); it deletes the `.md`, git keeps it.
 }
 ```
 
+- **Number:** the converter numbers tasks 1, 2, 3 … in file order (task files in `taskFiles` order, then done
+  files). A new task gets the highest number in all task files and done files plus 1 (`nextTaskNumber` in
+  `server/tasks-json.mjs`); the number never changes. The board shows it as the badge and names the task "#12 title";
+  `id` (the old code) stays and is still found by search. A hand-written task without `number` shows no badge.
 - **Done file:** a task accepted in the review moves to `<type>-done.json` (same shape), so the open file stays
   short. A task not accepted goes back to `open` with a `reviews[]` note; a dropped one moves there with the reason.
 - **Impact:** every task answers each item of the flow's `impactItems` (`nightshift flow`) with `none`, `better` or

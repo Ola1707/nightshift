@@ -65,7 +65,7 @@ A task that is only a few lines or one command: one agent, no split, and say so 
   - End: the checks to run, don't commit, final message = changed files and follow-ups only.
 - Flip the task's line from `- [ ]` to `+ [ ]` (it has a prompt now). Markdown projects: also one impact line
   under it (as before the list: each item named, or "OK").
-- A project with JSON task files (`<paths.tasks>/<type>.json`): no flipping and no separate prompt file. Write the
+- A project with JSON task files (`<paths.tasks>/<type>.json`): name the task to the owner as "#<number> <title>"; no flipping and no separate prompt file. Write the
   prompt (Markdown) into the task's `prompt` field and the answers into its `impact`:
   `"impact": { "memory": { "effect": "better", "note": "..." }, "native": { "effect": "worse", "note": "...",
   "approved": "<date>" } }`. A task with a `prompt` has a prompt.

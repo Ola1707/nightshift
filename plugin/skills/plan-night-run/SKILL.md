@@ -59,7 +59,7 @@ When the user says "plan prompts" (or picks tasks with no prompt):
    **Waiting for Claude** (`GET /api/waiting`): handle each by `<plugin>/review-actions.md` (`<plugin>` is two
    folders up from this skill's base directory): a "now" one before the run starts, a "later" one becomes a task.
 3. **Prompts.** Check every chosen task has a prompt (`hasPrompt: true`). One without: do the prompt planning (part
-   2) for those, one item at a time. Tasks in a task file marked `planOnly` get a plan, never code.
+   2) for those, one item at a time. Tasks in a task file marked `planOnly` get a plan, never code. In JSON task files name each task to the owner as "#<number> <title>"; a new JSON task gets `number` = highest number in all task files and done files + 1.
 4. **The skills' rules, before the run.** Run `pnpm exec nightshift rules --plugin <plugin>` (every skill: the run
    uses several). For each `CHANGED` file, go through it now (`<plugin>/project-rules.md`, "After the plugin
    changed"); its conflicts join the round of questions below, and `--mark` follows the answers. The run never

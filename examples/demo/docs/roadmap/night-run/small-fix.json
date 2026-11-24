@@ -3,6 +3,7 @@
   "intro": "Wording, a label, a spacing tweak.",
   "tasks": [
     {
+      "number": 12,
       "id": "T.1",
       "title": "Website: show the opening hours",
       "status": "built",
@@ -52,6 +53,7 @@
       "links": []
     },
     {
+      "number": 13,
       "id": "T.2",
       "title": "Website: the phone number is a link",
       "status": "open",
@@ -99,6 +101,7 @@
       "links": []
     },
     {
+      "number": 14,
       "id": "T.3",
       "title": "Order page: the Send button says \"Submit\"",
       "status": "open",
@@ -144,6 +147,7 @@
       "links": []
     },
     {
+      "number": 15,
       "id": "T.4",
       "title": "Contact page: fix the typo in the heading",
       "status": "open",
@@ -160,6 +164,7 @@
       "links": []
     },
     {
+      "number": 16,
       "id": "T.5",
       "title": "Menu page: the bread photos load slowly",
       "status": "open",

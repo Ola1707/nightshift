@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadConfig } from "./config.mjs";
-import { convertProject, convertTaskFile, lostWords, rawItems } from "./tasks-json.mjs";
+import { convertProject, convertTaskFile, lostWords, nextTaskNumber, rawItems } from "./tasks-json.mjs";
 
 const MD = `# Bugs
 
@@ -102,4 +102,21 @@ test("a dry run with outDir leaves the project alone", () => {
   assert.equal(existsSync(join(out, "bug.json")), true);
   assert.equal(existsSync(join(dir, "docs/roadmap/night-run/bug.md")), true);
   assert.match(readFileSync(join(dir, "docs/roadmap/claude-code-prompts-app.md"), "utf8"), /Do the thing/);
+});
+
+test("the converter numbers the tasks 1, 2, 3 in file order, done files last, and nextTaskNumber goes on", () => {
+  const dir = project();
+  writeFileSync(join(dir, "docs/roadmap/night-run/small-fix.md"), "# Small\n\n- [ ] One thing.\n- [ ] Two thing.\n");
+  const config = {
+    ...loadConfig(dir),
+    taskFiles: [{ file: "bug.md", title: "Bugs" }, { file: "small-fix.md", title: "Small" }],
+  };
+  assert.equal(nextTaskNumber(dir, config), 1);
+  convertProject(dir, config);
+  const night = join(dir, "docs/roadmap/night-run");
+  const read = (f) => JSON.parse(readFileSync(join(night, f), "utf8")).tasks.map((t) => t.number);
+  assert.deepEqual(read("bug.json"), [1, 2, 3]);
+  assert.deepEqual(read("small-fix.json"), [4, 5]);
+  assert.deepEqual(read("bug-done.json"), [6]);
+  assert.equal(nextTaskNumber(dir, config), 7);
 });

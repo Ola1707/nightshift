@@ -118,6 +118,7 @@ export function parseTaskJson(data, file) {
       seen.add(id);
       return {
         ...task,
+        ...(Number.isInteger(t.number) && { number: t.number }),
         hasPrompt: Boolean(t.prompt),
         file,
         phase: "Tasks",

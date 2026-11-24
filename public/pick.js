@@ -3,6 +3,8 @@ import {
   api,
   decisionRow,
   el,
+  ICON_DOC,
+  ICON_DOC_EMPTY,
   flagChips,
   impactRow,
   isManual,
@@ -10,7 +12,6 @@ import {
   nav,
   post,
   reviewWaiting,
-  promptChip,
   toast,
 } from "/common.js";
 
@@ -21,7 +22,7 @@ let notes = {};
 // A note or question on the task, for Claude to answer in the chat. Saved when the box loses focus.
 function noteBox(task) {
   const saved = notes[task.id]?.note ?? "";
-  const summary = el("summary", {}, saved ? "📝 note ✓" : "📝 note");
+  const summary = el("summary", {}, saved ? "note ✓" : "note");
   const area = el("textarea", {
     rows: 3,
     placeholder: "Something important, or a question for Claude",
@@ -29,7 +30,7 @@ function noteBox(task) {
       const note = area.value.trim();
       if (note === (notes[task.id]?.note ?? "")) return;
       notes = await post("/api/notes", { task, note });
-      summary.textContent = note ? "📝 note ✓" : "📝 note";
+      summary.textContent = note ? "note ✓" : "note";
       toast(note ? "Note saved" : "Note removed");
     },
   });
@@ -50,13 +51,44 @@ function refresh() {
 
 let impactItems = [];
 
+// One line under the title: the first sentence of the details, at most ~140 characters.
+export function detailsPreview(details = "") {
+  const text = details.replace(/[*_`]/g, "").replace(/\s+/g, " ").trim();
+  const sentence = text.match(/^.*?[.!?](?=\s|$)/)?.[0] ?? text;
+  const one = sentence.length > 140 ? text : sentence;
+  return one.length > 140 ? `${one.slice(0, 139).trimEnd()}…` : one;
+}
+
+// An icon plus words, built from the constant SVG strings in common.js.
+function iconText(icon, text, cls) {
+  const node = el("span", { class: `p-text ${cls}` }, text);
+  node.insertAdjacentHTML("afterbegin", icon);
+  return node;
+}
+
 function taskBox(task, extraChips = []) {
+  const flags = [...extraChips, ...flagChips(task)].flat();
+  const preview = detailsPreview(task.details);
+  const impact =
+    task.textOnly
+      ? el("span", { class: "chip none" }, "Wording only")
+      : impactRow(task, impactItems, false, async (key, ok) => {
+          const { impact } = await post("/api/impact-ok", { file: task.file, id: task.code, key, ok });
+          task.impact = impact;
+          return impact;
+        });
+  const badge =
+    task.number != null
+      ? el("span", { class: "num" }, task.number)
+      : task.code
+        ? el("span", { class: "num old", title: "old code" }, task.code)
+        : null;
   const box = el(
     "div",
     {
-      class: isManual(task) ? "box task manual" : "box task",
+      class: isManual(task) ? "box task tcard manual" : "box task tcard",
       "data-search":
-        `${task.code ?? ""} ${task.title} ${task.details ?? ""} ${task.phase ?? ""} ${task.file}`.toLowerCase(),
+        `${task.number ?? ""} #${task.number ?? ""} ${task.code ?? ""} ${task.title} ${task.details ?? ""} ${task.phase ?? ""} ${task.file}`.toLowerCase(),
       onclick: (e) => {
         if (e.target.closest("details.more, details.task-note")) return;
         if (chosen.has(task.id)) chosen.delete(task.id);
@@ -64,24 +96,42 @@ function taskBox(task, extraChips = []) {
         refresh();
       },
     },
-    el("span", { class: "tick" }, "✓"),
-    el("div", { class: "title" }, task.title),
     el(
       "div",
-      { class: "chips" },
-      task.code && el("span", { class: "chip code" }, task.code),
-      promptChip(task),
-      extraChips,
-      flagChips(task),
+      { class: "head" },
+      badge,
+      el(
+        "div",
+        { class: "head-main" },
+        el("div", { class: "title" }, task.title),
+        preview && el("p", { class: "preview" }, preview),
+        flags.length > 0 && el("div", { class: "chips" }, flags),
+      ),
+      el("span", { class: "tick" }, "✓"),
     ),
-    impactRow(task, impactItems, false, async (key, ok) => {
-      const { impact } = await post("/api/impact-ok", { file: task.file, id: task.code, key, ok });
-      task.impact = impact;
-      return impact;
-    }),
-    task.details &&
-      el("details", { class: "more" }, el("summary", {}, "more"), el("p", {}, task.details)),
-    noteBox(task),
+    el(
+      "div",
+      { class: "sections" },
+      el(
+        "div",
+        { class: "row" },
+        el("span", { class: "row-label" }, "Prompt"),
+        el(
+          "span",
+          { class: "row-val" },
+          task.hasPrompt
+            ? iconText(ICON_DOC, "Ready", "pm-ok")
+            : iconText(ICON_DOC_EMPTY, "Not written yet", "pm-miss"),
+        ),
+      ),
+      impact && el("div", { class: "row" }, el("span", { class: "row-label" }, "Impact"), el("span", { class: "row-val" }, impact)),
+    ),
+    el(
+      "div",
+      { class: "foot" },
+      task.details && el("details", { class: "more" }, el("summary", {}, "more"), el("p", {}, task.details)),
+      noteBox(task),
+    ),
   );
   boxes.set(task.id, [...(boxes.get(task.id) ?? []), box]);
   return box;
@@ -103,7 +153,7 @@ function renderNight(night) {
         group.tasks.length
           ? el(
               "div",
-              { class: "grid" },
+              { class: "grid tgrid" },
               group.tasks.map((t) =>
                 taskBox(t, group.planOnly ? [el("span", { class: "chip" }, "plan only")] : []),
               ),
@@ -230,7 +280,7 @@ function renderOther(other) {
               if (task.section !== lastSection || !grid) {
                 lastSection = task.section;
                 if (task.section) items.push(el("div", { class: "sub" }, task.section));
-                grid = el("div", { class: "grid" });
+                grid = el("div", { class: "grid tgrid" });
                 items.push(grid);
               }
               grid.append(taskBox(task));

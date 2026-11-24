@@ -159,6 +159,26 @@ function takePrompts(files, codes, write) {
   return found;
 }
 
+/** The highest `number` in the project's JSON task files and done files (0 when none has one). */
+function highestNumber(dir) {
+  let max = 0;
+  if (!existsSync(dir)) return max;
+  for (const name of readdirSync(dir).filter((f) => f.endsWith(".json"))) {
+    try {
+      const data = JSON.parse(readFileSync(join(dir, name), "utf8"));
+      for (const t of data.tasks ?? []) if (Number.isInteger(t.number) && t.number > max) max = t.number;
+    } catch {
+      // not a task file
+    }
+  }
+  return max;
+}
+
+/** The `number` a new JSON task gets: the highest in all task files and done files, plus 1. */
+export function nextTaskNumber(projectDir, config) {
+  return highestNumber(join(projectDir, config.paths.tasks)) + 1;
+}
+
 /**
  * Converts every task file of the project that has no .json yet. Returns { converted, prompts, skipped, files }
  * (files: { [file]: { items, prompts } }). With `outDir`, writes the results there and touches nothing in the project.
@@ -170,6 +190,8 @@ export function convertProject(projectDir, config, { outDir } = {}) {
     ? readdirSync(roadmapDir).filter((f) => /^claude-code-prompts.*\.md$/.test(f)).sort().map((f) => join(roadmapDir, f))
     : [];
   const report = { converted: [], prompts: 0, skipped: [], files: {}, lost: [] };
+  const writes = []; // [name, data]; numbered after the loop: task files in taskFiles order, then done files
+  const doneWrites = [];
   for (const { file } of config.taskFiles) {
     const base = file.replace(/\.(md|json)$/, "");
     const md = join(dir, `${base}.md`);
@@ -193,14 +215,19 @@ export function convertProject(projectDir, config, { outDir } = {}) {
       const target = (name) => (outDir ? join(outDir, name) : join(dir, name));
       const dropped = result.tasks.filter((t) => t.status === "dropped");
       const open = { ...result, tasks: result.tasks.filter((t) => t.status !== "dropped") };
-      writeFileSync(target(`${base}.json`), JSON.stringify(open, null, 2) + "\n");
+      writes.push([target(`${base}.json`), open]);
       if (dropped.length) {
         const done = { title: `${result.title} (done)`, tasks: dropped };
-        writeFileSync(target(`${base}-done.json`), JSON.stringify(done, null, 2) + "\n");
+        doneWrites.push([target(`${base}-done.json`), done]);
         report.files[`${base}.md`].dropped = dropped.length;
       }
       if (!outDir) unlinkSync(md);
     }
+  }
+  let number = highestNumber(dir) + 1;
+  for (const [path, data] of [...writes, ...doneWrites]) {
+    data.tasks = data.tasks.map((t) => ({ number: number++, ...t }));
+    writeFileSync(path, JSON.stringify(data, null, 2) + "\n");
   }
   return report;
 }

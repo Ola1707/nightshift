@@ -62,7 +62,7 @@ A project with `<paths.tasks>/<type>.json` files keeps tasks there, not as check
 - Accepted in the review: the task moves to `<type>-done.json` (same shape: `{ "title", "tasks": [] }`).
 - Not accepted: `status: "open"` and a `reviews[]` entry `{ on, run, accepted: false, note }` with the owner's note.
 - Dropped: moves to the done file with the reason.
-- A new task (point 2): add it to the JSON file, fields as `/nightshift:do` says.
+- A new task (point 2): add it to the JSON file, fields as `/nightshift:do` says (`number` = highest number in all task files and done files + 1). Name tasks to the owner as "#<number> <title>".
 
 Markdown projects keep the way above.
 
