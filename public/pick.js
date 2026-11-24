@@ -74,7 +74,11 @@ function taskBox(task, extraChips = []) {
       extraChips,
       flagChips(task),
     ),
-    impactRow(task, impactItems),
+    impactRow(task, impactItems, false, async (key, ok) => {
+      const { impact } = await post("/api/impact-ok", { file: task.file, id: task.code, key, ok });
+      task.impact = impact;
+      return impact;
+    }),
     task.details &&
       el("details", { class: "more" }, el("summary", {}, "more"), el("p", {}, task.details)),
     noteBox(task),

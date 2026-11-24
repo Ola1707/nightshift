@@ -310,9 +310,12 @@ the conversion (update `tasks-json`); it deletes the `.md`, git keeps it.
 - **Impact:** every task answers each item of the flow's `impactItems` (`nightshift flow`) with `none`, `better` or
   `worse` and a short note, while its prompt is written. A `worse` item needs the owner's OK, saved on it as
   `approved: <date>`; without it the task is never coded, not even on a night run. Only a `textOnly` task skips this.
-- **On the board** every task (pick and review pages) shows one icon per impact item, the note on hover: grey dot
-  none, green ▲ better, red ▼ worse. A task with no answers shows "Impact not checked"; a `worse` item without an OK
-  shows "Needs your OK".
+- **On the board** every task (pick and review pages) shows a row of chips, the note on hover: only items that change
+  get a chip with their name, green "▲ memory" for better, red "▼ cost" for worse. A red chip has a checkbox: ticked
+  means the owner OK'd it (`approved` is set, the chip is filled), unticked (outlined) waits for the OK. On the pick
+  page ticking saves `approved: <today>` into the JSON file (`POST /api/impact-ok`); on the review page the box is
+  read-only. All `none` answers fold into one grey chip ("7 OK", or "✓ No impact" when every item is none); missing
+  answers show an amber "N not checked".
 
 ## Settings: board.config.json
 

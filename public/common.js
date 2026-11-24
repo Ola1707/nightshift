@@ -48,7 +48,37 @@ export function nav(active) {
     work.map(link),
     el("span", { id: "review-waiting" }),
     el("span", { class: "setup" }, el("small", {}, "Setup"), setup.map(link)),
+    themeSwitch(),
   );
+}
+
+// System / Light / Dark: sets data-theme on <html> (none for System) and remembers it (public/theme.js applies it on load).
+function themeSwitch() {
+  const read = () => {
+    try {
+      const v = localStorage.getItem("board-theme");
+      return v === "light" || v === "dark" ? v : "system";
+    } catch {
+      return "system";
+    }
+  };
+  const buttons = [["system", "System"], ["light", "Light"], ["dark", "Dark"]].map(([value, label]) =>
+    el("button", {
+      type: "button",
+      onclick: () => {
+        if (value === "system") delete document.documentElement.dataset.theme;
+        else document.documentElement.dataset.theme = value;
+        try {
+          if (value === "system") localStorage.removeItem("board-theme");
+          else localStorage.setItem("board-theme", value);
+        } catch {}
+        mark(value);
+      },
+    }, label),
+  );
+  const mark = (current) => buttons.forEach((b, i) => b.setAttribute("aria-pressed", String(["system", "light", "dark"][i] === current)));
+  mark(read());
+  return el("span", { class: "theme-switch", role: "group", "aria-label": "Theme" }, buttons);
 }
 
 // Every page says when a run still waits for its review: until "Review done", it comes back each day
@@ -237,30 +267,55 @@ export async function loadImpactItems() {
   return impactItemsCache;
 }
 
-const IMPACT_ICON = { none: ["●", "none"], better: ["▲", "better"], worse: ["▼", "worse"] };
-
-// One small icon per impact item (grey dot, green ▲, red ▼; the note on hover), "Impact not checked" when answers
-// are missing, "Needs your OK" for a `worse` item without `approved`. Markdown tasks (no `source`) show nothing,
-// run.json tasks are told apart by having `impact`, `textOnly` or being passed `forced`.
-export function impactRow(task, impactItems, forced = false) {
+// The impact row: a chip with the NAME for each item that changes (green ▲ better, red ▼ worse with a checkbox =
+// the owner's OK), one grey chip "7 OK" for all `none` answers ("✓ No impact" when every item is none), an amber
+// "N not checked" chip for missing answers. The note is on hover. `onOk(key, checked)` saves a tick (pick page, must
+// return the task's new impact); without it the checkbox is read-only (review page). Markdown tasks (no `source`)
+// show nothing, run.json tasks are told apart by having `impact`, `textOnly` or being passed `forced`.
+export function impactRow(task, impactItems, forced = false, onOk = null) {
   if (task.textOnly) return null;
   if (!forced && task.source !== "json" && !task.impact) return null;
-  const answers = task.impact ?? {};
   const items = impactItems ?? [];
-  const missing = items.some((item) => !answers[item.key]);
-  const needsOk = Object.values(answers).some((a) => a?.effect === "worse" && !a.approved);
-  return el(
-    "div",
-    { class: "impact-row" },
-    items
-      .filter((item) => answers[item.key])
-      .map((item) => {
-        const answer = answers[item.key];
-        const [icon, cls] = IMPACT_ICON[answer.effect] ?? IMPACT_ICON.none;
-        const note = answer.note ? `: ${answer.note}` : answer.effect === "none" ? ": no impact" : "";
-        return el("span", { class: `impact ${cls}`, title: `${item.label}${note}` }, icon);
-      }),
-    missing && el("span", { class: "chip warn" }, "Impact not checked"),
-    needsOk && el("span", { class: "chip bad" }, "Needs your OK"),
-  );
+  const row = el("div", { class: "impact-row" });
+  const draw = (answers) => {
+    const missing = items.filter((item) => !answers[item.key]).length;
+    const none = items.filter((item) => answers[item.key]?.effect === "none").length;
+    const changing = items.filter((item) => ["better", "worse"].includes(answers[item.key]?.effect));
+    const chips = changing.map((item) => {
+      const answer = answers[item.key];
+      const tip = `${item.label}${answer.note ? `: ${answer.note}` : ""}${answer.approved ? ` (OK'd ${answer.approved})` : ""}`;
+      if (answer.effect === "better") return el("span", { class: "chip good", title: tip }, `▲ ${item.label}`);
+      const box = el("input", {
+        type: "checkbox",
+        "aria-label": `OK ${item.label} getting worse`,
+        disabled: !onOk,
+        onclick: (e) => e.stopPropagation(),
+        onchange: async () => {
+          const checked = box.checked;
+          box.disabled = true;
+          try {
+            draw((await onOk(item.key, checked)) ?? answers);
+          } catch (error) {
+            box.checked = !checked;
+            box.disabled = false;
+            toast(`Not saved: ${error.message}`);
+          }
+        },
+      });
+      box.checked = Boolean(answer.approved);
+      return el(
+        "label",
+        { class: `chip bad impact-worse${answer.approved ? " ok" : ""}`, title: tip, onclick: (e) => e.stopPropagation() },
+        `▼ ${item.label}`,
+        box,
+      );
+    });
+    row.replaceChildren(
+      ...chips,
+      ...[none > 0 && el("span", { class: "chip", title: "no impact" }, changing.length === 0 && missing === 0 ? "✓ No impact" : `${none} OK`),
+      missing > 0 && el("span", { class: "chip warn" }, `${missing} not checked`)].filter(Boolean),
+    );
+  };
+  draw(task.impact ?? {});
+  return row;
 }

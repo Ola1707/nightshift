@@ -26,7 +26,7 @@ model does each part**, so no part runs on a bigger model than it needs.
   item for this task: `none`, `better` or `worse`, plus a short note when it isn't `none`. The only exception is a
   task that just changes wording: mark it `"textOnly": true` and skip the list. A spacing tweak still answers.
 - Each `worse` item needs the owner's OK: ask it with AskUserQuestion, **one question per `worse` item**, in this
-  task's questions. An OK is saved on the item as `approved: <date>`. No OK: the task isn't coded; say so.
+  task's questions. An OK is saved on the item as `approved: <date>` (or ticked on the board, pick page). No OK: the task isn't coded; say so.
 
 ## 2. Split the work by model
 

@@ -37,7 +37,7 @@ When the user says "plan prompts" (or picks tasks with no prompt):
 2. **One item at a time:** first its impact: every item of the flow's `impactItems` (`nightshift flow`) answered
    `none` / `better` / `worse` with a short note, except a task that only changes wording (`textOnly: true`). Each
    `worse` item gets its own question for the owner's OK in that item's questions (AskUserQuestion); an OK is saved
-   as `approved: <date>` on the item, no OK means the task isn't coded. JSON task files: the answers and the prompt
+   as `approved: <date>` on the item (or ticked on the board, pick page), no OK means the task isn't coded. JSON task files: the answers and the prompt
    go into the task in `<paths.tasks>/<type>.json` (`impact`, `prompt`); Markdown: one impact line, as before (e.g.
    "CPU OK · memory OK · cost: one Cloud Run job per run"). Then ask that item's questions (AskUserQuestion, a recommended option first), let the user ask
    and answer back, then write its prompt (the project's prompt skill, `skills.prompt`; without one,

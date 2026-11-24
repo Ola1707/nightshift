@@ -9,6 +9,7 @@ import { addItem, readChecklist, removeItem, setTick } from "./checklist.mjs";
 import { loadConfig } from "./config.mjs";
 import { openDecisions, openDecisionsOfRuns, waitingOfRuns } from "./decisions.mjs";
 import { approveType, readFlow } from "./flow.mjs";
+import { setImpactOk } from "./impact-ok.mjs";
 import { readRoadmaps } from "./roadmaps.mjs";
 import { pictureProblems, reportProblems } from "./run-pictures.mjs";
 import { saveReview } from "./runs.mjs";
@@ -156,6 +157,11 @@ const routes = {
     writeJson(NOTES, notes);
     writeNotesToNextRun(notes);
     return notes;
+  },
+  // The owner's OK on a `worse` impact item of a JSON task (pick page checkbox); answers with the task's new impact.
+  "POST /api/impact-ok": async (req) => {
+    const { file, id, key, ok } = await body(req);
+    return { impact: setImpactOk(ROADMAPS, CONFIG, { file, id, key, ok: Boolean(ok) }) };
   },
   "GET /api/config": () => ({
     owner: CONFIG.owner,
