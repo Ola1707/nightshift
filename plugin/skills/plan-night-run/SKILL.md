@@ -67,9 +67,8 @@ When the user says "plan prompts" (or picks tasks with no prompt):
    (AskUserQuestion): real decisions only, short, a recommended option first. Add the reminders the project's
    rules files list.
 6. Show the final list (task, prompt ready, decisions, the impact line) in a few lines and wait for the user's OK.
-7. Then the night run follows the project's run skill (`skills.run`). Without one: make a branch, do each task by
-   its type's steps in the flow (`pnpm exec nightshift flow`), run each suite in `suites`, write the summary and
-   `run.json` (part 4), and open one pull request, not merged.
+7. Then the night run follows the project's run skill (`skills.run`), by default `nightshift:run-night-run`
+   (parallel worktrees, suites, summary and `run.json` as in part 4, one pull request, not merged).
 
 ## 4. During the run: fill run.json
 

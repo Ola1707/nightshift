@@ -66,6 +66,8 @@ After that, the words you use:
 
 - "night board": opens the board to pick tonight's tasks;
 - "night board ready": the picks are saved, Claude prepares the run;
+- "start the night run": `/nightshift:run-night-run` runs it: coding agents in parallel, each in its own git
+  worktree, merged back one task at a time, then the suites, the summary and one pull request;
 - `/nightshift:do`: starts a new piece of work by its type's steps;
 - `/nightshift:start-review` and `/nightshift:review-done`: review mode on and off (code edits are blocked in
   between, docs stay editable);
@@ -298,7 +300,7 @@ them. `nightshift config` prints the result.
 | `suites[].failureShot` | | where the runner saves a failed test's screenshot, e.g. `"test-failed-*.png"` |
 | `suites[].screenshot` | | how to take a screenshot: `{ how, viewport }` when the test runner takes it (e.g. `{ "how": "playwright", "viewport": "390x844" }`), or `{ command }`, a shell command that prints a PNG or writes the path given as `{file}` (e.g. `"adb exec-out screencap -p"`, `"xcrun simctl io booted screenshot {file}"`) |
 | `apps` | `[]` | the project's apps, by name |
-| `skills` | `{}` | the project's own skill names, by role: `run` (the night run), `prompt` (writing prompts; default `/nightshift:write-a-prompt`), `tests` (running the suites); without one, the plugin's skills do it themselves |
+| `skills` | `{}` | the project's own skill names, by role: `run` (the night run; default `/nightshift:run-night-run`), `prompt` (writing prompts; default `/nightshift:write-a-prompt`), `tests` (running the suites); without one, the plugin's skills do it themselves |
 | `gate.holdUntilReviewed` | `[]` | environments that get no deploy while a run waits for its review |
 | `reviewMode.alsoGuard` | `[]` | extra folders guarded during a review (absolute or relative to the project); in them only Markdown and `plugin/skills/` stay editable |
 
