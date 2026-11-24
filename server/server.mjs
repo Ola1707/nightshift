@@ -13,6 +13,7 @@ import { setImpactOk } from "./impact-ok.mjs";
 import { readRoadmaps } from "./roadmaps.mjs";
 import { pictureProblems, reportProblems } from "./run-pictures.mjs";
 import { saveReview } from "./runs.mjs";
+import { settleAllRuns } from "./task-review.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(process.env.BOARD_PROJECT ?? process.cwd());
@@ -129,7 +130,11 @@ function runPath(name, file) {
 }
 
 const routes = {
-  "GET /api/roadmaps": () => readRoadmaps(ROADMAPS, readJson(ORDER, {}), CONFIG),
+  // A task a run finished moves to the done file; a review note without a tick brings it back (task-review.mjs).
+  "GET /api/roadmaps": () => {
+    settleAllRuns(REPO, CONFIG);
+    return readRoadmaps(ROADMAPS, readJson(ORDER, {}), CONFIG);
+  },
   // The order of the roadmaps and their phases, moved on the board; Claude then reorders the roadmap and prompt files.
   "POST /api/order": async (req) => {
     const { roadmaps, phases } = await body(req);
@@ -229,7 +234,6 @@ createServer(async (req, res) => {
           runsPath: CONFIG.paths.runs,
           name: run[1],
           done,
-          config: CONFIG,
         }));
     }
     if (run && req.method === "POST" && run[2] === "/qa") {
@@ -246,6 +250,7 @@ createServer(async (req, res) => {
         at: new Date().toISOString(),
       };
       writeJson(qaFile, qa);
+      settleAllRuns(REPO, CONFIG);
       return send(res, 200, qa);
     }
 

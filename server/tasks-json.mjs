@@ -1,11 +1,11 @@
 // Converts Markdown task files (and their prompts) to JSON task files (docs/plan-tasks-json.md, points 3-4).
 //   convertTaskFile(mdText, { promptsByCode })  the JSON object of one task file
 //   convertProject(projectDir, config)          every <paths.tasks>/*.md task file without a .json yet;
-//                                               dropped items go to <base>-done.json
+//                                               dropped and ticked [x] items go to <base>-done.json
 // Nothing is dropped: what can't be split cleanly stays whole in `details`.
 import { existsSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { settleReviewedRuns } from "./task-review.mjs";
+import { settleAllRuns } from "./task-review.mjs";
 
 const ITEM = /^([-+]) \[([ xX])\] (.*)$/;
 const CODE_IN_PARENS = /\s*\(([0-9A-Z]+[A-Za-z]*\.[\w.]+)\)$/;
@@ -52,7 +52,7 @@ function parseItem(marker, box, first, rest) {
   return {
     id: code ?? slug(title),
     title,
-    status: done ? "built" : dropped ? "dropped" : "open",
+    status: done ? "done" : dropped ? "dropped" : "open",
     ...(asked && { asked: { by: asked.by, on: asked.on, ...(asked.from && { from: asked.from }) } }),
     ...(asked?.quote && { quote: asked.quote }),
     details,
@@ -214,8 +214,9 @@ export function convertProject(projectDir, config, { outDir } = {}) {
       report.files[`${base}.md`] = { items: result.tasks.length, prompts: n };
       report.converted.push(`${base}.md`);
       const target = (name) => (outDir ? join(outDir, name) : join(dir, name));
-      const dropped = result.tasks.filter((t) => t.status === "dropped");
-      const open = { ...result, tasks: result.tasks.filter((t) => t.status !== "dropped") };
+      // Ticked [x] items are finished: they go to the done file with the dropped ones (a review note brings one back).
+      const dropped = result.tasks.filter((t) => t.status === "dropped" || t.status === "done");
+      const open = { ...result, tasks: result.tasks.filter((t) => t.status !== "dropped" && t.status !== "done") };
       writes.push([target(`${base}.json`), open]);
       if (dropped.length) {
         const done = { title: `${result.title} (done)`, tasks: dropped };
@@ -230,7 +231,6 @@ export function convertProject(projectDir, config, { outDir } = {}) {
     data.tasks = data.tasks.map((t) => ({ number: number++, ...t }));
     writeFileSync(path, JSON.stringify(data, null, 2) + "\n");
   }
-  // A ticked [x] item ("built") whose run review is already done: accepted → done file, rejected → open.
-  if (!outDir && config.paths.runs) report.settled = settleReviewedRuns(projectDir, config, { only: ["built"] });
+  if (!outDir) report.settled = settleAllRuns(projectDir, config);
   return report;
 }

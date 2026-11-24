@@ -1,11 +1,10 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync, existsSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { saveReview } from "./runs.mjs";
 import { convertProject } from "./tasks-json.mjs";
-import { settleReviewedRuns, settleTasks, verdict } from "./task-review.mjs";
+import { settleAllRuns, settleRun, verdict } from "./task-review.mjs";
 
 const config = {
   paths: { tasks: "docs/roadmap/night-run", runs: "docs/release-log", roadmaps: "docs/roadmap" },
@@ -21,89 +20,112 @@ function project() {
   return dir;
 }
 const tasks = (dir, name) => join(dir, config.paths.tasks, name);
-const task = (number, id, title, status = "built") => ({ number, id, title, status, details: "", reviews: [] });
+const task = (number, id, title, status = "open") => ({ number, id, title, status, details: "", reviews: [] });
+const ids = (dir, name) => json(tasks(dir, name)).tasks.map((t) => `${t.number} ${t.status}`);
 
-function run(dir, name, runJson, qa, reviewDone = true) {
+function run(dir, name, runJson, qa) {
   const folder = join(dir, config.paths.runs, name);
   mkdirSync(folder, { recursive: true });
   put(join(folder, "run.json"), runJson);
   if (qa) put(join(folder, "qa.json"), qa);
-  if (reviewDone) put(join(folder, "review.json"), { done: true, at: "2026-11-23T20:35:51.448Z" });
 }
 
-test("verdict: a tick accepts, a note without a tick rejects, a done task with no note is accepted", () => {
+test("verdict: a tick accepts, a note without a tick rejects, a done task is finished, partly done is nothing", () => {
   assert.equal(verdict({ status: "partial" }, { checked: true }), "accepted");
   assert.equal(verdict({ status: "done" }, { checked: false, note: "that wasn't the plan" }), "rejected");
-  assert.equal(verdict({ status: "done" }, undefined), "accepted");
+  assert.equal(verdict({ status: "done" }, undefined), "finished");
   assert.equal(verdict({ status: "partial" }, undefined), null);
   assert.equal(verdict({ status: "not-done" }, { checked: false, note: "  " }), null);
+  assert.equal(verdict({ status: "not-done" }, { checked: false, note: "what does it wait for?" }), null);
 });
 
-test("Review done moves accepted tasks to the done file and sends rejected ones back to open with the note", () => {
+test("a task the run finished moves to the done file at once, with no review", () => {
   const dir = project();
   put(tasks(dir, "small-fix.json"), {
     title: "Small fixes",
-    tasks: [
-      task(1, "8A.2cr", "AI board: a task that isn't done stands out"),
-      task(2, "8A.2cs", "Admin Versions: the Local row stays visible"),
-      task(3, "8A.2cv", "Tap cooldown: one default"),
-      task(4, "other", "Not in this run", "open"),
-    ],
+    tasks: [task(2, "8A.2cs", "Admin Versions"), task(3, "8A.2cl", "Admin Health"), task(4, "other", "Not in the run")],
   });
   run(dir, "night-run-2026-11-23", {
     tasks: [
-      { id: "8A.2cr", title: "AI board", status: "done", done: "Chip added." },
       { id: "8A.2cs", title: "Admin Versions", status: "done", done: "Sticky cell.\nMore." },
-      { id: "8A.2cv", title: "Tap cooldown", status: "done", done: "One default." },
+      { id: "8A.2cl", title: "Admin Health", status: "partial" },
     ],
-  }, { "8A.2cr": { checked: false, note: "show only the relevant part" }, "8A.2cs": { checked: true, note: "" } }, false);
-  const review = saveReview({
-    repo: dir,
-    runsDir: join(dir, config.paths.runs),
-    name: "night-run-2026-11-23",
-    done: true,
-    now: new Date("2026-11-23T11:04:53Z"),
-    config,
   });
-  assert.deepEqual(review.settled.moved.map((t) => t.number), [2, 3]);
-  assert.deepEqual(review.settled.reopened, [{ number: 1, title: "AI board: a task that isn't done stands out", note: "show only the relevant part" }]);
-  const open = json(tasks(dir, "small-fix.json")).tasks;
-  assert.deepEqual(open.map((t) => [t.number, t.status]), [[1, "open"], [4, "open"]]);
-  assert.deepEqual(open[0].reviews, [{ on: "2026-11-23", run: "night-run-2026-11-23", accepted: false, note: "show only the relevant part" }]);
+  const report = settleAllRuns(dir, config);
+  assert.deepEqual(report.moved.map((t) => t.number), [2]);
+  assert.deepEqual(ids(dir, "small-fix.json"), ["3 open", "4 open"]);
   const done = json(tasks(dir, "small-fix-done.json"));
   assert.equal(done.title, "Small fixes (done)");
-  assert.deepEqual(done.tasks.map((t) => [t.number, t.status]), [[2, "done"], [3, "done"]]);
-  assert.deepEqual(done.tasks[0].done, { on: "2026-11-23", in: "night-run-2026-11-23", evidence: "Sticky cell." });
-  assert.deepEqual(done.tasks[0].reviews, [{ on: "2026-11-23", run: "night-run-2026-11-23", accepted: true }]);
-  // The review.json on disk stays { done, at }.
-  assert.deepEqual(Object.keys(json(join(dir, config.paths.runs, "night-run-2026-11-23", "review.json"))), ["done", "at"]);
+  assert.equal(done.tasks[0].status, "done");
+  assert.equal(done.tasks[0].done.in, "night-run-2026-11-23");
+  assert.equal(done.tasks[0].done.evidence, "Sticky cell.");
+  assert.deepEqual(done.tasks[0].reviews, []);
+  // Loading the board again changes nothing.
+  assert.deepEqual(settleAllRuns(dir, config), { moved: [], reopened: [] });
 });
 
-test("a run task matches its JSON task by title when the ids differ, and reopening a review moves nothing", () => {
+test("a review note without a tick brings a finished task back to open; a tick then moves it to done again", () => {
   const dir = project();
-  put(tasks(dir, "bug.json"), { title: "Bugs", tasks: [task(4, "keyboard-scrolling-a-form", "**Keyboard: scrolling a form doesn't close the keyboard (P2).**")] });
-  run(dir, "day-run-2026-11-23", { tasks: [{ id: "keyboard-scroll", title: "Keyboard: scrolling a form doesn't close the keyboard", status: "done" }] }, {}, false);
-  const runsDir = join(dir, config.paths.runs);
-  const reopened = saveReview({ repo: dir, runsDir, name: "day-run-2026-11-23", done: false, config });
-  assert.equal(reopened.settled, undefined);
-  assert.equal(json(tasks(dir, "bug.json")).tasks.length, 1);
-  saveReview({ repo: dir, runsDir, name: "day-run-2026-11-23", done: true, config });
-  assert.equal(json(tasks(dir, "bug.json")).tasks.length, 0);
-  assert.equal(json(tasks(dir, "bug-done.json")).tasks[0].number, 4);
-  // Pressing Review done again doesn't add the task twice.
-  saveReview({ repo: dir, runsDir, name: "day-run-2026-11-23", done: true, config });
-  assert.equal(json(tasks(dir, "bug-done.json")).tasks.length, 1);
+  put(tasks(dir, "small-fix.json"), { title: "Small fixes", tasks: [task(1, "8A.2cr", "AI board: a task stands out")] });
+  run(dir, "night-run-2026-11-23", { tasks: [{ id: "8A.2cr", title: "AI board", status: "done" }] });
+  settleAllRuns(dir, config);
+  assert.deepEqual(ids(dir, "small-fix-done.json"), ["1 done"]);
+  const qa = join(dir, config.paths.runs, "night-run-2026-11-23", "qa.json");
+  put(qa, { "8A.2cr": { checked: false, note: "show only the relevant part" } });
+  assert.deepEqual(settleAllRuns(dir, config).reopened.map((t) => t.note), ["show only the relevant part"]);
+  assert.deepEqual(ids(dir, "small-fix.json"), ["1 open"]);
+  assert.deepEqual(ids(dir, "small-fix-done.json"), []);
+  const reopened = json(tasks(dir, "small-fix.json")).tasks[0];
+  assert.deepEqual(reopened.reviews.map((r) => [r.run, r.accepted, r.note]), [["night-run-2026-11-23", false, "show only the relevant part"]]);
+  put(qa, { "8A.2cr": { checked: true, note: "ok now" } });
+  settleAllRuns(dir, config);
+  assert.deepEqual(ids(dir, "small-fix-done.json"), ["1 done"]);
+  // One review per run: the tick replaced the note.
+  assert.deepEqual(json(tasks(dir, "small-fix-done.json")).tasks[0].reviews.map((r) => [r.accepted, r.note]), [[true, "ok now"]]);
 });
 
-test("settleTasks leaves a partial task with no tick open, and a done task already in the done file alone", () => {
+test("a tick moves a partly done task to done; a title match works when the ids differ", () => {
   const dir = project();
-  put(tasks(dir, "bug.json"), { title: "Bugs", tasks: [task(23, "emulator-boot", "Emulator boots", "open")] });
-  const r = settleTasks(dir, config, { run: { tasks: [{ id: "emulator-boot", status: "partial" }] }, qa: {}, runName: "n" });
-  assert.deepEqual(r, { moved: [], reopened: [] });
-  assert.equal(existsSync(tasks(dir, "bug-done.json")), false);
+  put(tasks(dir, "bug.json"), { title: "Bugs", tasks: [task(23, "the-windowed-emulator", "**Tests: the windowed Android emulator boots (P4, very important)**")] });
+  run(dir, "night-run-2026-11-23-2", { tasks: [{ id: "emulator-boot", title: "Tests: the windowed Android emulator boots", status: "partial" }] },
+    { "emulator-boot": { checked: true, note: "" } });
+  settleAllRuns(dir, config);
+  assert.deepEqual(ids(dir, "bug-done.json"), ["23 done"]);
 });
 
-test("the conversion settles [x] items whose run review is done; the newest review decides", () => {
+test("the owner's own decision (a review with no run) is final: a run's note doesn't reopen it", () => {
+  const dir = project();
+  const t = { ...task(11, "8A.2dd", "Test 5 holds a wait", "done"), reviews: [{ on: "2026-11-24", accepted: true, note: "done; new task" }] };
+  put(tasks(dir, "bug.json"), { title: "Bugs", tasks: [] });
+  put(tasks(dir, "bug-done.json"), { title: "Bugs (done)", tasks: [t] });
+  run(dir, "day-run-2026-11-23", { tasks: [{ id: "8A.2dd", status: "done" }] }, { "8A.2dd": { checked: false, note: "60 s is too long" } });
+  assert.deepEqual(settleRun(dir, config, { run: { tasks: [{ id: "8A.2dd", status: "done" }] }, qa: { "8A.2dd": { checked: false, note: "x" } }, runName: "r" }),
+    { moved: [], reopened: [] });
+  settleAllRuns(dir, config);
+  assert.deepEqual(ids(dir, "bug-done.json"), ["11 done"]);
+});
+
+test("a decision from another run on a later day wins over this run's note", () => {
+  const dir = project();
+  const t = { ...task(11, "8A.2dd", "Test 5", "done"), reviews: [{ on: "2026-11-24", run: "day run 2026-11-23", accepted: true }] };
+  put(tasks(dir, "bug.json"), { title: "Bugs", tasks: [] });
+  put(tasks(dir, "bug-done.json"), { title: "Bugs (done)", tasks: [t] });
+  run(dir, "day-run-2026-11-23", { tasks: [{ id: "8A.2dd", status: "done" }] },
+    { "8A.2dd": { checked: false, note: "60 s is too long", at: "2026-11-23T20:33:11Z" } });
+  settleAllRuns(dir, config);
+  assert.deepEqual(ids(dir, "bug-done.json"), ["11 done"]);
+});
+
+test("the newest run's word wins: rejected in an older run, finished again in a newer one → done", () => {
+  const dir = project();
+  put(tasks(dir, "bug.json"), { title: "Bugs", tasks: [task(7, "8A.2cq", "iOS saved text")] });
+  run(dir, "night-run-2026-11-23", { tasks: [{ id: "8A.2cq", status: "done" }] }, { "8A.2cq": { checked: false, note: "not fixed" } });
+  run(dir, "night-run-2026-11-24", { tasks: [{ id: "8A.2cq", status: "done", done: "Swipe clear of the preview." }] });
+  settleAllRuns(dir, config);
+  assert.deepEqual(ids(dir, "bug-done.json"), ["7 done"]);
+});
+
+test("the conversion puts ticked [x] items in the done file, and a run's review note brings one back", () => {
   const dir = project();
   put(tasks(dir, "small-fix.md"), [
     "# Small fixes",
@@ -111,26 +133,20 @@ test("the conversion settles [x] items whose run review is done; the newest revi
     "## Tasks",
     "",
     "+ [x] **Tap cooldown: one default (8A.2cv).** _(owner, 2026-11-23)_ Text.",
-    "+ [x] **Test 5 holds a wait (8A.2dd).** _(owner, 2026-11-23)_ Text.",
-    "+ [x] **Not reviewed yet (8A.2zz).** _(owner, 2026-11-23)_ Text.",
+    "+ [x] **AI board chip (8A.2cr).** _(owner, 2026-11-23)_ Text.",
     "+ [ ] **Still open (8A.2yy).** _(owner, 2026-11-23)_ Text.",
     "",
   ].join("\n"));
-  run(dir, "night-run-2026-11-22", { tasks: [{ id: "8A.2dd", status: "done" }] }, {});
-  run(dir, "night-run-2026-11-23", { tasks: [{ id: "8A.2cv", status: "done" }, { id: "8A.2dd", status: "done" }, { id: "8A.2yy", status: "done" }] },
-    { "8A.2dd": { checked: false, note: "60 s is too long" } });
-  run(dir, "night-run-2026-11-24", { tasks: [{ id: "8A.2zz", status: "done" }] }, {}, false);
+  run(dir, "night-run-2026-11-23", { tasks: [{ id: "8A.2cv", status: "done" }, { id: "8A.2cr", status: "done" }] },
+    { "8A.2cr": { checked: false, note: "show only the relevant part" } });
   const report = convertProject(dir, { ...config, taskFiles: [{ file: "small-fix.md" }] });
-  // 8A.2dd: the newer run rejected it, so the older acceptance doesn't move it; 8A.2zz's run isn't reviewed yet;
-  // 8A.2yy was never ticked ([ ]), so the conversion leaves it open.
-  assert.deepEqual(report.settled.moved.map((t) => t.title), ["Tap cooldown: one default"]);
-  assert.deepEqual(report.settled.reopened.map((t) => t.note), ["60 s is too long"]);
-  const open = json(tasks(dir, "small-fix.json")).tasks;
-  assert.deepEqual(open.map((t) => [t.id, t.status]), [["8A.2dd", "open"], ["8A.2zz", "built"], ["8A.2yy", "open"]]);
-  assert.deepEqual(json(tasks(dir, "small-fix-done.json")).tasks.map((t) => t.id), ["8A.2cv"]);
+  assert.deepEqual(report.settled.reopened.map((t) => t.title), ["AI board chip"]);
+  assert.deepEqual(json(tasks(dir, "small-fix.json")).tasks.map((t) => [t.id, t.status]), [["8A.2yy", "open"], ["8A.2cr", "open"]]);
+  assert.deepEqual(json(tasks(dir, "small-fix-done.json")).tasks.map((t) => [t.id, t.status]), [["8A.2cv", "done"]]);
 });
 
-test("settleReviewedRuns with no runs folder changes nothing", () => {
+test("no runs folder: nothing changes", () => {
   const dir = mkdtempSync(join(tmpdir(), "task-review-none-"));
-  assert.deepEqual(settleReviewedRuns(dir, config), { moved: [], reopened: [] });
+  assert.deepEqual(settleAllRuns(dir, config), { moved: [], reopened: [] });
+  assert.equal(existsSync(join(dir, config.paths.tasks)), false);
 });

@@ -52,7 +52,7 @@ test("convertTaskFile splits the item and keeps every word", () => {
   assert.match(out.intro, /Something works wrong/);
   assert.deepEqual(
     out.tasks.map((t) => [t.id, t.status]),
-    [["8A.2cv", "open"], ["B.2", "built"], ["plain-item-without-bold", "open"], ["dropped", "dropped"]],
+    [["8A.2cv", "open"], ["B.2", "done"], ["plain-item-without-bold", "open"], ["dropped", "dropped"]],
   );
   const [first, done, plain] = out.tasks;
   assert.equal(first.title, "Tap cooldown is wrong");
@@ -79,10 +79,10 @@ test("convertProject writes the JSON, moves the prompt, deletes the md", () => {
   const night = join(dir, "docs/roadmap/night-run");
   assert.equal(existsSync(join(night, "bug.md")), false);
   const json = JSON.parse(readFileSync(join(night, "bug.json"), "utf8"));
-  assert.deepEqual(json.tasks.map((t) => t.status), ["open", "built", "open"]);
+  assert.deepEqual(json.tasks.map((t) => t.status), ["open", "open"]);
   const done = JSON.parse(readFileSync(join(night, "bug-done.json"), "utf8"));
   assert.equal(done.title, "Bugs (done)");
-  assert.deepEqual(done.tasks.map((t) => [t.id, t.status]), [["dropped", "dropped"]]);
+  assert.deepEqual(done.tasks.map((t) => [t.id, t.status]), [["B.2", "done"], ["dropped", "dropped"]]);
   assert.match(json.tasks[0].prompt, /^### 8A.2cv/);
   assert.match(json.tasks[0].prompt, /Do the thing/);
   assert.match(json.tasks[0].prompt, /# not a heading/);
@@ -104,7 +104,7 @@ test("a dry run with outDir leaves the project alone", () => {
   assert.match(readFileSync(join(dir, "docs/roadmap/claude-code-prompts-app.md"), "utf8"), /Do the thing/);
 });
 
-test("the converter numbers the tasks 1, 2, 3 in file order, done files last, and nextTaskNumber goes on", () => {
+test("the converter numbers the tasks in file order, done files last, and nextTaskNumber goes on", () => {
   const dir = project();
   writeFileSync(join(dir, "docs/roadmap/night-run/small-fix.md"), "# Small\n\n- [ ] One thing.\n- [ ] Two thing.\n");
   const config = {
@@ -115,8 +115,8 @@ test("the converter numbers the tasks 1, 2, 3 in file order, done files last, an
   convertProject(dir, config);
   const night = join(dir, "docs/roadmap/night-run");
   const read = (f) => JSON.parse(readFileSync(join(night, f), "utf8")).tasks.map((t) => t.number);
-  assert.deepEqual(read("bug.json"), [1, 2, 3]);
-  assert.deepEqual(read("small-fix.json"), [4, 5]);
-  assert.deepEqual(read("bug-done.json"), [6]);
+  assert.deepEqual(read("bug.json"), [1, 2]);
+  assert.deepEqual(read("small-fix.json"), [3, 4]);
+  assert.deepEqual(read("bug-done.json"), [5, 6]);
   assert.equal(nextTaskNumber(dir, config), 7);
 });
