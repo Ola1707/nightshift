@@ -1,4 +1,4 @@
-import { $, answered, api, decisionRow, impactRow, loadImpactItems, solutionRow, el, href, nav, post, proposedItems, proposedKey, reviewWaiting } from "/common.js";
+import { $, answered, api, decisionRow, impactRow, loadImpactItems, solutionRow, el, href, nav, post, proposedItems, proposedKey, reviewWaiting, startTime } from "/common.js";
 import { failureAttempts, stepsLink } from "/failure-report.js";
 import { reviewSaver } from "/review-save.js";
 
@@ -383,7 +383,10 @@ async function show(runName) {
   impactItems = await loadImpactItems().catch(() => []);
   missingReports = reports ?? {};
   let qa = initialQa;
-  $("#title").textContent = run.title;
+  $("#title").replaceChildren(
+    run.title,
+    ...(run.started ? [" ", el("span", { class: "started" }, `· started ${startTime(run.started)}`)] : []),
+  );
   const qaTasks = run.tasks.filter((t) => t.qa);
   const decisions = [...run.tasks.flatMap((t) => t.decisions ?? []), ...(run.decisions ?? [])];
   const stats = el("div", { class: "stats" });
@@ -676,7 +679,7 @@ if (!runs.length) {
       el(
         "option",
         { value: r.name, selected: r.name === wanted },
-        `${r.reviewed ? "✓" : "⏳"} ${r.title}`,
+        `${r.reviewed ? "✓" : "⏳"} ${r.title}${r.started ? ` · ${startTime(r.started).split(", ")[1]}` : ""}`,
       ),
     ),
   );

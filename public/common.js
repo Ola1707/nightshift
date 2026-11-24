@@ -22,6 +22,15 @@ export async function api(path, options) {
   return res.json();
 }
 
+/** "Sun 23 Nov, 14:10" for a run's start time (ISO), in the viewer's time zone; "" when unknown. */
+export function startTime(iso) {
+  if (!iso || Number.isNaN(Date.parse(iso))) return "";
+  const d = new Date(iso);
+  const day = d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+  const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  return `${day}, ${time}`;
+}
+
 export const post = (path, data) =>
   api(path, {
     method: "POST",

@@ -14,6 +14,7 @@ import { readRoadmaps } from "./roadmaps.mjs";
 import { pictureProblems, reportProblems } from "./run-pictures.mjs";
 import { saveReview } from "./runs.mjs";
 import { settleAllRuns } from "./task-review.mjs";
+import { runStarted } from "./run-start.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(process.env.BOARD_PROJECT ?? process.cwd());
@@ -114,14 +115,21 @@ function writeNotesToNextRun(notes) {
 function runFolders() {
   if (!existsSync(RUNS)) return [];
   const open = new Set(unreviewedRuns(RUNS));
+  // Newest first, by start time (else the run's date, else the date in its name): a day run sorts among the night runs.
+  const when = (r) => r.started ?? r.date ?? r.name.replace(/^\D+/, "");
   return readdirSync(RUNS)
     .filter((name) => existsSync(join(RUNS, name, "run.json")))
-    .sort()
-    .reverse()
     .map((name) => {
       const run = readJson(join(RUNS, name, "run.json"), {});
-      return { name, title: run.title ?? name, date: run.date ?? null, reviewed: !open.has(name) };
-    });
+      return {
+        name,
+        title: run.title ?? name,
+        date: run.date ?? null,
+        started: runStarted(REPO, CONFIG, name, run),
+        reviewed: !open.has(name),
+      };
+    })
+    .sort((a, b) => (when(a) < when(b) ? 1 : when(a) > when(b) ? -1 : 0));
 }
 
 function runPath(name, file) {
@@ -213,7 +221,7 @@ createServer(async (req, res) => {
       const runJson = readJson(runPath(run[1], "run.json"), null);
       const qa = readJson(runPath(run[1], "qa.json"), {});
       return send(res, 200, {
-        run: runJson,
+        run: runJson && { ...runJson, started: runStarted(REPO, CONFIG, run[1], runJson) },
         // Shots the review page marks "Blank picture" or "Missing picture" instead of showing a broken image.
         pictures: runJson ? await pictureProblems(runJson, REPO) : {},
         // Test report pages (failures.html) the runs folder no longer has: the review page says so.

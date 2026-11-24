@@ -94,6 +94,13 @@ h1 {
   font-size: 26px;
   margin: 8px 0 4px;
 }
+h1 .started {
+  color: var(--muted);
+  font-size: 0.55em;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
 h2 {
   font-size: 19px;
   margin: 32px 0 10px;

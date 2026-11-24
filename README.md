@@ -207,6 +207,7 @@ out.
 {
   "title": "Night run 2030-01-05",
   "date": "2030-01-05",
+  "started": "2030-01-05T23:10:00+02:00", // when the run started; left out → the first commit of its plan file
   "summary": "docs/release-log/night-run-2030-01-05.md",
   "links": [{ "label": "PR #12 (the run)", "url": "https://github.com/example/corner-bakery/pull/12" }],
   "you": ["What you must do first"],
