@@ -5,6 +5,7 @@
 // Nothing is dropped: what can't be split cleanly stays whole in `details`.
 import { existsSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { settleReviewedRuns } from "./task-review.mjs";
 
 const ITEM = /^([-+]) \[([ xX])\] (.*)$/;
 const CODE_IN_PARENS = /\s*\(([0-9A-Z]+[A-Za-z]*\.[\w.]+)\)$/;
@@ -229,5 +230,7 @@ export function convertProject(projectDir, config, { outDir } = {}) {
     data.tasks = data.tasks.map((t) => ({ number: number++, ...t }));
     writeFileSync(path, JSON.stringify(data, null, 2) + "\n");
   }
+  // A ticked [x] item ("built") whose run review is already done: accepted → done file, rejected → open.
+  if (!outDir && config.paths.runs) report.settled = settleReviewedRuns(projectDir, config, { only: ["built"] });
   return report;
 }

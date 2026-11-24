@@ -59,6 +59,10 @@ Status: planning with Ola, one point at a time. Nothing built yet.
 - `status`: `open` → `built` (done by a run, waits for the review) → accepted in the review → the task **moves to the
   done file** (`<type>-done.json` next to it, e.g. `bug-done.json`), so the open file stays short, easy to read and
   cheap to load. Not accepted → back to `open` with the review note.
+- Done by code (`server/task-review.mjs`, Ola, 2026-11-24): **Review done** settles each task of the run. A tick
+  accepts; a note without a tick rejects; a task the run finished (`done`) with no note is accepted. Reopening a
+  review moves nothing back. The `tasks-json` conversion does the same for `[x]` items whose run review is already
+  done, newest run first (the newest verdict decides). A partly done task with no tick stays `built` for the owner.
 - `dropped` (the owner doesn't want it) also moves to the done file, with the reason.
 
 ## 4. Where the files live (Ola, 2026-11-24)

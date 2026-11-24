@@ -156,8 +156,10 @@ changes.
    ticks on decisions and notes on fixed tests are saved in `<runs>/<run>/qa.json`. A shot that is almost one color
    shows a "Blank picture" chip, a shot whose file is gone a "Missing picture" chip; a video plays as a silent loop. A failed test shows every
    failed run's picture in order with its label ("Failed 4 times" above them), each with its own chip.
-   **Review done** writes `review.json` and the review into each release log the run names; **Reopen the review**
-   asks first. Until a run's review is done, every page shows ⏳ for it, and deploys to the environments in
+   **Review done** writes `review.json` and the review into each release log the run names, and settles the run's
+   tasks in the JSON task files: accepted ones (ticked, or done with no note) move to `<type>-done.json`, rejected
+   ones (a note without a tick) go back to `open` with the note. **Reopen the review** asks first and moves nothing
+   back. Until a run's review is done, every page shows ⏳ for it, and deploys to the environments in
    `gate.holdUntilReviewed` are refused by `reviewGateProblem` (see "Use in your scripts").
 
 **Setup:**

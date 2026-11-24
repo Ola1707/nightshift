@@ -229,6 +229,7 @@ createServer(async (req, res) => {
           runsPath: CONFIG.paths.runs,
           name: run[1],
           done,
+          config: CONFIG,
         }));
     }
     if (run && req.method === "POST" && run[2] === "/qa") {
