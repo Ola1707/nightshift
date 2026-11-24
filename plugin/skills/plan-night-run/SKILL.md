@@ -34,10 +34,8 @@ When the user says "plan prompts" (or picks tasks with no prompt):
 
 1. List the open items with no prompt (`- [ ]`, `hasPrompt: false`) from the task files and roadmaps, short, one
    line each, and let the user pick which to write prompts for (GUI, multi-select).
-2. **One item at a time:** first one line on its impact: the list in the flow's Plan step "shows Human the impact"
-   (`nightshift flow`; e.g. CPU · memory · disk · native · policy · cost · security & privacy · database migration ·
-   older app versions), each named with what it costs or needs, or "OK" (e.g. "CPU OK · memory OK · cost: one Cloud
-   Run job per run"). Then ask that item's questions (AskUserQuestion, a recommended option first), let the user ask
+2. **One item at a time:** first one line on its impact: each item of the flow's `impact` list (`nightshift flow`), named
+   with what it costs or needs, or "OK" (e.g. "CPU OK · memory OK · cost: one Cloud Run job per run"). Then ask that item's questions (AskUserQuestion, a recommended option first), let the user ask
    and answer back, then write its prompt (the project's prompt skill, `skills.prompt`; without one,
    `/nightshift:write-a-prompt`) and flip its line from `- [ ]` to `+ [ ]`. Only then go to the next item. Never
    collect the questions of several items into one round.

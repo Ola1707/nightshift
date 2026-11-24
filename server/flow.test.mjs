@@ -110,3 +110,16 @@ test("a changed step clears the approval", () => {
   assert.equal(after.changed, true);
   assert.equal(after.approvedAt, null);
 });
+
+test("impact: the list lives once in the default flow; a step with impact: true shows it as its note", () => {
+  const p = project({ types: { bug: { title: "Bug", steps: [{ who: "planner", text: "shows Human the impact", impact: true }] } } });
+  const flow = readFlow(p.config, p.dir);
+  assert.match(flow.impact, /^CPU · memory/);
+  const step = flow.types[1].steps[0];
+  assert.equal(step.note, flow.impact);
+  assert.equal("impact" in step, false);
+  const parts = flow.types.find((t) => t.id === "feature").parts;
+  assert.ok(parts.some((part) => part.steps.some((s) => s.note === flow.impact)));
+  const own = project({ impact: "CPU · cost" });
+  assert.equal(readFlow(own.config, own.dir).impact, "CPU · cost");
+});
