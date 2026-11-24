@@ -1,7 +1,8 @@
-// The pictures a run.json points to: each task's before and after shots and each failed test's screenshot.
+// The pictures a run.json points to: each task's before and after shots and each failed run's screenshot (failures[].attempts, or the old single screenshot).
 // Videos and full URLs are not pictures in the repo, so they are left out.
 import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { failureAttempts } from "../public/failure-report.js";
 import { isBlankPicture } from "./shot-check.mjs";
 
 const PICTURE = /\.(png|jpe?g|gif|webp)$/i;
@@ -16,11 +17,22 @@ export function runPictures(run) {
   for (const task of run?.tasks ?? []) {
     for (const when of ["before", "after"]) {
       for (const shot of task[when] ?? [])
-        found.push({ where: `task ${task.id ?? task.title} ${when}`, path: shot.path });
+        found.push({
+          where: `task ${task.id ?? task.title} ${when}`,
+          path: shot.path,
+        });
     }
   }
-  for (const f of run?.failures ?? [])
-    if (f.screenshot) found.push({ where: `failure ${f.test}`, path: f.screenshot });
+  for (const f of run?.failures ?? []) {
+    const attempts = failureAttempts(f);
+    attempts.forEach((a, i) => {
+      if (a.screenshot)
+        found.push({
+          where: attempts.length > 1 ? `failure ${f.test} attempt ${i + 1}` : `failure ${f.test}`,
+          path: a.screenshot,
+        });
+    });
+  }
   return found.filter(
     (p) => typeof p.path === "string" && !/^https?:/.test(p.path) && PICTURE.test(p.path),
   );

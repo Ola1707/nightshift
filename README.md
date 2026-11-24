@@ -66,10 +66,14 @@ After that, the words you use:
 
 - "night board": opens the board to pick tonight's tasks;
 - "night board ready": the picks are saved, Claude prepares the run;
+- "start the night run": `/nightshift:run-night-run` runs it: coding agents in parallel, each in its own git
+  worktree, merged back one task at a time, then the suites, the summary and one pull request;
 - `/nightshift:do`: starts a new piece of work by its type's steps;
 - `/nightshift:start-review` and `/nightshift:review-done`: review mode on and off (code edits are blocked in
   between, docs stay editable);
-- `/nightshift:doctor`: checks the setup again, for example after your test flow changes.
+- `/nightshift:doctor`: checks the setup again, for example after your test flow changes;
+- `/nightshift:update`: after updating Nightshift, asks which of the new updates to apply (nothing changes in your
+  project until you say yes).
 
 ## Updates
 
@@ -128,6 +132,7 @@ Each command works on the project in the current folder (or `BOARD_PROJECT`):
 | `nightshift checklist-import` | sets every checklist tick from a "Plan checklist choices" text on stdin |
 | `nightshift init [--answers <file>] [--force]` | writes `board.config.json` (from a JSON file of settings) and the folders and files the board needs; never overwrites a file without `--force` |
 | `nightshift doctor [--shots]` | checks the project, one `OK` or `PROBLEM:` line per check; `--shots` also runs each suite's screenshot command and checks the picture is not blank |
+| `nightshift rules --plugin <dir> [skill...] [--mark]` | the project's rules files for those skills (default all) plus `all.md`: `OK`, `NONE`, or `CHANGED` (the plugin skill changed since the file was checked; exit 1); `--mark` records them as checked |
 | `nightshift demo` | the board on the invented demo project, http://localhost:8096 |
 
 ## The pages
@@ -137,7 +142,9 @@ through those once when starting with Nightshift (`/nightshift:setup` opens them
 changes.
 
 1. **Pick tasks** (`/`). At the top, **Decisions from last night**: every decision Claude made alone that you have
-   not ticked yet, from every run, with an "OK" checkbox and a text box (saved into that run's `qa.json`). Then every
+   not answered yet, from every run, with **OK**, **Revert now** and **Revert later** and a text box (saved into
+   that run's `qa.json`). Under it, **Waiting for Claude**: reverts and ways forward picked on the review page that
+   Claude hasn't handled yet (`plugin/review-actions.md`). Then every
    open task in the task files (one section per type of change), with **Check all night work** (every open task
    except Manual ones) and **Uncheck all**, then the other roadmaps grouped by phase. Drag a roadmap or a phase by
    its **⠿** handle to reorder it; **Send order to Claude** saves `board-order.json`, and Claude reorders the files
@@ -147,7 +154,8 @@ changes.
 2. **Tonight's list** (`/list`): what was saved, with the next step: tell Claude "night board ready".
 3. **Review a run** (`/review`): reads `<runs>/<run>/run.json`. QA ticks and problem notes, answers to questions,
    ticks on decisions and notes on fixed tests are saved in `<runs>/<run>/qa.json`. A shot that is almost one color
-   shows a "Blank picture" chip, a shot whose file is gone a "Missing picture" chip; a video plays as a silent loop.
+   shows a "Blank picture" chip, a shot whose file is gone a "Missing picture" chip; a video plays as a silent loop. A failed test shows every
+   failed run's picture in order with its label ("Failed 4 times" above them), each with its own chip.
    **Review done** writes `review.json` and the review into each release log the run names; **Reopen the review**
    asks first. Until a run's review is done, every page shows ⏳ for it, and deploys to the environments in
    `gate.holdUntilReviewed` are refused by `reviewGateProblem` (see "Use in your scripts").
@@ -179,8 +187,10 @@ Paths are the defaults; each can be changed in the settings file.
 | `docs/release-log/<run>/review.json` | board | `{ done, at }`, written by "Review done" |
 | `docs/board/flow.json` | you, Claude, board | your changes to the flow of work, and the approvals |
 | `docs/board/plan-checklist.json` | board | your checklist ticks and added items |
+| `docs/board/handled.json` | Claude | reverts and picked ways forward Claude has handled: `{ "<run>/<qa key>": { how, done, at } }` |
 
-Keys in `qa.json`: a task's id (QA tick, problem or answer), `decision:<id>`, `failure:<test>` (a note on a fixed
+Keys in `qa.json`: a task's id (QA tick, problem or answer), `decision:<id>` (`checked` for OK, or
+`revert: "now" | "later"`), `solution:<id>` (`do: "now" | "later"`; none = don't), `failure:<test>` (a note on a fixed
 test) and `proposed:<id>` (ticked = add it as an action item).
 
 The phrases Claude listens for: "night board ready" (the picks are saved), "order sent" (reorder the roadmaps),
@@ -212,13 +222,18 @@ out.
       "status": "done", // done | partial | not-done
       "done": "What was done",
       "decisions": [{ "id": "T.1-1", "text": "Kept the hours in one line on phones." }],
+      // Ways forward for a task not done: the owner picks Do it now, Do it later or neither for each.
+      "solutions": [{ "id": "T.1-a", "text": "Install the older runtime (about 8 GB)." }],
       "missing": "What's missing to finish, or null",
       "qa": "Where to check (app and screen), or null when there is nothing to see",
       "questions": ["Questions for you, when there is no screen"],
       "before": [{ "label": "Home page", "path": "docs/release-log/night-run-2030-01-05/before/home.jpg" }],
       "after": [{ "label": "Home page", "path": "docs/release-log/night-run-2030-01-05/after/home.jpg" }],
       "videos": [{ "label": "Menu opens", "when": "after", "path": "docs/release-log/night-run-2030-01-05/after/menu.mp4" }],
-      "tests": [{ "name": "web home.spec.ts 3", "what": "the hours show", "result": "failed before, passes after" }]
+      "tests": [{ "name": "web home.spec.ts 3", "what": "the hours show", "result": "failed before, passes after" }],
+      // The task's answers to the flow's impact list, as in its task file; left out when textOnly is true.
+      "impact": { "memory": { "effect": "better", "note": "cards unload after the animation" } },
+      "textOnly": false
     }
   ],
   "testRuns": [
@@ -238,7 +253,16 @@ out.
       "failedOn": "What it failed on",
       "failedStep": "The step that failed",
       "report": "tests/e2e/runs/2030-01-05-web/failures.html#checkout-12", // the card's "Steps" link
-      "screenshot": "docs/release-log/night-run-2030-01-05/failures/checkout-12.png",
+      // One entry per failed run of this test, in order, each with the picture taken when the step failed
+      // (4 failed runs = 4 pictures). An old run.json with a single "screenshot" still works: it counts as one attempt.
+      "attempts": [
+        {
+          "label": "run 1 (02:14)",
+          "screenshot": "docs/release-log/night-run-2030-01-05/failures/checkout-12-run1.png",
+          "failedStep": "Tap Pay",
+          "report": "tests/e2e/runs/2030-01-05-web/failures.html#checkout-12"
+        }
+      ],
       "fixedIn": "app", // app | test | not fixed
       "fixFile": "checkout.tsx",
       "explanation": "One short line: what the fix was"
@@ -250,6 +274,53 @@ out.
   "proposed": [{ "id": "P1", "text": "What, where, done when" }]
 }
 ```
+
+## Task files as JSON
+
+A project can keep its tasks in `<paths.tasks>/<type>.json` instead of `<type>.md` (the board reads the `.json` when
+it exists, else the `.md`; `taskFiles[].file` may say either). Roadmaps stay Markdown. `/nightshift:update` offers
+the conversion (update `tasks-json`); it deletes the `.md`, git keeps it.
+
+```jsonc
+{
+  "title": "Bugs",
+  "intro": "Markdown",
+  "tasks": [
+    {
+      "number": 12, // permanent, 1, 2, 3 … across all task files and done files; shown on the board instead of the code
+      "id": "8A.2cv",
+      "title": "Tap cooldown: one default",
+      "status": "open", // open | built (a run did it, waits for the review)
+      "asked": { "by": "Ola", "on": "2026-11-23", "from": "review of day run 2026-11-12" },
+      "quote": "the owner's own words",
+      "details": "Markdown: what's wrong today, what's wanted",
+      "doneWhen": "what proves it is done",
+      "textOnly": false, // true: the task only changes wording and skips the impact list
+      "impact": { "native": { "effect": "worse", "note": "new store build", "approved": "2026-11-24" } },
+      "prompt": "Markdown",
+      "done": { "on": "2026-11-23", "in": "night run 2026-11-23", "evidence": "the test failed first, then passed" },
+      "reviews": [{ "on": "2026-11-23", "run": "night run 2026-11-23", "accepted": false, "note": "what to change" }],
+      "links": ["https://github.com/example/corner-bakery/pull/4"]
+    }
+  ]
+}
+```
+
+- **Number:** the converter numbers tasks 1, 2, 3 … in file order (task files in `taskFiles` order, then done
+  files). A new task gets the highest number in all task files and done files plus 1 (`nextTaskNumber` in
+  `server/tasks-json.mjs`); the number never changes. The board shows it as the badge and names the task "#12 title";
+  `id` (the old code) stays and is still found by search. A hand-written task without `number` shows no badge.
+- **Done file:** a task accepted in the review moves to `<type>-done.json` (same shape), so the open file stays
+  short. A task not accepted goes back to `open` with a `reviews[]` note; a dropped one moves there with the reason.
+- **Impact:** every task answers each item of the flow's `impactItems` (`nightshift flow`) with `none`, `better` or
+  `worse` and a short note, while its prompt is written. A `worse` item needs the owner's OK, saved on it as
+  `approved: <date>`; without it the task is never coded, not even on a night run. Only a `textOnly` task skips this.
+- **On the board** every task (pick and review pages) shows a row of chips, the note on hover: only items that change
+  get a chip with their name, green "▲ memory" for better, red "▼ cost" for worse. A red chip has a checkbox: ticked
+  means the owner OK'd it (`approved` is set, the chip is filled), unticked (outlined) waits for the OK. On the pick
+  page ticking saves `approved: <today>` into the JSON file (`POST /api/impact-ok`); on the review page the box is
+  read-only. All `none` answers fold into one grey chip ("7 OK", or "✓ No impact" when every item is none); missing
+  answers show an amber "N not checked".
 
 ## Settings: board.config.json
 
@@ -281,12 +352,20 @@ them. `nightshift config` prints the result.
 | `suites[].failureShot` | | where the runner saves a failed test's screenshot, e.g. `"test-failed-*.png"` |
 | `suites[].screenshot` | | how to take a screenshot: `{ how, viewport }` when the test runner takes it (e.g. `{ "how": "playwright", "viewport": "390x844" }`), or `{ command }`, a shell command that prints a PNG or writes the path given as `{file}` (e.g. `"adb exec-out screencap -p"`, `"xcrun simctl io booted screenshot {file}"`) |
 | `apps` | `[]` | the project's apps, by name |
-| `skills` | `{}` | the project's own skill names, by role: `run` (the night run), `prompt` (writing prompts; default `/nightshift:write-a-prompt`), `tests` (running the suites); without one, the plugin's skills do it themselves |
+| `skills` | `{}` | the project's own skill names, by role: `run` (the night run; default `/nightshift:run-night-run`), `prompt` (writing prompts; default `/nightshift:write-a-prompt`), `tests` (running the suites); without one, the plugin's skills do it themselves |
+| `updates` | `{}` | which updates of a new Nightshift version were answered: `{ "<id>": "applied" \| "skipped" }`. Written by `nightshift update`, never by hand |
 | `gate.holdUntilReviewed` | `[]` | environments that get no deploy while a run waits for its review |
 | `reviewMode.alsoGuard` | `[]` | extra folders guarded during a review (absolute or relative to the project); in them only Markdown and `plugin/skills/` stay editable |
 
-Next to it, `<paths.board>/project.md` (optional, written first by `/nightshift:setup`) holds the project's own
-rules for the skills, grouped by skill; where it and a skill differ, it wins.
+**Rule 1** for everything the skills write for the owner (summaries, run.json, review replies): new information
+only, no process, decisions say what changes for the owner (`plugin/rule-1.md`).
+
+Next to it, `<paths.board>/skills/` (optional, written first by `/nightshift:setup`) holds the project's own rules
+for the skills: one file per skill (`do.md`, `plan-night-run.md`, ...) and `all.md` for every skill. They only add
+to the plugin's skills (where they differ, the project's file wins); a fix to how a skill works goes into Nightshift.
+A rule is added only after the owner's yes. Each file records the plugin skill it was checked against; after a plugin
+update, `nightshift rules --plugin <plugin folder>` prints `CHANGED` for the files to go through again, and the
+night run doesn't start until they are (`plugin/project-rules.md`).
 
 Example:
 

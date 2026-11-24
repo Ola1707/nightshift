@@ -20,3 +20,14 @@ export function stepsLink(failure, missing = {}) {
     return { gone: true, text: "page no longer on this computer" };
   return { href: failure.report, text: "Steps" };
 }
+
+/**
+ * The failed runs of one test, in order: `attempts` (one per failed run), or the single `screenshot` of an old run.json
+ * counted as one attempt. Attempts without a screenshot are kept (their label and failed step still show).
+ * @param {{ attempts?: object[], screenshot?: string, failedStep?: string, report?: string }} failure a run.json failures[] entry
+ * @returns {{ label?: string, screenshot?: string, failedStep?: string, report?: string }[]}
+ */
+export function failureAttempts(failure) {
+  if (Array.isArray(failure?.attempts) && failure.attempts.length) return failure.attempts;
+  return failure?.screenshot ? [{ screenshot: failure.screenshot }] : [];
+}

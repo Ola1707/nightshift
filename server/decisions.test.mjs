@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { allDecisions, openDecisions, openDecisionsOfRuns } from "./decisions.mjs";
+import { allDecisions, openDecisions, openDecisionsOfRuns, waitingOfRuns } from "./decisions.mjs";
 
 const run = {
   title: "Night run 2030-01-06",
@@ -98,6 +98,45 @@ test("the pick page lists open decisions of every run", () => {
         note: "",
       },
     ]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("reverts and picked solutions wait for Claude until handled.json records them", () => {
+  const withSolutions = {
+    ...run,
+    tasks: [...run.tasks, { id: "T.4", title: "iOS tests", solutions: [{ id: "T.4-a", text: "Install iOS 26" }, { id: "T.4-b", text: "Newer Maestro" }, { id: "T.4-c", text: "Other Xcode" }] }],
+  };
+  const qa = {
+    "decision:T.3-1": { checked: false, revert: "now", note: "too slow" },
+    "decision:T.3-2": { checked: false, revert: "later", note: "" },
+    "decision:run-1": { checked: true, note: "" },
+    "solution:T.4-a": { checked: false, do: "now", note: "" },
+    "solution:T.4-b": { checked: false, do: "later", note: "" },
+  };
+  assert.deepEqual(openDecisions(withSolutions, qa), []);
+  assert.equal(openDecisions(run, { "decision:T.3-1": { checked: false, revert: "someday" } }).length, 3, "only now or later");
+
+  const dir = mkdtempSync(join(tmpdir(), "nightshift-waiting-"));
+  try {
+    const name = "night-run-2030-01-06";
+    mkdirSync(join(dir, name));
+    writeFileSync(join(dir, name, "run.json"), JSON.stringify(withSolutions));
+    writeFileSync(join(dir, name, "qa.json"), JSON.stringify(qa));
+    const file = join(dir, "handled.json");
+    assert.deepEqual(
+      waitingOfRuns(dir, file).map((x) => [x.ref, x.kind, x.how, x.note]),
+      [
+        [`${name}/decision:T.3-1`, "revert", "now", "too slow"],
+        [`${name}/decision:T.3-2`, "revert", "later", ""],
+        [`${name}/solution:T.4-a`, "solution", "now", ""],
+        [`${name}/solution:T.4-b`, "solution", "later", ""],
+      ],
+      "T.4-c has no pick: don't",
+    );
+    writeFileSync(file, JSON.stringify({ [`${name}/decision:T.3-1`]: { how: "now", done: "x" }, [`${name}/solution:T.4-a`]: { how: "now", done: "y" } }));
+    assert.deepEqual(waitingOfRuns(dir, file).map((x) => x.ref), [`${name}/decision:T.3-2`, `${name}/solution:T.4-b`]);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

@@ -1,6 +1,6 @@
 ---
 name: start-review
-description: Help the user review a finished long task (a day run, night run, release, or any unattended run) line by line, from its summary in the runs folder or the task and roadmap files. Use whenever the user types /nightshift:start-review, says "start review", says they are reviewing a run or a long task, quotes or selects lines from a run summary, or comes with questions, remarks and small fixes about what a run did — even if they don't say "review".
+description: Help the user review a finished long task (a day run, night run, release, or any unattended run) line by line, from its summary in the runs folder or the task and roadmap files. Use whenever the user types /nightshift:start-review, says "start review", says they are reviewing a run or a long task, quotes or selects lines from a run summary, or says "do it now" or "revert now", or comes with questions, remarks and small fixes about what a run did — even if they don't say "review".
 ---
 
 # Review a long task
@@ -9,8 +9,11 @@ description: Help the user review a finished long task (a day run, night run, re
 
 1. Run `pnpm exec nightshift config` (or `npx nightshift config`) for the project's settings: `port`, `paths`
    (`runs`, `tasks`, `roadmaps`, `board`), `skills`.
-2. Read `<paths.board>/project.md` if it exists: the project's own rules, grouped by skill. Where project.md and this
-   skill differ, project.md wins.
+2. Then the project's own rules: run `pnpm exec nightshift rules start-review --plugin <plugin>` (`<plugin>` is two folders
+   up from this skill's base directory) and follow `<plugin>/project-rules.md`: read each `OK` file (it adds to this
+   skill and wins where they differ); a `CHANGED` file is gone through first.
+
+**Rule 1:** everything you write for the owner follows `<plugin>/rule-1.md` (new information only).
 
 The user reads the summary of a long task (for example `<runs folder>/day-run-<date>.md`) and comes back with
 questions, remarks and small fixes, often several in one message, often about a quoted or selected line. Work
@@ -52,6 +55,17 @@ Sort each point into one of these and handle it:
    technical details yourself.
 5. **A sentence that's cut off or unclear:** say where it stopped and ask what they meant. Don't guess.
 
+## JSON task files
+
+A project with `<paths.tasks>/<type>.json` files keeps tasks there, not as checkboxes:
+
+- Accepted in the review: the task moves to `<type>-done.json` (same shape: `{ "title", "tasks": [] }`).
+- Not accepted: `status: "open"` and a `reviews[]` entry `{ on, run, accepted: false, note }` with the owner's note.
+- Dropped: moves to the done file with the reason.
+- A new task (point 2): add it to the JSON file, fields as `/nightshift:do` says (`number` = highest number in all task files and done files + 1). Name tasks to the owner as "#<number> <title>".
+
+Markdown projects keep the way above.
+
 ## Proposed items
 
 When the review reaches the summary's "Proposed items", ask about them with AskUserQuestion: one question per item,
@@ -62,7 +76,11 @@ items the user already handled in the review.
 
 - Don't commit unless the user asks. At the end of each reply, say what's changed and not committed yet.
 - Use the roadmap's exact item names; no new names.
-- A new lasting rule from the review goes into the skill or doc it's about; a rule about how this project uses the
-  board goes into `<paths.board>/project.md`. Memory only for a personal preference written nowhere else.
+- A new lasting rule from the review goes into the skill or doc it's about. A rule for a Nightshift skill: only
+  after the owner's yes, into the project's `<paths.board>/skills/<skill>.md` if only this project needs it, or
+  into Nightshift itself if any project would (`<plugin>/project-rules.md`, "Adding a rule"). Memory only for a
+  personal preference written nowhere else.
+- A decision marked **Revert now** / **Revert later**, a way forward marked **Do it now** / **Do it later**, or the
+  user says "do it now" or "revert now": follow `<plugin>/review-actions.md`.
 - Items or decisions still open when the user presses "Review done": list them under "Carried to the next review"
   in that run's summary and raise them at the start of the next review.

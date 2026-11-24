@@ -1,7 +1,7 @@
 // The flow of work: the default in defaults/flow.json, laid over by the project's <paths.board>/flow.json.
-// The project file: { intro?, roles?, types: { <id>: <whole type> | null }, always?, eachDay?, approved: { <id>: { at, hash } } }.
+// The project file: { impact?, intro?, roles?, types: { <id>: <whole type> | null }, always?, eachDay?, approved: { <id>: { at, hash } } }.
 // A project type replaces the default with the same id, a new id is added at the end, null hides a default type;
-// intro, always and eachDay replace the default, roles merge key by key.
+// impact, intro, always and eachDay replace the default, roles merge key by key.
 // An approval holds the sha1 of the merged type's JSON: when the type changes, it no longer counts.
 //   nightshift flow [id]   prints the merged flow (or one type) of the project (bin/nightshift.mjs).
 import { createHash } from "node:crypto";
@@ -19,6 +19,14 @@ export const projectFlowPath = (config, projectDir) =>
   join(projectDir, config.paths.board, "flow.json");
 
 export const typeHash = (type) => createHash("sha1").update(JSON.stringify(type)).digest("hex");
+
+// The impact list lives once (`impact`); a step with `impact: true` gets it as its note.
+const withImpact = (steps, impact) =>
+  steps.map(({ impact: on, ...step }) => (on ? { ...step, note: impact } : step));
+function fillImpact(type, impact) {
+  if (type.steps) return { ...type, steps: withImpact(type.steps, impact) };
+  return { ...type, parts: type.parts.map((part) => ({ ...part, steps: withImpact(part.steps ?? [], impact) })) };
+}
 
 function checkType(type) {
   if (Array.isArray(type.steps) === Array.isArray(type.parts))
@@ -39,17 +47,28 @@ function mergedFlow(config, projectDir) {
   for (const [id, type] of Object.entries(overrides))
     if (type !== null && !baseIds.has(id)) types.push(Object.assign({ id }, type, { id }));
   types.forEach(checkType);
+  const impact = own.impact ?? base.impact;
   return {
     own,
     flow: {
+      impact,
       roles: { ...base.roles, ...own.roles },
       intro: own.intro ?? base.intro,
-      types,
+      types: types.map((type) => fillImpact(type, impact)),
       always: own.always ?? base.always,
       eachDay: own.eachDay ?? base.eachDay,
     },
   };
 }
+
+/** "security & privacy" -> "security-privacy": the key of an impact item. */
+export const impactKey = (label) => label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+const impactItems = (impact) =>
+  (Array.isArray(impact) ? impact : String(impact ?? "").split(" · "))
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((label) => ({ key: impactKey(label), label }));
 
 /** The merged flow; each type carries approved, approvedAt and changed (approved before, but the type changed since). */
 export function readFlow(config, projectDir) {
@@ -57,6 +76,7 @@ export function readFlow(config, projectDir) {
   const approvals = own.approved ?? {};
   return {
     ...flow,
+    impactItems: impactItems(flow.impact),
     types: flow.types.map((type) => {
       const approval = approvals[type.id];
       const same = Boolean(approval) && approval.hash === typeHash(type);

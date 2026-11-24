@@ -88,9 +88,12 @@ Whatever is not asked takes the detected or default value; say which in one line
 2. Run `nightshift init --answers <that file>`. It writes `board.config.json`, the task files, the runs folder and
    `<paths.board>/flow.json` and `plan-checklist.json`, and never overwrites a file that exists. If it refuses an
    answer, fix the file and run it again.
-3. Write a starter `<paths.board>/project.md`: the project's own rules that came up in steps b and c, grouped by
-   skill (`## All skills`, `## plan-night-run`, `## do`, `## start-review`). The skills read it first; where it and
-   a skill differ, it wins. Keep it to what really came up; it can grow later.
+3. Write the project's own rules that came up in steps b and c, one file per skill in `<paths.board>/skills/`
+   (`all.md` for every skill, `plan-night-run.md`, `do.md`, `start-review.md`, `write-a-prompt.md`; only the skills
+   with something to add). Only what this project adds, never a change to how a skill works
+   (`<plugin>/project-rules.md`; `<plugin>` is two folders up from this skill's base directory). Keep it to what
+   really came up; it can grow later, always after the user's yes. Then run
+   `nightshift rules --plugin <plugin> --mark`.
 
 ## e. Show how the work will go
 

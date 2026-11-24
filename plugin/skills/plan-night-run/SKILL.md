@@ -12,8 +12,11 @@ No `board.config.json` in the project yet: offer `/nightshift:setup` first.
 1. Run `pnpm exec nightshift config` (or `npx nightshift config`). It prints the project's settings as JSON: `owner`,
    `port`, `paths` (`tasks`, `runs`, `board`, `roadmaps`), `taskFiles`, `suites`, `skills`, `gate`. Below, "the
    tasks folder" is `paths.tasks`, "the runs folder" is `paths.runs`, and so on.
-2. Read `<paths.board>/project.md` if it exists: the project's own rules, grouped by skill. Where project.md and this
-   skill differ, project.md wins.
+2. Then the project's own rules: run `pnpm exec nightshift rules plan-night-run --plugin <plugin>` (`<plugin>` is two folders
+   up from this skill's base directory) and follow `<plugin>/project-rules.md`: read each `OK` file (it adds to this
+   skill and wins where they differ); a `CHANGED` file is gone through first.
+
+**Rule 1:** everything you write for the owner follows `<plugin>/rule-1.md` (new information only).
 
 The board is a local website in the package `nightshift-board` (file formats and pages:
 `node_modules/nightshift-board/README.md`). Its pages: pick (`/`), list (`/list`), review (`/review`), flow (`/flow`),
@@ -31,9 +34,14 @@ When the user says "plan prompts" (or picks tasks with no prompt):
 
 1. List the open items with no prompt (`- [ ]`, `hasPrompt: false`) from the task files and roadmaps, short, one
    line each, and let the user pick which to write prompts for (GUI, multi-select).
-2. **One item at a time:** ask that item's questions (AskUserQuestion, a recommended option first), let the user ask
+2. **One item at a time:** first its impact: every item of the flow's `impactItems` (`nightshift flow`) answered
+   `none` / `better` / `worse` with a short note, except a task that only changes wording (`textOnly: true`). Each
+   `worse` item gets its own question for the owner's OK in that item's questions (AskUserQuestion); an OK is saved
+   as `approved: <date>` on the item (or ticked on the board, pick page), no OK means the task isn't coded. JSON task files: the answers and the prompt
+   go into the task in `<paths.tasks>/<type>.json` (`impact`, `prompt`); Markdown: one impact line, as before (e.g.
+   "CPU OK · memory OK · cost: one Cloud Run job per run"). Then ask that item's questions (AskUserQuestion, a recommended option first), let the user ask
    and answer back, then write its prompt (the project's prompt skill, `skills.prompt`; without one,
-   `/nightshift:write-a-prompt`) and flip its line from `- [ ]` to `+ [ ]`. Only then go to the next item. Never
+   `/nightshift:write-a-prompt`) and flip its line from `- [ ]` to `+ [ ]` (JSON: its `prompt` is filled). Only then go to the next item. Never
    collect the questions of several items into one round.
 3. End with the list: each item, prompt written or skipped.
 
@@ -48,34 +56,49 @@ When the user says "plan prompts" (or picks tasks with no prompt):
    **Decisions from last night** (top of the pick page, `GET /api/open-decisions`): read the `decision:<id>` and
    `failure:<test>` notes in each run's `qa.json` and answer or act on them in the chat, like the task notes. Never
    tick a decision: only the user does.
+   **Waiting for Claude** (`GET /api/waiting`): handle each by `<plugin>/review-actions.md` (`<plugin>` is two
+   folders up from this skill's base directory): a "now" one before the run starts, a "later" one becomes a task.
 3. **Prompts.** Check every chosen task has a prompt (`hasPrompt: true`). One without: do the prompt planning (part
-   2) for those, one item at a time. Tasks in a task file marked `planOnly` get a plan, never code.
-4. **Questions.** Collect what the run needs from the user (not prompt questions: those were asked in part 2) into
+   2) for those, one item at a time. Tasks in a task file marked `planOnly` get a plan, never code. In JSON task files name each task to the owner as "#<number> <title>"; a new JSON task gets `number` = highest number in all task files and done files + 1.
+4. **The skills' rules, before the run.** Run `pnpm exec nightshift rules --plugin <plugin>` (every skill: the run
+   uses several). For each `CHANGED` file, go through it now (`<plugin>/project-rules.md`, "After the plugin
+   changed"); its conflicts join the round of questions below, and `--mark` follows the answers. The run never
+   starts with a `CHANGED` file.
+5. **Questions.** Collect what the run needs from the user (not prompt questions: those were asked in part 2) into
    **one round** of GUI questions
-   (AskUserQuestion): real decisions only, short, a recommended option first. Add the reminders the project lists in
-   project.md.
-5. Show the final list (task, prompt ready, decisions) in a few lines and wait for the user's OK.
-6. Then the night run follows the project's run skill (`skills.run`). Without one: make a branch, do each task by
-   its type's steps in the flow (`pnpm exec nightshift flow`), run each suite in `suites`, write the summary and
-   `run.json` (part 4), and open one pull request, not merged.
+   (AskUserQuestion): real decisions only, short, a recommended option first. Add the reminders the project's
+   rules files list.
+6. Show the final list (task, prompt ready, decisions, the impact line) in a few lines and wait for the user's OK.
+7. Then the night run follows the project's run skill (`skills.run`), by default `nightshift:run-night-run`
+   (parallel worktrees, suites, summary and `run.json` as in part 4, one pull request, not merged).
 
 ## 4. During the run: fill run.json
 
 A subagent writes `<runs folder>/<night-run|day-run>-<date>/run.json`, next to the run's Markdown summary, in the
-format of `node_modules/nightshift-board/README.md`. Same content as the Markdown summary, plus:
+format of `node_modules/nightshift-board/README.md`, following Rule 1 (`<plugin>/rule-1.md`): a task done as agreed
+is "Done as planned.", no process, decisions say what changes for the owner, leftovers of old code are named.
+Same content as the Markdown summary, plus:
 
+- each task's `impact` (as answered in the prompt planning), and `textOnly` when set;
 - before / after screenshots and videos per task, copied into the run folder (repo-relative paths). A screenshot is
-  the whole screen, taken with the suite's `screenshot` setting (a viewport, or a command for a device). Before
+  taken with the suite's `screenshot` setting (a viewport, or a command for a device) and shows only the part that
+  changed, so the difference is seen at a glance: on a page bigger than a phone screen, crop to the changed element
+  (an element screenshot, e.g. the one task row with its new chip), never the full page or site; a phone screen
+  stays whole. Before and after crop the same area (user, 2026-11-23). Before
   saving, wait for the network to go idle, fonts (`document.fonts.ready`) and images to load, then run
   `isBlankPicture` (from the package `nightshift-board`) and retake once if blank. The review page shows a red
   "Blank picture" or "Missing picture" chip on a bad shot, and each video as a silent loop labelled "Video · N s" (a
   click opens it with sound);
 - each new test, what it checks, and "failed before, passes after" when it reproduces a bug;
-- each failed test with a screenshot of the failure (the suite's `failureShot` file, or the screenshot its runner
-  saved), `fixedIn` app or test, and one short line on the fix;
+- each failed test with `fixedIn` app or test and one short line on the fix. Each failed run of a test gets its own
+  picture, taken at the moment the step failed (the runner's failure shot, e.g. the suite's `failureShot` file), all
+  listed in `attempts: [{ label, screenshot, failedStep, report }]` in order: 4 failures = 4 pictures;
 - `qa` only for changes the user can see in an app;
 - `stillOpen` grouped by category (one topic each), and `proposed: [{ id, text }]` (each gets an "Add as an action
   item" tick and a comment box on the review page);
+- a task not done (or partly) with more than one way forward: each in `solutions: [{ id, text }]` on the task (one
+  short line each: what it is and what it costs), not in `missing`. The owner picks Do it now, Do it later or
+  neither per solution;
 - every decision made alone in `decisions: [{ id, text }]`: on its task, or at the top of run.json for the run's
   own. You write the `id` (e.g. "T.1-1"), unique within the run, so a tick stays on its decision when run.json is
   written again. Not in the task's `done` text, and no "Decisions made alone" section. The user ticks them; never

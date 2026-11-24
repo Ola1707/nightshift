@@ -12,8 +12,11 @@ No `board.config.json` in the project yet: offer `/nightshift:setup` first.
 
 1. Run `pnpm exec nightshift config` (or `npx nightshift config`) for the project's settings: `port`, `paths`
    (`tasks`, `board`, `roadmaps`), `taskFiles`, `suites`, `skills`.
-2. Read `<paths.board>/project.md` if it exists: the project's own rules, grouped by skill. Where project.md and this
-   skill differ, project.md wins.
+2. Then the project's own rules: run `pnpm exec nightshift rules do --plugin <plugin>` (`<plugin>` is two folders
+   up from this skill's base directory) and follow `<plugin>/project-rules.md`: read each `OK` file (it adds to this
+   skill and wins where they differ); a `CHANGED` file is gone through first.
+
+**Rule 1:** everything you write for the owner follows `<plugin>/rule-1.md` (new information only).
 3. Run `pnpm exec nightshift flow` (or `npx nightshift flow`): the flow of work as JSON. Each type has an `id`, a
    `title`, an `example`, `steps` or `parts` (stages, each with a `title` and `steps`; a step has `who` + `text`, `who`
    is a key of `roles`) and `approved`. A change type has three stages: **1 · Report**, **2 · Plan**, **3 · Execute**. `always` holds the rules
@@ -51,6 +54,9 @@ Follow the type's stages and their `steps` in order. Stop after each step whose 
 
 - **Where it is written:** the task file in `taskFiles` whose `file` is `<type id>.md`, in the tasks folder, from the
   start. A file marked `planOnly`: plan only, never done unattended.
+- **JSON task files:** when `<paths.tasks>/<type id>.json` exists, write the new task there (`number` = the highest `number` in all task files and done files + 1, `id`, `title`,
+  `status: "open"`, `asked: { by, on, from }`, `quote`, `details`, `doneWhen`, `textOnly`, `impact`, `prompt`;
+  `done`, `reviews` and `links` come later), not into the `.md`. Name the task to the owner as "#<number> <title>". Without it, the Markdown way.
 - **Questions** (plan stage and prompt): one item at a time. Ask that item's questions, let the user ask and answer
   back, and only then go to the next item.
 - **Prompt:** with the project's prompt skill (`skills.prompt`), use it. Without one, use `/nightshift:write-a-prompt`:

@@ -147,7 +147,9 @@ export async function doctor(dir, { shots = false, port } = {}) {
   }
 
   for (const { file } of config.taskFiles) {
-    const path = join(config.paths.tasks, file);
+    // A task file converted to JSON (`nightshift update tasks-json`) counts as present.
+    const json = join(config.paths.tasks, file.replace(/\.(md|json)$/, ".json"));
+    const path = isFile(join(dir, json)) ? json : join(config.paths.tasks, file);
     if (isFile(join(dir, path))) ok(`task file ${path}`);
     else problem(`task file ${path} does not exist. Create it or remove "${file}" from taskFiles.`);
   }
@@ -182,6 +184,10 @@ export async function doctor(dir, { shots = false, port } = {}) {
   } catch (error) {
     problem(`the flow does not load: ${error.message}. Fix ${join(config.paths.board, "flow.json")}.`);
   }
+
+  const oldRules = join(config.paths.board, "project.md");
+  if (isFile(join(dir, oldRules)))
+    problem(`${oldRules} is the old one-file form of the project's rules. Split it into one file per skill in ${join(config.paths.board, "skills")}/ (all.md for every skill), then delete it.`);
 
   const boardPort = port ?? Number(process.env.BOARD_PORT ?? config.port);
   const state = await portState(boardPort);

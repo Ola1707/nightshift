@@ -96,3 +96,14 @@ test("NIGHTSHIFT_DEV_DIR runs the other copy; this copy's own folder is not run 
   // A folder without bin/nightshift.mjs is ignored.
   assert.equal(run(project(), ["config"], { env: { NIGHTSHIFT_DEV_DIR: project() } }).status, 0);
 });
+
+test("updates lists the open ones; update --skip records the answer", () => {
+  const dir = project({ "board.config.json": {} });
+  const listed = run(dir, ["updates"]);
+  assert.equal(listed.status, 0);
+  assert.match(listed.stdout, /^tasks-json: Task files as JSON\./);
+  const skipped = run(dir, ["update", "tasks-json", "--skip"]);
+  assert.equal(skipped.status, 0);
+  assert.equal(run(dir, ["updates"]).stdout, "");
+  assert.equal(run(dir, ["update", "nope"]).status, 1);
+});

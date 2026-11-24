@@ -1,5 +1,5 @@
-import { $, api, decisionRow, el, href, nav, post, proposedItems, proposedKey, reviewWaiting } from "/common.js";
-import { stepsLink } from "/failure-report.js";
+import { $, answered, api, decisionRow, impactRow, loadImpactItems, solutionRow, el, href, nav, post, proposedItems, proposedKey, reviewWaiting } from "/common.js";
+import { failureAttempts, stepsLink } from "/failure-report.js";
 import { reviewSaver } from "/review-save.js";
 
 $("#nav").replaceWith(nav("/review"));
@@ -142,8 +142,8 @@ function answerBox(runName, task, qa, onChange) {
     "textarea",
     {
       placeholder: task.questions?.length
-        ? "Your answer, or a note for Claude"
-        : "A note or a question for Claude",
+        ? "Your answer to the questions, or a note on this task"
+        : "A note or a question on this task",
       rows: 1,
     },
     qa[task.id]?.note ?? "",
@@ -155,6 +155,8 @@ function answerBox(runName, task, qa, onChange) {
   );
   return note;
 }
+
+let impactItems = [];
 
 function taskCard(runName, task, qa, onChange) {
   const [tone, statusText] = STATUS[task.status] ?? ["", task.status ?? ""];
@@ -184,6 +186,7 @@ function taskCard(runName, task, qa, onChange) {
       ),
       qaParts?.label,
     ),
+    impactRow(task, impactItems, true),
     task.done && el("p", { class: "kv" }, el("b", {}, "Done"), task.done),
     task.missing && el("p", { class: "kv" }, el("b", {}, "Missing"), task.missing),
     task.qa && el("p", { class: "kv" }, el("b", {}, "Where to check"), task.qa),
@@ -226,6 +229,15 @@ function taskCard(runName, task, qa, onChange) {
           ),
         ),
       ),
+    // The task's own note comes before its ways forward and decisions.
+    qaParts ? qaParts.note : answerBox(runName, task, qa, onChange),
+    task.solutions?.length > 0 &&
+      el(
+        "div",
+        { class: "solutions" },
+        el("div", { class: "label" }, "Ways forward", el("span", { class: "muted small" }, " · none picked = don't")),
+        task.solutions.map((s) => solutionRow(runName, s, qa[`solution:${s.id}`], (next) => onChange(next))),
+      ),
     task.decisions?.length > 0 &&
       el(
         "div",
@@ -235,7 +247,6 @@ function taskCard(runName, task, qa, onChange) {
           decisionRow(runName, d, qa[`decision:${d.id}`], (next) => onChange(next)),
         ),
       ),
-    qaParts ? qaParts.note : answerBox(runName, task, qa, onChange),
   );
 }
 
@@ -303,6 +314,30 @@ function stepsLinkRow(f) {
   );
 }
 
+// Every failed run of the test: its picture with its label, and its failed step and steps page when given.
+function failurePictures(f) {
+  const attempts = failureAttempts(f);
+  if (!attempts.length) return el("div", { class: "muted small" }, "No failure screenshot");
+  const many = attempts.length > 1;
+  return el(
+    "div",
+    {},
+    many && el("p", { class: "kv" }, el("b", {}, `Failed ${attempts.length} times`)),
+    attempts.map((a, i) => {
+      const label = a.label || (many ? `run ${i + 1}` : "the failure");
+      return el(
+        "div",
+        { class: "attempt" },
+        many && a.failedStep && el("p", { class: "kv" }, el("b", {}, "Failed step"), el("code", {}, a.failedStep)),
+        many && a.report && el("p", { class: "kv" }, el("a", { href: href(a.report), target: "_blank", rel: "noopener" }, "Steps")),
+        a.screenshot
+          ? shots([{ label, path: a.screenshot }])
+          : el("div", { class: "muted small" }, `${label}: no screenshot`),
+      );
+    }),
+  );
+}
+
 function failureCard(f, runName, qa, onChange) {
   return el(
     "div",
@@ -337,9 +372,7 @@ function failureCard(f, runName, qa, onChange) {
       f.explanation,
       f.fixFile ? el("code", { style: "margin-left: 6px" }, f.fixFile) : "",
     ),
-    f.screenshot
-      ? shots([{ label: "the failure", path: f.screenshot }])
-      : el("div", { class: "muted small" }, "No failure screenshot"),
+    failurePictures(f),
     f.fixedIn !== "not fixed" && failureNote(runName, f, qa, onChange),
   );
 }
@@ -347,6 +380,7 @@ function failureCard(f, runName, qa, onChange) {
 async function show(runName) {
   const { run, qa: initialQa, review, pictures, reports } = await api(`/api/runs/${runName}`);
   pictureProblems = pictures ?? {};
+  impactItems = await loadImpactItems().catch(() => []);
   missingReports = reports ?? {};
   let qa = initialQa;
   $("#title").textContent = run.title;
@@ -387,9 +421,9 @@ async function show(runName) {
               el(
                 "b",
                 {},
-                `${decisions.filter((d) => qa[`decision:${d.id}`]?.checked).length} / ${decisions.length}`,
+                `${decisions.filter((d) => answered(qa[`decision:${d.id}`])).length} / ${decisions.length}`,
               ),
-              "decisions ticked",
+              "decisions answered",
             ),
           ]
         : []),

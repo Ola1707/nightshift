@@ -7,7 +7,7 @@ import { test } from "node:test";
 import sharp from "sharp";
 import { loadConfig } from "./config.mjs";
 import { allDecisions } from "./decisions.mjs";
-import { parseRoadmap } from "./roadmaps.mjs";
+import { parseRoadmap, readRoadmaps } from "./roadmaps.mjs";
 import { pictureProblems, reportProblems, runPictures } from "./run-pictures.mjs";
 import { DEMO_DIR, DEMO_RUN, SetupError, doctor, initProject, prepareDemo } from "./setup.mjs";
 
@@ -142,11 +142,10 @@ test("the demo's run.json passes the same checks as a real one", async () => {
   assert.equal(existsSync(join(DEMO_DIR, "docs/release-log", DEMO_RUN, "review.json")), false);
 });
 
-test("the demo has four open tasks in two task files and two roadmap phases", () => {
-  const open = ["small-fix.md", "bug.md"].flatMap((f) =>
-    parseRoadmap(readFileSync(join(DEMO_DIR, "docs/roadmap/night-run", f), "utf8"), f).flatMap((p) => p.tasks),
-  );
-  assert.equal(open.length, 4);
+test("the demo has six open tasks in two task files (one JSON) and two roadmap phases", () => {
+  const { night } = readRoadmaps(join(DEMO_DIR, "docs/roadmap"), {}, loadConfig(DEMO_DIR));
+  const open = night.flatMap((f) => f.tasks).filter((t) => t.status !== "built");
+  assert.equal(open.length, 6);
   const phases = parseRoadmap(readFileSync(join(DEMO_DIR, "docs/roadmap/bakery-plan.md"), "utf8"), "bakery-plan.md");
   assert.equal(phases.length, 2);
   assert.equal(loadConfig(DEMO_DIR).port, 8096);
@@ -158,4 +157,10 @@ test("the demo runs on a copy in the temp folder", () => {
   assert.ok(copy.startsWith(tmpdir()) || copy.startsWith("/private"));
   assert.ok(existsSync(join(copy, "board.config.json")));
   rmSync(copy, { recursive: true, force: true });
+});
+
+test("doctor names the old one-file project.md", async () => {
+  const dir = prepareDemo();
+  writeFileSync(join(dir, "docs/board/project.md"), "# Rules\n");
+  assert.match(problems(await doctor(dir, { port: 1 })).join("\n"), /project\.md is the old one-file form/);
 });

@@ -1,0 +1,9 @@
+[
+  {
+    "id": "tasks-json",
+    "title": "Task files as JSON",
+    "what": "Each task file (bug.md, feature.md, ...) becomes a JSON file with fields per task: who asked, impact, prompt, review notes.\nThe prompts move from the claude-code-prompts files into their tasks. The board reads both kinds.",
+    "changes": ["<paths.tasks>/*.md → *.json", "prompts move from claude-code-prompts*.md into the tasks"],
+    "undo": "git checkout the files"
+  }
+]

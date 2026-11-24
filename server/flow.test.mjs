@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadConfig } from "./config.mjs";
-import { approveType, projectFlowPath, readFlow } from "./flow.mjs";
+import { approveType, impactKey, projectFlowPath, readFlow } from "./flow.mjs";
 
 const DEFAULT_IDS = [
   "small-fix",
@@ -109,4 +109,33 @@ test("a changed step clears the approval", () => {
   assert.equal(after.approved, false);
   assert.equal(after.changed, true);
   assert.equal(after.approvedAt, null);
+});
+
+test("impact: the list lives once in the default flow; a step with impact: true shows it as its note", () => {
+  const p = project({ types: { bug: { title: "Bug", steps: [{ who: "planner", text: "shows Human the impact", impact: true }] } } });
+  const flow = readFlow(p.config, p.dir);
+  assert.match(flow.impact, /^CPU · memory/);
+  const step = flow.types[1].steps[0];
+  assert.equal(step.note, flow.impact);
+  assert.equal("impact" in step, false);
+  const parts = flow.types.find((t) => t.id === "feature").parts;
+  assert.ok(parts.some((part) => part.steps.some((s) => s.note === flow.impact)));
+  const own = project({ impact: "CPU · cost" });
+  assert.equal(readFlow(own.config, own.dir).impact, "CPU · cost");
+});
+
+test("impactKey lowercases and joins with dashes", () => {
+  assert.equal(impactKey("security & privacy"), "security-privacy");
+  assert.equal(impactKey("CPU"), "cpu");
+  assert.equal(impactKey(" older app versions "), "older-app-versions");
+});
+
+test("readFlow lists the impact items with keys", () => {
+  const { dir, config } = project({ impact: "CPU · security & privacy · database migration" });
+  const { impactItems } = readFlow(config, dir);
+  assert.deepEqual(impactItems, [
+    { key: "cpu", label: "CPU" },
+    { key: "security-privacy", label: "security & privacy" },
+    { key: "database-migration", label: "database migration" },
+  ]);
 });
