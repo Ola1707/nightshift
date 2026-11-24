@@ -42,7 +42,7 @@ function project() {
   const dir = mkdtempSync(join(tmpdir(), "tasks-json-"));
   mkdirSync(join(dir, "docs/roadmap/night-run"), { recursive: true });
   writeFileSync(join(dir, "docs/roadmap/night-run/bug.md"), MD);
-  writeFileSync(join(dir, "docs/roadmap/claude-code-prompts-pilot.md"), PROMPTS);
+  writeFileSync(join(dir, "docs/roadmap/claude-code-prompts-app.md"), PROMPTS);
   return dir;
 }
 
@@ -86,7 +86,7 @@ test("convertProject writes the JSON, moves the prompt, deletes the md", () => {
   assert.match(json.tasks[0].prompt, /^### 8A.2cv/);
   assert.match(json.tasks[0].prompt, /Do the thing/);
   assert.match(json.tasks[0].prompt, /# not a heading/);
-  const prompts = readFileSync(join(dir, "docs/roadmap/claude-code-prompts-pilot.md"), "utf8");
+  const prompts = readFileSync(join(dir, "docs/roadmap/claude-code-prompts-app.md"), "utf8");
   assert.doesNotMatch(prompts, /Do the thing/);
   assert.match(prompts, /stays here/);
   assert.match(prompts, /stays too/);
@@ -101,5 +101,5 @@ test("a dry run with outDir leaves the project alone", () => {
   convertProject(dir, config, { outDir: out });
   assert.equal(existsSync(join(out, "bug.json")), true);
   assert.equal(existsSync(join(dir, "docs/roadmap/night-run/bug.md")), true);
-  assert.match(readFileSync(join(dir, "docs/roadmap/claude-code-prompts-pilot.md"), "utf8"), /Do the thing/);
+  assert.match(readFileSync(join(dir, "docs/roadmap/claude-code-prompts-app.md"), "utf8"), /Do the thing/);
 });
